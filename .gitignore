@@ -18,3 +18,4 @@
 bin/
 cue.mod/pkg
 .env.dagger
+.scannerwork/**
