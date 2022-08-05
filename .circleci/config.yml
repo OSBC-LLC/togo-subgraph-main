@@ -38,28 +38,28 @@ jobs:
             dagger project update
             dagger do staticAnalysis sonarscanner --log-format plain
 
-  dagger-golangci:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - checkout
-      - setup_remote_docker:
-          version: "20.10.14"
-      - run:
-          name: "Install Dagger"
-          command: |
-            cd /usr/local
-            wget -O - https://dl.dagger.io/dagger/install.sh | sudo sh
-            cd -
-      - run:
-          name: "Run Dagger Static Check"
-          command: |
-            dagger project update
-            dagger do staticAnalysis lint --log-format plain
+  #dagger-golangci:
+    #docker:
+      #- image: cimg/base:stable
+    #steps:
+      #- checkout
+      #- setup_remote_docker:
+          #version: "20.10.14"
+      #- run:
+          #name: "Install Dagger"
+          #command: |
+            #cd /usr/local
+            #wget -O - https://dl.dagger.io/dagger/install.sh | sudo sh
+            #cd -
+      #- run:
+          #name: "Run Dagger Static Check"
+          #command: |
+            #dagger project update
+            #dagger do staticAnalysis lint --log-format plain
 
 workflows:
   dagger-workflow:
     jobs:
       - dagger-build
       - dagger-sonarqube
-      - dagger-golangci
+      #- dagger-golangci
