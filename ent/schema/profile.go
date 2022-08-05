@@ -1,6 +1,12 @@
 package schema
 
-import "entgo.io/ent"
+import (
+	"time"
+
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+)
 
 // Profile holds the schema definition for the Profile entity.
 type Profile struct {
@@ -9,7 +15,13 @@ type Profile struct {
 
 // Fields of the Profile.
 func (Profile) Fields() []ent.Field {
-	return nil
+	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).Default(uuid.New).Unique(),
+		field.String("name").Unique(),
+		field.String("description"),
+		field.Time("updated_at").Default(time.Now),
+		field.Time("created_at").Default(time.Now),
+	}
 }
 
 // Edges of the Profile.
