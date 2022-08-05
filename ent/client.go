@@ -8,14 +8,17 @@ import (
 	"log"
 
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/migrate"
-	"github.com/google/uuid"
 
-	"github.com/OSBC-LLC/togo-subgraph-main/ent/account"
-	"github.com/OSBC-LLC/togo-subgraph-main/ent/tennant"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/breed"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofilebreed"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/profile"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -23,10 +26,22 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// Account is the client for interacting with the Account builders.
-	Account *AccountClient
-	// Tennant is the client for interacting with the Tennant builders.
-	Tennant *TennantClient
+	// Breed is the client for interacting with the Breed builders.
+	Breed *BreedClient
+	// Dog is the client for interacting with the Dog builders.
+	Dog *DogClient
+	// DogProfileBreed is the client for interacting with the DogProfileBreed builders.
+	DogProfileBreed *DogProfileBreedClient
+	// DogProfileOwner is the client for interacting with the DogProfileOwner builders.
+	DogProfileOwner *DogProfileOwnerClient
+	// Image is the client for interacting with the Image builders.
+	Image *ImageClient
+	// Profile is the client for interacting with the Profile builders.
+	Profile *ProfileClient
+	// User is the client for interacting with the User builders.
+	User *UserClient
+	// additional fields for node api
+	tables tables
 }
 
 // NewClient creates a new client configured with the given options.
@@ -40,8 +55,13 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
-	c.Account = NewAccountClient(c.config)
-	c.Tennant = NewTennantClient(c.config)
+	c.Breed = NewBreedClient(c.config)
+	c.Dog = NewDogClient(c.config)
+	c.DogProfileBreed = NewDogProfileBreedClient(c.config)
+	c.DogProfileOwner = NewDogProfileOwnerClient(c.config)
+	c.Image = NewImageClient(c.config)
+	c.Profile = NewProfileClient(c.config)
+	c.User = NewUserClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -73,10 +93,15 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:     ctx,
-		config:  cfg,
-		Account: NewAccountClient(cfg),
-		Tennant: NewTennantClient(cfg),
+		ctx:             ctx,
+		config:          cfg,
+		Breed:           NewBreedClient(cfg),
+		Dog:             NewDogClient(cfg),
+		DogProfileBreed: NewDogProfileBreedClient(cfg),
+		DogProfileOwner: NewDogProfileOwnerClient(cfg),
+		Image:           NewImageClient(cfg),
+		Profile:         NewProfileClient(cfg),
+		User:            NewUserClient(cfg),
 	}, nil
 }
 
@@ -94,17 +119,22 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:     ctx,
-		config:  cfg,
-		Account: NewAccountClient(cfg),
-		Tennant: NewTennantClient(cfg),
+		ctx:             ctx,
+		config:          cfg,
+		Breed:           NewBreedClient(cfg),
+		Dog:             NewDogClient(cfg),
+		DogProfileBreed: NewDogProfileBreedClient(cfg),
+		DogProfileOwner: NewDogProfileOwnerClient(cfg),
+		Image:           NewImageClient(cfg),
+		Profile:         NewProfileClient(cfg),
+		User:            NewUserClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Account.
+//		Breed.
 //		Query().
 //		Count(ctx)
 //
@@ -127,88 +157,93 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Account.Use(hooks...)
-	c.Tennant.Use(hooks...)
+	c.Breed.Use(hooks...)
+	c.Dog.Use(hooks...)
+	c.DogProfileBreed.Use(hooks...)
+	c.DogProfileOwner.Use(hooks...)
+	c.Image.Use(hooks...)
+	c.Profile.Use(hooks...)
+	c.User.Use(hooks...)
 }
 
-// AccountClient is a client for the Account schema.
-type AccountClient struct {
+// BreedClient is a client for the Breed schema.
+type BreedClient struct {
 	config
 }
 
-// NewAccountClient returns a client for the Account from the given config.
-func NewAccountClient(c config) *AccountClient {
-	return &AccountClient{config: c}
+// NewBreedClient returns a client for the Breed from the given config.
+func NewBreedClient(c config) *BreedClient {
+	return &BreedClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `account.Hooks(f(g(h())))`.
-func (c *AccountClient) Use(hooks ...Hook) {
-	c.hooks.Account = append(c.hooks.Account, hooks...)
+// A call to `Use(f, g, h)` equals to `breed.Hooks(f(g(h())))`.
+func (c *BreedClient) Use(hooks ...Hook) {
+	c.hooks.Breed = append(c.hooks.Breed, hooks...)
 }
 
-// Create returns a builder for creating a Account entity.
-func (c *AccountClient) Create() *AccountCreate {
-	mutation := newAccountMutation(c.config, OpCreate)
-	return &AccountCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a Breed entity.
+func (c *BreedClient) Create() *BreedCreate {
+	mutation := newBreedMutation(c.config, OpCreate)
+	return &BreedCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of Account entities.
-func (c *AccountClient) CreateBulk(builders ...*AccountCreate) *AccountCreateBulk {
-	return &AccountCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Breed entities.
+func (c *BreedClient) CreateBulk(builders ...*BreedCreate) *BreedCreateBulk {
+	return &BreedCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for Account.
-func (c *AccountClient) Update() *AccountUpdate {
-	mutation := newAccountMutation(c.config, OpUpdate)
-	return &AccountUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Breed.
+func (c *BreedClient) Update() *BreedUpdate {
+	mutation := newBreedMutation(c.config, OpUpdate)
+	return &BreedUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *AccountClient) UpdateOne(a *Account) *AccountUpdateOne {
-	mutation := newAccountMutation(c.config, OpUpdateOne, withAccount(a))
-	return &AccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *BreedClient) UpdateOne(b *Breed) *BreedUpdateOne {
+	mutation := newBreedMutation(c.config, OpUpdateOne, withBreed(b))
+	return &BreedUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *AccountClient) UpdateOneID(id uuid.UUID) *AccountUpdateOne {
-	mutation := newAccountMutation(c.config, OpUpdateOne, withAccountID(id))
-	return &AccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *BreedClient) UpdateOneID(id int) *BreedUpdateOne {
+	mutation := newBreedMutation(c.config, OpUpdateOne, withBreedID(id))
+	return &BreedUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for Account.
-func (c *AccountClient) Delete() *AccountDelete {
-	mutation := newAccountMutation(c.config, OpDelete)
-	return &AccountDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Breed.
+func (c *BreedClient) Delete() *BreedDelete {
+	mutation := newBreedMutation(c.config, OpDelete)
+	return &BreedDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *AccountClient) DeleteOne(a *Account) *AccountDeleteOne {
-	return c.DeleteOneID(a.ID)
+func (c *BreedClient) DeleteOne(b *Breed) *BreedDeleteOne {
+	return c.DeleteOneID(b.ID)
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *AccountClient) DeleteOneID(id uuid.UUID) *AccountDeleteOne {
-	builder := c.Delete().Where(account.ID(id))
+func (c *BreedClient) DeleteOneID(id int) *BreedDeleteOne {
+	builder := c.Delete().Where(breed.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &AccountDeleteOne{builder}
+	return &BreedDeleteOne{builder}
 }
 
-// Query returns a query builder for Account.
-func (c *AccountClient) Query() *AccountQuery {
-	return &AccountQuery{
+// Query returns a query builder for Breed.
+func (c *BreedClient) Query() *BreedQuery {
+	return &BreedQuery{
 		config: c.config,
 	}
 }
 
-// Get returns a Account entity by its id.
-func (c *AccountClient) Get(ctx context.Context, id uuid.UUID) (*Account, error) {
-	return c.Query().Where(account.ID(id)).Only(ctx)
+// Get returns a Breed entity by its id.
+func (c *BreedClient) Get(ctx context.Context, id int) (*Breed, error) {
+	return c.Query().Where(breed.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *AccountClient) GetX(ctx context.Context, id uuid.UUID) *Account {
+func (c *BreedClient) GetX(ctx context.Context, id int) *Breed {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -216,105 +251,89 @@ func (c *AccountClient) GetX(ctx context.Context, id uuid.UUID) *Account {
 	return obj
 }
 
-// QueryTennants queries the tennants edge of a Account.
-func (c *AccountClient) QueryTennants(a *Account) *TennantQuery {
-	query := &TennantQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := a.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(account.Table, account.FieldID, id),
-			sqlgraph.To(tennant.Table, tennant.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, account.TennantsTable, account.TennantsColumn),
-		)
-		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
-func (c *AccountClient) Hooks() []Hook {
-	return c.hooks.Account
+func (c *BreedClient) Hooks() []Hook {
+	return c.hooks.Breed
 }
 
-// TennantClient is a client for the Tennant schema.
-type TennantClient struct {
+// DogClient is a client for the Dog schema.
+type DogClient struct {
 	config
 }
 
-// NewTennantClient returns a client for the Tennant from the given config.
-func NewTennantClient(c config) *TennantClient {
-	return &TennantClient{config: c}
+// NewDogClient returns a client for the Dog from the given config.
+func NewDogClient(c config) *DogClient {
+	return &DogClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `tennant.Hooks(f(g(h())))`.
-func (c *TennantClient) Use(hooks ...Hook) {
-	c.hooks.Tennant = append(c.hooks.Tennant, hooks...)
+// A call to `Use(f, g, h)` equals to `dog.Hooks(f(g(h())))`.
+func (c *DogClient) Use(hooks ...Hook) {
+	c.hooks.Dog = append(c.hooks.Dog, hooks...)
 }
 
-// Create returns a builder for creating a Tennant entity.
-func (c *TennantClient) Create() *TennantCreate {
-	mutation := newTennantMutation(c.config, OpCreate)
-	return &TennantCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a Dog entity.
+func (c *DogClient) Create() *DogCreate {
+	mutation := newDogMutation(c.config, OpCreate)
+	return &DogCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of Tennant entities.
-func (c *TennantClient) CreateBulk(builders ...*TennantCreate) *TennantCreateBulk {
-	return &TennantCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Dog entities.
+func (c *DogClient) CreateBulk(builders ...*DogCreate) *DogCreateBulk {
+	return &DogCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for Tennant.
-func (c *TennantClient) Update() *TennantUpdate {
-	mutation := newTennantMutation(c.config, OpUpdate)
-	return &TennantUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Dog.
+func (c *DogClient) Update() *DogUpdate {
+	mutation := newDogMutation(c.config, OpUpdate)
+	return &DogUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *TennantClient) UpdateOne(t *Tennant) *TennantUpdateOne {
-	mutation := newTennantMutation(c.config, OpUpdateOne, withTennant(t))
-	return &TennantUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DogClient) UpdateOne(d *Dog) *DogUpdateOne {
+	mutation := newDogMutation(c.config, OpUpdateOne, withDog(d))
+	return &DogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *TennantClient) UpdateOneID(id uuid.UUID) *TennantUpdateOne {
-	mutation := newTennantMutation(c.config, OpUpdateOne, withTennantID(id))
-	return &TennantUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DogClient) UpdateOneID(id int) *DogUpdateOne {
+	mutation := newDogMutation(c.config, OpUpdateOne, withDogID(id))
+	return &DogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for Tennant.
-func (c *TennantClient) Delete() *TennantDelete {
-	mutation := newTennantMutation(c.config, OpDelete)
-	return &TennantDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Dog.
+func (c *DogClient) Delete() *DogDelete {
+	mutation := newDogMutation(c.config, OpDelete)
+	return &DogDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *TennantClient) DeleteOne(t *Tennant) *TennantDeleteOne {
-	return c.DeleteOneID(t.ID)
+func (c *DogClient) DeleteOne(d *Dog) *DogDeleteOne {
+	return c.DeleteOneID(d.ID)
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *TennantClient) DeleteOneID(id uuid.UUID) *TennantDeleteOne {
-	builder := c.Delete().Where(tennant.ID(id))
+func (c *DogClient) DeleteOneID(id int) *DogDeleteOne {
+	builder := c.Delete().Where(dog.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &TennantDeleteOne{builder}
+	return &DogDeleteOne{builder}
 }
 
-// Query returns a query builder for Tennant.
-func (c *TennantClient) Query() *TennantQuery {
-	return &TennantQuery{
+// Query returns a query builder for Dog.
+func (c *DogClient) Query() *DogQuery {
+	return &DogQuery{
 		config: c.config,
 	}
 }
 
-// Get returns a Tennant entity by its id.
-func (c *TennantClient) Get(ctx context.Context, id uuid.UUID) (*Tennant, error) {
-	return c.Query().Where(tennant.ID(id)).Only(ctx)
+// Get returns a Dog entity by its id.
+func (c *DogClient) Get(ctx context.Context, id int) (*Dog, error) {
+	return c.Query().Where(dog.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *TennantClient) GetX(ctx context.Context, id uuid.UUID) *Tennant {
+func (c *DogClient) GetX(ctx context.Context, id int) *Dog {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -322,23 +341,457 @@ func (c *TennantClient) GetX(ctx context.Context, id uuid.UUID) *Tennant {
 	return obj
 }
 
-// QueryAccount queries the account edge of a Tennant.
-func (c *TennantClient) QueryAccount(t *Tennant) *AccountQuery {
-	query := &AccountQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(tennant.Table, tennant.FieldID, id),
-			sqlgraph.To(account.Table, account.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, tennant.AccountTable, tennant.AccountColumn),
-		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
-		return fromV, nil
+// Hooks returns the client hooks.
+func (c *DogClient) Hooks() []Hook {
+	return c.hooks.Dog
+}
+
+// DogProfileBreedClient is a client for the DogProfileBreed schema.
+type DogProfileBreedClient struct {
+	config
+}
+
+// NewDogProfileBreedClient returns a client for the DogProfileBreed from the given config.
+func NewDogProfileBreedClient(c config) *DogProfileBreedClient {
+	return &DogProfileBreedClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `dogprofilebreed.Hooks(f(g(h())))`.
+func (c *DogProfileBreedClient) Use(hooks ...Hook) {
+	c.hooks.DogProfileBreed = append(c.hooks.DogProfileBreed, hooks...)
+}
+
+// Create returns a builder for creating a DogProfileBreed entity.
+func (c *DogProfileBreedClient) Create() *DogProfileBreedCreate {
+	mutation := newDogProfileBreedMutation(c.config, OpCreate)
+	return &DogProfileBreedCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DogProfileBreed entities.
+func (c *DogProfileBreedClient) CreateBulk(builders ...*DogProfileBreedCreate) *DogProfileBreedCreateBulk {
+	return &DogProfileBreedCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DogProfileBreed.
+func (c *DogProfileBreedClient) Update() *DogProfileBreedUpdate {
+	mutation := newDogProfileBreedMutation(c.config, OpUpdate)
+	return &DogProfileBreedUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DogProfileBreedClient) UpdateOne(dpb *DogProfileBreed) *DogProfileBreedUpdateOne {
+	mutation := newDogProfileBreedMutation(c.config, OpUpdateOne, withDogProfileBreed(dpb))
+	return &DogProfileBreedUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DogProfileBreedClient) UpdateOneID(id int) *DogProfileBreedUpdateOne {
+	mutation := newDogProfileBreedMutation(c.config, OpUpdateOne, withDogProfileBreedID(id))
+	return &DogProfileBreedUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DogProfileBreed.
+func (c *DogProfileBreedClient) Delete() *DogProfileBreedDelete {
+	mutation := newDogProfileBreedMutation(c.config, OpDelete)
+	return &DogProfileBreedDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DogProfileBreedClient) DeleteOne(dpb *DogProfileBreed) *DogProfileBreedDeleteOne {
+	return c.DeleteOneID(dpb.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *DogProfileBreedClient) DeleteOneID(id int) *DogProfileBreedDeleteOne {
+	builder := c.Delete().Where(dogprofilebreed.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DogProfileBreedDeleteOne{builder}
+}
+
+// Query returns a query builder for DogProfileBreed.
+func (c *DogProfileBreedClient) Query() *DogProfileBreedQuery {
+	return &DogProfileBreedQuery{
+		config: c.config,
 	}
-	return query
+}
+
+// Get returns a DogProfileBreed entity by its id.
+func (c *DogProfileBreedClient) Get(ctx context.Context, id int) (*DogProfileBreed, error) {
+	return c.Query().Where(dogprofilebreed.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DogProfileBreedClient) GetX(ctx context.Context, id int) *DogProfileBreed {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
 }
 
 // Hooks returns the client hooks.
-func (c *TennantClient) Hooks() []Hook {
-	return c.hooks.Tennant
+func (c *DogProfileBreedClient) Hooks() []Hook {
+	return c.hooks.DogProfileBreed
+}
+
+// DogProfileOwnerClient is a client for the DogProfileOwner schema.
+type DogProfileOwnerClient struct {
+	config
+}
+
+// NewDogProfileOwnerClient returns a client for the DogProfileOwner from the given config.
+func NewDogProfileOwnerClient(c config) *DogProfileOwnerClient {
+	return &DogProfileOwnerClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `dogprofileowner.Hooks(f(g(h())))`.
+func (c *DogProfileOwnerClient) Use(hooks ...Hook) {
+	c.hooks.DogProfileOwner = append(c.hooks.DogProfileOwner, hooks...)
+}
+
+// Create returns a builder for creating a DogProfileOwner entity.
+func (c *DogProfileOwnerClient) Create() *DogProfileOwnerCreate {
+	mutation := newDogProfileOwnerMutation(c.config, OpCreate)
+	return &DogProfileOwnerCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DogProfileOwner entities.
+func (c *DogProfileOwnerClient) CreateBulk(builders ...*DogProfileOwnerCreate) *DogProfileOwnerCreateBulk {
+	return &DogProfileOwnerCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DogProfileOwner.
+func (c *DogProfileOwnerClient) Update() *DogProfileOwnerUpdate {
+	mutation := newDogProfileOwnerMutation(c.config, OpUpdate)
+	return &DogProfileOwnerUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DogProfileOwnerClient) UpdateOne(dpo *DogProfileOwner) *DogProfileOwnerUpdateOne {
+	mutation := newDogProfileOwnerMutation(c.config, OpUpdateOne, withDogProfileOwner(dpo))
+	return &DogProfileOwnerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DogProfileOwnerClient) UpdateOneID(id int) *DogProfileOwnerUpdateOne {
+	mutation := newDogProfileOwnerMutation(c.config, OpUpdateOne, withDogProfileOwnerID(id))
+	return &DogProfileOwnerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DogProfileOwner.
+func (c *DogProfileOwnerClient) Delete() *DogProfileOwnerDelete {
+	mutation := newDogProfileOwnerMutation(c.config, OpDelete)
+	return &DogProfileOwnerDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DogProfileOwnerClient) DeleteOne(dpo *DogProfileOwner) *DogProfileOwnerDeleteOne {
+	return c.DeleteOneID(dpo.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *DogProfileOwnerClient) DeleteOneID(id int) *DogProfileOwnerDeleteOne {
+	builder := c.Delete().Where(dogprofileowner.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DogProfileOwnerDeleteOne{builder}
+}
+
+// Query returns a query builder for DogProfileOwner.
+func (c *DogProfileOwnerClient) Query() *DogProfileOwnerQuery {
+	return &DogProfileOwnerQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a DogProfileOwner entity by its id.
+func (c *DogProfileOwnerClient) Get(ctx context.Context, id int) (*DogProfileOwner, error) {
+	return c.Query().Where(dogprofileowner.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DogProfileOwnerClient) GetX(ctx context.Context, id int) *DogProfileOwner {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *DogProfileOwnerClient) Hooks() []Hook {
+	return c.hooks.DogProfileOwner
+}
+
+// ImageClient is a client for the Image schema.
+type ImageClient struct {
+	config
+}
+
+// NewImageClient returns a client for the Image from the given config.
+func NewImageClient(c config) *ImageClient {
+	return &ImageClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `image.Hooks(f(g(h())))`.
+func (c *ImageClient) Use(hooks ...Hook) {
+	c.hooks.Image = append(c.hooks.Image, hooks...)
+}
+
+// Create returns a builder for creating a Image entity.
+func (c *ImageClient) Create() *ImageCreate {
+	mutation := newImageMutation(c.config, OpCreate)
+	return &ImageCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Image entities.
+func (c *ImageClient) CreateBulk(builders ...*ImageCreate) *ImageCreateBulk {
+	return &ImageCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Image.
+func (c *ImageClient) Update() *ImageUpdate {
+	mutation := newImageMutation(c.config, OpUpdate)
+	return &ImageUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ImageClient) UpdateOne(i *Image) *ImageUpdateOne {
+	mutation := newImageMutation(c.config, OpUpdateOne, withImage(i))
+	return &ImageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ImageClient) UpdateOneID(id int) *ImageUpdateOne {
+	mutation := newImageMutation(c.config, OpUpdateOne, withImageID(id))
+	return &ImageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Image.
+func (c *ImageClient) Delete() *ImageDelete {
+	mutation := newImageMutation(c.config, OpDelete)
+	return &ImageDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ImageClient) DeleteOne(i *Image) *ImageDeleteOne {
+	return c.DeleteOneID(i.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *ImageClient) DeleteOneID(id int) *ImageDeleteOne {
+	builder := c.Delete().Where(image.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ImageDeleteOne{builder}
+}
+
+// Query returns a query builder for Image.
+func (c *ImageClient) Query() *ImageQuery {
+	return &ImageQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Image entity by its id.
+func (c *ImageClient) Get(ctx context.Context, id int) (*Image, error) {
+	return c.Query().Where(image.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ImageClient) GetX(ctx context.Context, id int) *Image {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ImageClient) Hooks() []Hook {
+	return c.hooks.Image
+}
+
+// ProfileClient is a client for the Profile schema.
+type ProfileClient struct {
+	config
+}
+
+// NewProfileClient returns a client for the Profile from the given config.
+func NewProfileClient(c config) *ProfileClient {
+	return &ProfileClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `profile.Hooks(f(g(h())))`.
+func (c *ProfileClient) Use(hooks ...Hook) {
+	c.hooks.Profile = append(c.hooks.Profile, hooks...)
+}
+
+// Create returns a builder for creating a Profile entity.
+func (c *ProfileClient) Create() *ProfileCreate {
+	mutation := newProfileMutation(c.config, OpCreate)
+	return &ProfileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Profile entities.
+func (c *ProfileClient) CreateBulk(builders ...*ProfileCreate) *ProfileCreateBulk {
+	return &ProfileCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Profile.
+func (c *ProfileClient) Update() *ProfileUpdate {
+	mutation := newProfileMutation(c.config, OpUpdate)
+	return &ProfileUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProfileClient) UpdateOne(pr *Profile) *ProfileUpdateOne {
+	mutation := newProfileMutation(c.config, OpUpdateOne, withProfile(pr))
+	return &ProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProfileClient) UpdateOneID(id int) *ProfileUpdateOne {
+	mutation := newProfileMutation(c.config, OpUpdateOne, withProfileID(id))
+	return &ProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Profile.
+func (c *ProfileClient) Delete() *ProfileDelete {
+	mutation := newProfileMutation(c.config, OpDelete)
+	return &ProfileDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ProfileClient) DeleteOne(pr *Profile) *ProfileDeleteOne {
+	return c.DeleteOneID(pr.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *ProfileClient) DeleteOneID(id int) *ProfileDeleteOne {
+	builder := c.Delete().Where(profile.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProfileDeleteOne{builder}
+}
+
+// Query returns a query builder for Profile.
+func (c *ProfileClient) Query() *ProfileQuery {
+	return &ProfileQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Profile entity by its id.
+func (c *ProfileClient) Get(ctx context.Context, id int) (*Profile, error) {
+	return c.Query().Where(profile.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProfileClient) GetX(ctx context.Context, id int) *Profile {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ProfileClient) Hooks() []Hook {
+	return c.hooks.Profile
+}
+
+// UserClient is a client for the User schema.
+type UserClient struct {
+	config
+}
+
+// NewUserClient returns a client for the User from the given config.
+func NewUserClient(c config) *UserClient {
+	return &UserClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
+func (c *UserClient) Use(hooks ...Hook) {
+	c.hooks.User = append(c.hooks.User, hooks...)
+}
+
+// Create returns a builder for creating a User entity.
+func (c *UserClient) Create() *UserCreate {
+	mutation := newUserMutation(c.config, OpCreate)
+	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of User entities.
+func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
+	return &UserCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for User.
+func (c *UserClient) Update() *UserUpdate {
+	mutation := newUserMutation(c.config, OpUpdate)
+	return &UserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
+	mutation := newUserMutation(c.config, OpUpdateOne, withUser(u))
+	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserClient) UpdateOneID(id int) *UserUpdateOne {
+	mutation := newUserMutation(c.config, OpUpdateOne, withUserID(id))
+	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for User.
+func (c *UserClient) Delete() *UserDelete {
+	mutation := newUserMutation(c.config, OpDelete)
+	return &UserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
+	return c.DeleteOneID(u.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
+	builder := c.Delete().Where(user.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserDeleteOne{builder}
+}
+
+// Query returns a query builder for User.
+func (c *UserClient) Query() *UserQuery {
+	return &UserQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a User entity by its id.
+func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
+	return c.Query().Where(user.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserClient) GetX(ctx context.Context, id int) *User {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *UserClient) Hooks() []Hook {
+	return c.hooks.User
 }

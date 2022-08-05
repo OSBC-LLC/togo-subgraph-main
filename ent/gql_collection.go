@@ -10,43 +10,30 @@ import (
 )
 
 // CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
-func (a *AccountQuery) CollectFields(ctx context.Context, satisfies ...string) (*AccountQuery, error) {
+func (b *BreedQuery) CollectFields(ctx context.Context, satisfies ...string) (*BreedQuery, error) {
 	fc := graphql.GetFieldContext(ctx)
 	if fc == nil {
-		return a, nil
+		return b, nil
 	}
-	if err := a.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := b.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
-	return a, nil
+	return b, nil
 }
 
-func (a *AccountQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+func (b *BreedQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
-	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
-		switch field.Name {
-		case "tennants":
-			var (
-				path  = append(path, field.Name)
-				query = &TennantQuery{config: a.config}
-			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
-				return err
-			}
-			a.withTennants = query
-		}
-	}
 	return nil
 }
 
-type accountPaginateArgs struct {
+type breedPaginateArgs struct {
 	first, last   *int
 	after, before *Cursor
-	opts          []AccountPaginateOption
+	opts          []BreedPaginateOption
 }
 
-func newAccountPaginateArgs(rv map[string]interface{}) *accountPaginateArgs {
-	args := &accountPaginateArgs{}
+func newBreedPaginateArgs(rv map[string]interface{}) *breedPaginateArgs {
+	args := &breedPaginateArgs{}
 	if rv == nil {
 		return args
 	}
@@ -62,50 +49,37 @@ func newAccountPaginateArgs(rv map[string]interface{}) *accountPaginateArgs {
 	if v := rv[beforeField]; v != nil {
 		args.before = v.(*Cursor)
 	}
-	if v, ok := rv[whereField].(*AccountWhereInput); ok {
-		args.opts = append(args.opts, WithAccountFilter(v.Filter))
+	if v, ok := rv[whereField].(*BreedWhereInput); ok {
+		args.opts = append(args.opts, WithBreedFilter(v.Filter))
 	}
 	return args
 }
 
 // CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
-func (t *TennantQuery) CollectFields(ctx context.Context, satisfies ...string) (*TennantQuery, error) {
+func (d *DogQuery) CollectFields(ctx context.Context, satisfies ...string) (*DogQuery, error) {
 	fc := graphql.GetFieldContext(ctx)
 	if fc == nil {
-		return t, nil
+		return d, nil
 	}
-	if err := t.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := d.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
-	return t, nil
+	return d, nil
 }
 
-func (t *TennantQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+func (d *DogQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
-	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
-		switch field.Name {
-		case "account":
-			var (
-				path  = append(path, field.Name)
-				query = &AccountQuery{config: t.config}
-			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
-				return err
-			}
-			t.withAccount = query
-		}
-	}
 	return nil
 }
 
-type tennantPaginateArgs struct {
+type dogPaginateArgs struct {
 	first, last   *int
 	after, before *Cursor
-	opts          []TennantPaginateOption
+	opts          []DogPaginateOption
 }
 
-func newTennantPaginateArgs(rv map[string]interface{}) *tennantPaginateArgs {
-	args := &tennantPaginateArgs{}
+func newDogPaginateArgs(rv map[string]interface{}) *dogPaginateArgs {
+	args := &dogPaginateArgs{}
 	if rv == nil {
 		return args
 	}
@@ -121,8 +95,238 @@ func newTennantPaginateArgs(rv map[string]interface{}) *tennantPaginateArgs {
 	if v := rv[beforeField]; v != nil {
 		args.before = v.(*Cursor)
 	}
-	if v, ok := rv[whereField].(*TennantWhereInput); ok {
-		args.opts = append(args.opts, WithTennantFilter(v.Filter))
+	if v, ok := rv[whereField].(*DogWhereInput); ok {
+		args.opts = append(args.opts, WithDogFilter(v.Filter))
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (dpb *DogProfileBreedQuery) CollectFields(ctx context.Context, satisfies ...string) (*DogProfileBreedQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return dpb, nil
+	}
+	if err := dpb.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return dpb, nil
+}
+
+func (dpb *DogProfileBreedQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	return nil
+}
+
+type dogprofilebreedPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []DogProfileBreedPaginateOption
+}
+
+func newDogProfileBreedPaginateArgs(rv map[string]interface{}) *dogprofilebreedPaginateArgs {
+	args := &dogprofilebreedPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	if v, ok := rv[whereField].(*DogProfileBreedWhereInput); ok {
+		args.opts = append(args.opts, WithDogProfileBreedFilter(v.Filter))
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (dpo *DogProfileOwnerQuery) CollectFields(ctx context.Context, satisfies ...string) (*DogProfileOwnerQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return dpo, nil
+	}
+	if err := dpo.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return dpo, nil
+}
+
+func (dpo *DogProfileOwnerQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	return nil
+}
+
+type dogprofileownerPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []DogProfileOwnerPaginateOption
+}
+
+func newDogProfileOwnerPaginateArgs(rv map[string]interface{}) *dogprofileownerPaginateArgs {
+	args := &dogprofileownerPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	if v, ok := rv[whereField].(*DogProfileOwnerWhereInput); ok {
+		args.opts = append(args.opts, WithDogProfileOwnerFilter(v.Filter))
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (i *ImageQuery) CollectFields(ctx context.Context, satisfies ...string) (*ImageQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return i, nil
+	}
+	if err := i.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return i, nil
+}
+
+func (i *ImageQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	return nil
+}
+
+type imagePaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []ImagePaginateOption
+}
+
+func newImagePaginateArgs(rv map[string]interface{}) *imagePaginateArgs {
+	args := &imagePaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	if v, ok := rv[whereField].(*ImageWhereInput); ok {
+		args.opts = append(args.opts, WithImageFilter(v.Filter))
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (pr *ProfileQuery) CollectFields(ctx context.Context, satisfies ...string) (*ProfileQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return pr, nil
+	}
+	if err := pr.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return pr, nil
+}
+
+func (pr *ProfileQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	return nil
+}
+
+type profilePaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []ProfilePaginateOption
+}
+
+func newProfilePaginateArgs(rv map[string]interface{}) *profilePaginateArgs {
+	args := &profilePaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	if v, ok := rv[whereField].(*ProfileWhereInput); ok {
+		args.opts = append(args.opts, WithProfileFilter(v.Filter))
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (u *UserQuery) CollectFields(ctx context.Context, satisfies ...string) (*UserQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return u, nil
+	}
+	if err := u.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return u, nil
+}
+
+func (u *UserQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	return nil
+}
+
+type userPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []UserPaginateOption
+}
+
+func newUserPaginateArgs(rv map[string]interface{}) *userPaginateArgs {
+	args := &userPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	if v, ok := rv[whereField].(*UserWhereInput); ok {
+		args.opts = append(args.opts, WithUserFilter(v.Filter))
 	}
 	return args
 }

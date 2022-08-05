@@ -13,6 +13,7 @@ require (
 	github.com/sailsforce/gomicro-kit v0.4.2
 	github.com/vektah/gqlparser/v2 v2.4.3-0.20220508162109-d3d9eb001575
 	github.com/vmihailenco/msgpack/v5 v5.0.0-beta.9
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 )
 
 require (

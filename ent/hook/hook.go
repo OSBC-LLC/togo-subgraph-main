@@ -9,28 +9,93 @@ import (
 	"github.com/OSBC-LLC/togo-subgraph-main/ent"
 )
 
-// The AccountFunc type is an adapter to allow the use of ordinary
-// function as Account mutator.
-type AccountFunc func(context.Context, *ent.AccountMutation) (ent.Value, error)
+// The BreedFunc type is an adapter to allow the use of ordinary
+// function as Breed mutator.
+type BreedFunc func(context.Context, *ent.BreedMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f AccountFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.AccountMutation)
+func (f BreedFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.BreedMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AccountMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BreedMutation", m)
 	}
 	return f(ctx, mv)
 }
 
-// The TennantFunc type is an adapter to allow the use of ordinary
-// function as Tennant mutator.
-type TennantFunc func(context.Context, *ent.TennantMutation) (ent.Value, error)
+// The DogFunc type is an adapter to allow the use of ordinary
+// function as Dog mutator.
+type DogFunc func(context.Context, *ent.DogMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f TennantFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.TennantMutation)
+func (f DogFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.DogMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TennantMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DogMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The DogProfileBreedFunc type is an adapter to allow the use of ordinary
+// function as DogProfileBreed mutator.
+type DogProfileBreedFunc func(context.Context, *ent.DogProfileBreedMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DogProfileBreedFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.DogProfileBreedMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DogProfileBreedMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The DogProfileOwnerFunc type is an adapter to allow the use of ordinary
+// function as DogProfileOwner mutator.
+type DogProfileOwnerFunc func(context.Context, *ent.DogProfileOwnerMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DogProfileOwnerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.DogProfileOwnerMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DogProfileOwnerMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The ImageFunc type is an adapter to allow the use of ordinary
+// function as Image mutator.
+type ImageFunc func(context.Context, *ent.ImageMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ImageFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.ImageMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ImageMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The ProfileFunc type is an adapter to allow the use of ordinary
+// function as Profile mutator.
+type ProfileFunc func(context.Context, *ent.ProfileMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProfileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.ProfileMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProfileMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The UserFunc type is an adapter to allow the use of ordinary
+// function as User mutator.
+type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.UserMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
 	}
 	return f(ctx, mv)
 }

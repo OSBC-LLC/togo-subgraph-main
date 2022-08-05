@@ -8,47 +8,87 @@ import (
 )
 
 var (
-	// AccountsColumns holds the columns for the "accounts" table.
-	AccountsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "name", Type: field.TypeString},
-		{Name: "created_at", Type: field.TypeTime},
+	// BreedsColumns holds the columns for the "breeds" table.
+	BreedsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
 	}
-	// AccountsTable holds the schema information for the "accounts" table.
-	AccountsTable = &schema.Table{
-		Name:       "accounts",
-		Columns:    AccountsColumns,
-		PrimaryKey: []*schema.Column{AccountsColumns[0]},
+	// BreedsTable holds the schema information for the "breeds" table.
+	BreedsTable = &schema.Table{
+		Name:       "breeds",
+		Columns:    BreedsColumns,
+		PrimaryKey: []*schema.Column{BreedsColumns[0]},
 	}
-	// TennantsColumns holds the columns for the "tennants" table.
-	TennantsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "external_id", Type: field.TypeString},
-		{Name: "cloud", Type: field.TypeString},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "account_id", Type: field.TypeUUID},
+	// DogsColumns holds the columns for the "dogs" table.
+	DogsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
 	}
-	// TennantsTable holds the schema information for the "tennants" table.
-	TennantsTable = &schema.Table{
-		Name:       "tennants",
-		Columns:    TennantsColumns,
-		PrimaryKey: []*schema.Column{TennantsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "tennants_accounts_tennants",
-				Columns:    []*schema.Column{TennantsColumns[4]},
-				RefColumns: []*schema.Column{AccountsColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
+	// DogsTable holds the schema information for the "dogs" table.
+	DogsTable = &schema.Table{
+		Name:       "dogs",
+		Columns:    DogsColumns,
+		PrimaryKey: []*schema.Column{DogsColumns[0]},
+	}
+	// DogProfileBreedsColumns holds the columns for the "dog_profile_breeds" table.
+	DogProfileBreedsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+	}
+	// DogProfileBreedsTable holds the schema information for the "dog_profile_breeds" table.
+	DogProfileBreedsTable = &schema.Table{
+		Name:       "dog_profile_breeds",
+		Columns:    DogProfileBreedsColumns,
+		PrimaryKey: []*schema.Column{DogProfileBreedsColumns[0]},
+	}
+	// DogProfileOwnersColumns holds the columns for the "dog_profile_owners" table.
+	DogProfileOwnersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+	}
+	// DogProfileOwnersTable holds the schema information for the "dog_profile_owners" table.
+	DogProfileOwnersTable = &schema.Table{
+		Name:       "dog_profile_owners",
+		Columns:    DogProfileOwnersColumns,
+		PrimaryKey: []*schema.Column{DogProfileOwnersColumns[0]},
+	}
+	// ImagesColumns holds the columns for the "images" table.
+	ImagesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+	}
+	// ImagesTable holds the schema information for the "images" table.
+	ImagesTable = &schema.Table{
+		Name:       "images",
+		Columns:    ImagesColumns,
+		PrimaryKey: []*schema.Column{ImagesColumns[0]},
+	}
+	// ProfilesColumns holds the columns for the "profiles" table.
+	ProfilesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+	}
+	// ProfilesTable holds the schema information for the "profiles" table.
+	ProfilesTable = &schema.Table{
+		Name:       "profiles",
+		Columns:    ProfilesColumns,
+		PrimaryKey: []*schema.Column{ProfilesColumns[0]},
+	}
+	// UsersColumns holds the columns for the "users" table.
+	UsersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+	}
+	// UsersTable holds the schema information for the "users" table.
+	UsersTable = &schema.Table{
+		Name:       "users",
+		Columns:    UsersColumns,
+		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		AccountsTable,
-		TennantsTable,
+		BreedsTable,
+		DogsTable,
+		DogProfileBreedsTable,
+		DogProfileOwnersTable,
+		ImagesTable,
+		ProfilesTable,
+		UsersTable,
 	}
 )
 
 func init() {
-	TennantsTable.ForeignKeys[0].RefTable = AccountsTable
 }

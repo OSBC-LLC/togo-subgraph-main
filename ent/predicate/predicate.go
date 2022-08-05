@@ -6,8 +6,23 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// Account is the predicate function for account builders.
-type Account func(*sql.Selector)
+// Breed is the predicate function for breed builders.
+type Breed func(*sql.Selector)
 
-// Tennant is the predicate function for tennant builders.
-type Tennant func(*sql.Selector)
+// Dog is the predicate function for dog builders.
+type Dog func(*sql.Selector)
+
+// DogProfileBreed is the predicate function for dogprofilebreed builders.
+type DogProfileBreed func(*sql.Selector)
+
+// DogProfileOwner is the predicate function for dogprofileowner builders.
+type DogProfileOwner func(*sql.Selector)
+
+// Image is the predicate function for image builders.
+type Image func(*sql.Selector)
+
+// Profile is the predicate function for profile builders.
+type Profile func(*sql.Selector)
+
+// User is the predicate function for user builders.
+type User func(*sql.Selector)

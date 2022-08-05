@@ -12,10 +12,20 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// Account is the client for interacting with the Account builders.
-	Account *AccountClient
-	// Tennant is the client for interacting with the Tennant builders.
-	Tennant *TennantClient
+	// Breed is the client for interacting with the Breed builders.
+	Breed *BreedClient
+	// Dog is the client for interacting with the Dog builders.
+	Dog *DogClient
+	// DogProfileBreed is the client for interacting with the DogProfileBreed builders.
+	DogProfileBreed *DogProfileBreedClient
+	// DogProfileOwner is the client for interacting with the DogProfileOwner builders.
+	DogProfileOwner *DogProfileOwnerClient
+	// Image is the client for interacting with the Image builders.
+	Image *ImageClient
+	// Profile is the client for interacting with the Profile builders.
+	Profile *ProfileClient
+	// User is the client for interacting with the User builders.
+	User *UserClient
 
 	// lazily loaded.
 	client     *Client
@@ -151,8 +161,13 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.Account = NewAccountClient(tx.config)
-	tx.Tennant = NewTennantClient(tx.config)
+	tx.Breed = NewBreedClient(tx.config)
+	tx.Dog = NewDogClient(tx.config)
+	tx.DogProfileBreed = NewDogProfileBreedClient(tx.config)
+	tx.DogProfileOwner = NewDogProfileOwnerClient(tx.config)
+	tx.Image = NewImageClient(tx.config)
+	tx.Profile = NewProfileClient(tx.config)
+	tx.User = NewUserClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -162,7 +177,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Account.QueryXXX(), the query will be executed
+// applies a query, for example: Breed.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

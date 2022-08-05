@@ -10,8 +10,13 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/OSBC-LLC/togo-subgraph-main/ent/account"
-	"github.com/OSBC-LLC/togo-subgraph-main/ent/tennant"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/breed"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofilebreed"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/profile"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -32,8 +37,13 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		account.Table: account.ValidColumn,
-		tennant.Table: tennant.ValidColumn,
+		breed.Table:           breed.ValidColumn,
+		dog.Table:             dog.ValidColumn,
+		dogprofilebreed.Table: dogprofilebreed.ValidColumn,
+		dogprofileowner.Table: dogprofileowner.ValidColumn,
+		image.Table:           image.ValidColumn,
+		profile.Table:         profile.ValidColumn,
+		user.Table:            user.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {
