@@ -2,7 +2,7 @@
 
 package runtime
 
-// The schema-stitching logic is generated in github.com/OSBC-LLC/apollo-subgraph-template/ent/runtime.go
+// The schema-stitching logic is generated in github.com/OSBC-LLC/togo-subgraph-main/ent/runtime.go
 
 const (
 	Version = "v0.11.1"                                         // Version of ent codegen.

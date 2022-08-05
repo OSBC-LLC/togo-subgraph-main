@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/OSBC-LLC/apollo-subgraph-template/ent/account"
-	"github.com/OSBC-LLC/apollo-subgraph-template/ent/predicate"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/account"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
 )
 
 // AccountDelete is the builder for deleting a Account entity.

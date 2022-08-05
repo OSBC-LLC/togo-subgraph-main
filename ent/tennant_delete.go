@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/OSBC-LLC/apollo-subgraph-template/ent/predicate"
-	"github.com/OSBC-LLC/apollo-subgraph-template/ent/tennant"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/tennant"
 )
 
 // TennantDelete is the builder for deleting a Tennant entity.

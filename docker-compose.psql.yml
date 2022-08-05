@@ -1,11 +1,11 @@
 version: "3"
 services:
-  subgraph-postgres:
+  togo-subgraph-main-postgres:
     image: postgres:12.10
     network_mode: bridge
-    container_name: subgraph-postgres
+    container_name: togo-subgraph-main-postgres
     volumes:
-      - subgraph-data:/var/lib/postgresql/data
+      - togo-subgraph-main-data:/var/lib/postgresql/data
     expose:
       - 5432
     ports:
@@ -16,4 +16,4 @@ services:
       - POSTGRES_DB=postgres
 
 volumes:
-  subgraph-data:
+  togo-subgraph-main-data:

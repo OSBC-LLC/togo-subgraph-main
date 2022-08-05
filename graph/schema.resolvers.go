@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OSBC-LLC/apollo-subgraph-template/ent"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent"
 )
 
 func (r *queryResolver) Example(ctx context.Context, tenantIds []*string) ([]*ent.Account, error) {

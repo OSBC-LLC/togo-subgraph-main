@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/OSBC-LLC/apollo-subgraph-template/ent/account"
-	"github.com/OSBC-LLC/apollo-subgraph-template/ent/predicate"
-	"github.com/OSBC-LLC/apollo-subgraph-template/ent/tennant"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/account"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/tennant"
 	"github.com/google/uuid"
 
 	"entgo.io/ent"

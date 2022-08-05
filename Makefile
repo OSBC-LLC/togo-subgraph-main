@@ -1,6 +1,6 @@
 build:
-	@echo "Building subgraph-app"
-	@go build -o bin/subgraph-app -v .
+	@echo "Building togo-subgraph-main"
+	@go build -o bin/togo-subgraph-main -v .
 	@echo "done."
 
 db:

@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/OSBC-LLC/apollo-subgraph-template/ent/migrate"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/migrate"
 	"github.com/google/uuid"
 
-	"github.com/OSBC-LLC/apollo-subgraph-template/ent/account"
-	"github.com/OSBC-LLC/apollo-subgraph-template/ent/tennant"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/account"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/tennant"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

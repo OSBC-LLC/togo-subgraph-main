@@ -5,12 +5,12 @@ package enttest
 import (
 	"context"
 
-	"github.com/OSBC-LLC/apollo-subgraph-template/ent"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent"
 	// required by schema hooks.
-	_ "github.com/OSBC-LLC/apollo-subgraph-template/ent/runtime"
+	_ "github.com/OSBC-LLC/togo-subgraph-main/ent/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
-	"github.com/OSBC-LLC/apollo-subgraph-template/ent/migrate"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/migrate"
 )
 
 type (

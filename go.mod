@@ -1,4 +1,4 @@
-module github.com/OSBC-LLC/apollo-subgraph-template
+module github.com/OSBC-LLC/togo-subgraph-main
 
 go 1.18
 

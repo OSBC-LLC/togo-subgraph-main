@@ -10,8 +10,8 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/OSBC-LLC/apollo-subgraph-template/ent"
-	"github.com/OSBC-LLC/apollo-subgraph-template/graph"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent"
+	"github.com/OSBC-LLC/togo-subgraph-main/graph"
 	"github.com/newrelic/go-agent/v3/newrelic"
 
 	kit_utils "github.com/sailsforce/gomicro-kit/utils"

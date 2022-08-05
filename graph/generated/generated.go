@@ -15,8 +15,8 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
-	"github.com/OSBC-LLC/apollo-subgraph-template/ent"
-	"github.com/OSBC-LLC/apollo-subgraph-template/ent/schema/uuidgql"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/schema/uuidgql"
 	"github.com/google/uuid"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -503,7 +503,7 @@ scalar Cursor
 An object with an ID.
 Follows the [Relay Global Object Identification Specification](https://relay.dev/graphql/objectidentification.htm)
 """
-interface Node @goModel(model: "github.com/OSBC-LLC/apollo-subgraph-template/ent.Noder") {
+interface Node @goModel(model: "github.com/OSBC-LLC/togo-subgraph-main/ent.Noder") {
   """The id of the object."""
   id: ID!
 }
@@ -723,7 +723,7 @@ func (ec *executionContext) field_Query_accounts_args(ctx context.Context, rawAr
 	var arg0 *ent.Cursor
 	if tmp, ok := rawArgs["after"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg0, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐCursor(ctx, tmp)
+		arg0, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐCursor(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -741,7 +741,7 @@ func (ec *executionContext) field_Query_accounts_args(ctx context.Context, rawAr
 	var arg2 *ent.Cursor
 	if tmp, ok := rawArgs["before"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
-		arg2, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐCursor(ctx, tmp)
+		arg2, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐCursor(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -759,7 +759,7 @@ func (ec *executionContext) field_Query_accounts_args(ctx context.Context, rawAr
 	var arg4 *ent.AccountWhereInput
 	if tmp, ok := rawArgs["where"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
-		arg4, err = ec.unmarshalOAccountWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccountWhereInput(ctx, tmp)
+		arg4, err = ec.unmarshalOAccountWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccountWhereInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -819,7 +819,7 @@ func (ec *executionContext) field_Query_tennants_args(ctx context.Context, rawAr
 	var arg0 *ent.Cursor
 	if tmp, ok := rawArgs["after"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg0, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐCursor(ctx, tmp)
+		arg0, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐCursor(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -837,7 +837,7 @@ func (ec *executionContext) field_Query_tennants_args(ctx context.Context, rawAr
 	var arg2 *ent.Cursor
 	if tmp, ok := rawArgs["before"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
-		arg2, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐCursor(ctx, tmp)
+		arg2, err = ec.unmarshalOCursor2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐCursor(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -855,7 +855,7 @@ func (ec *executionContext) field_Query_tennants_args(ctx context.Context, rawAr
 	var arg4 *ent.TennantWhereInput
 	if tmp, ok := rawArgs["where"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
-		arg4, err = ec.unmarshalOTennantWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennantWhereInput(ctx, tmp)
+		arg4, err = ec.unmarshalOTennantWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennantWhereInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1059,7 +1059,7 @@ func (ec *executionContext) _Account_tennants(ctx context.Context, field graphql
 	}
 	res := resTmp.([]*ent.Tennant)
 	fc.Result = res
-	return ec.marshalOTennant2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennantᚄ(ctx, field.Selections, res)
+	return ec.marshalOTennant2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennantᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Account_tennants(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1114,7 +1114,7 @@ func (ec *executionContext) _AccountConnection_edges(ctx context.Context, field 
 	}
 	res := resTmp.([]*ent.AccountEdge)
 	fc.Result = res
-	return ec.marshalOAccountEdge2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccountEdge(ctx, field.Selections, res)
+	return ec.marshalOAccountEdge2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccountEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_AccountConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1164,7 +1164,7 @@ func (ec *executionContext) _AccountConnection_pageInfo(ctx context.Context, fie
 	}
 	res := resTmp.(ent.PageInfo)
 	fc.Result = res
-	return ec.marshalNPageInfo2githubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalNPageInfo2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_AccountConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1259,7 +1259,7 @@ func (ec *executionContext) _AccountEdge_node(ctx context.Context, field graphql
 	}
 	res := resTmp.(*ent.Account)
 	fc.Result = res
-	return ec.marshalOAccount2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccount(ctx, field.Selections, res)
+	return ec.marshalOAccount2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccount(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_AccountEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1313,7 +1313,7 @@ func (ec *executionContext) _AccountEdge_cursor(ctx context.Context, field graph
 	}
 	res := resTmp.(ent.Cursor)
 	fc.Result = res
-	return ec.marshalNCursor2githubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐCursor(ctx, field.Selections, res)
+	return ec.marshalNCursor2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐCursor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_AccountEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1442,7 +1442,7 @@ func (ec *executionContext) _PageInfo_startCursor(ctx context.Context, field gra
 	}
 	res := resTmp.(*ent.Cursor)
 	fc.Result = res
-	return ec.marshalOCursor2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐCursor(ctx, field.Selections, res)
+	return ec.marshalOCursor2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐCursor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_PageInfo_startCursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1483,7 +1483,7 @@ func (ec *executionContext) _PageInfo_endCursor(ctx context.Context, field graph
 	}
 	res := resTmp.(*ent.Cursor)
 	fc.Result = res
-	return ec.marshalOCursor2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐCursor(ctx, field.Selections, res)
+	return ec.marshalOCursor2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐCursor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_PageInfo_endCursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1524,7 +1524,7 @@ func (ec *executionContext) _Query_node(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(ent.Noder)
 	fc.Result = res
-	return ec.marshalONode2githubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐNoder(ctx, field.Selections, res)
+	return ec.marshalONode2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐNoder(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1579,7 +1579,7 @@ func (ec *executionContext) _Query_nodes(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.([]ent.Noder)
 	fc.Result = res
-	return ec.marshalNNode2ᚕgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐNoder(ctx, field.Selections, res)
+	return ec.marshalNNode2ᚕgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐNoder(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_nodes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1634,7 +1634,7 @@ func (ec *executionContext) _Query_accounts(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*ent.AccountConnection)
 	fc.Result = res
-	return ec.marshalNAccountConnection2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccountConnection(ctx, field.Selections, res)
+	return ec.marshalNAccountConnection2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccountConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_accounts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1697,7 +1697,7 @@ func (ec *executionContext) _Query_tennants(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*ent.TennantConnection)
 	fc.Result = res
-	return ec.marshalNTennantConnection2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennantConnection(ctx, field.Selections, res)
+	return ec.marshalNTennantConnection2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennantConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_tennants(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1760,7 +1760,7 @@ func (ec *executionContext) _Query_example(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.([]*ent.Account)
 	fc.Result = res
-	return ec.marshalNAccount2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccountᚄ(ctx, field.Selections, res)
+	return ec.marshalNAccount2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccountᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_example(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2222,7 +2222,7 @@ func (ec *executionContext) _Tennant_account(ctx context.Context, field graphql.
 	}
 	res := resTmp.(*ent.Account)
 	fc.Result = res
-	return ec.marshalNAccount2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccount(ctx, field.Selections, res)
+	return ec.marshalNAccount2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccount(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Tennant_account(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2273,7 +2273,7 @@ func (ec *executionContext) _TennantConnection_edges(ctx context.Context, field 
 	}
 	res := resTmp.([]*ent.TennantEdge)
 	fc.Result = res
-	return ec.marshalOTennantEdge2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennantEdge(ctx, field.Selections, res)
+	return ec.marshalOTennantEdge2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennantEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_TennantConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2323,7 +2323,7 @@ func (ec *executionContext) _TennantConnection_pageInfo(ctx context.Context, fie
 	}
 	res := resTmp.(ent.PageInfo)
 	fc.Result = res
-	return ec.marshalNPageInfo2githubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalNPageInfo2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_TennantConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2418,7 +2418,7 @@ func (ec *executionContext) _TennantEdge_node(ctx context.Context, field graphql
 	}
 	res := resTmp.(*ent.Tennant)
 	fc.Result = res
-	return ec.marshalOTennant2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennant(ctx, field.Selections, res)
+	return ec.marshalOTennant2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennant(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_TennantEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2476,7 +2476,7 @@ func (ec *executionContext) _TennantEdge_cursor(ctx context.Context, field graph
 	}
 	res := resTmp.(ent.Cursor)
 	fc.Result = res
-	return ec.marshalNCursor2githubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐCursor(ctx, field.Selections, res)
+	return ec.marshalNCursor2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐCursor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_TennantEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4319,7 +4319,7 @@ func (ec *executionContext) unmarshalInputAccountWhereInput(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
-			it.Not, err = ec.unmarshalOAccountWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccountWhereInput(ctx, v)
+			it.Not, err = ec.unmarshalOAccountWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccountWhereInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4327,7 +4327,7 @@ func (ec *executionContext) unmarshalInputAccountWhereInput(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
-			it.And, err = ec.unmarshalOAccountWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccountWhereInputᚄ(ctx, v)
+			it.And, err = ec.unmarshalOAccountWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccountWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4335,7 +4335,7 @@ func (ec *executionContext) unmarshalInputAccountWhereInput(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
-			it.Or, err = ec.unmarshalOAccountWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccountWhereInputᚄ(ctx, v)
+			it.Or, err = ec.unmarshalOAccountWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccountWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4583,7 +4583,7 @@ func (ec *executionContext) unmarshalInputAccountWhereInput(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasTennantsWith"))
-			it.HasTennantsWith, err = ec.unmarshalOTennantWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennantWhereInputᚄ(ctx, v)
+			it.HasTennantsWith, err = ec.unmarshalOTennantWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennantWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4606,7 +4606,7 @@ func (ec *executionContext) unmarshalInputTennantWhereInput(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
-			it.Not, err = ec.unmarshalOTennantWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennantWhereInput(ctx, v)
+			it.Not, err = ec.unmarshalOTennantWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennantWhereInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4614,7 +4614,7 @@ func (ec *executionContext) unmarshalInputTennantWhereInput(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
-			it.And, err = ec.unmarshalOTennantWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennantWhereInputᚄ(ctx, v)
+			it.And, err = ec.unmarshalOTennantWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennantWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4622,7 +4622,7 @@ func (ec *executionContext) unmarshalInputTennantWhereInput(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
-			it.Or, err = ec.unmarshalOTennantWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennantWhereInputᚄ(ctx, v)
+			it.Or, err = ec.unmarshalOTennantWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennantWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5006,7 +5006,7 @@ func (ec *executionContext) unmarshalInputTennantWhereInput(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasAccountWith"))
-			it.HasAccountWith, err = ec.unmarshalOAccountWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccountWhereInputᚄ(ctx, v)
+			it.HasAccountWith, err = ec.unmarshalOAccountWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccountWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5883,7 +5883,7 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNAccount2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccountᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Account) graphql.Marshaler {
+func (ec *executionContext) marshalNAccount2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccountᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Account) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -5907,7 +5907,7 @@ func (ec *executionContext) marshalNAccount2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋap
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNAccount2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccount(ctx, sel, v[i])
+			ret[i] = ec.marshalNAccount2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccount(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -5927,7 +5927,7 @@ func (ec *executionContext) marshalNAccount2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋap
 	return ret
 }
 
-func (ec *executionContext) marshalNAccount2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccount(ctx context.Context, sel ast.SelectionSet, v *ent.Account) graphql.Marshaler {
+func (ec *executionContext) marshalNAccount2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccount(ctx context.Context, sel ast.SelectionSet, v *ent.Account) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -5937,11 +5937,11 @@ func (ec *executionContext) marshalNAccount2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapoll
 	return ec._Account(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNAccountConnection2githubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccountConnection(ctx context.Context, sel ast.SelectionSet, v ent.AccountConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNAccountConnection2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccountConnection(ctx context.Context, sel ast.SelectionSet, v ent.AccountConnection) graphql.Marshaler {
 	return ec._AccountConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAccountConnection2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccountConnection(ctx context.Context, sel ast.SelectionSet, v *ent.AccountConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNAccountConnection2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccountConnection(ctx context.Context, sel ast.SelectionSet, v *ent.AccountConnection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -5951,7 +5951,7 @@ func (ec *executionContext) marshalNAccountConnection2ᚖgithubᚗcomᚋOSBCᚑL
 	return ec._AccountConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNAccountWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccountWhereInput(ctx context.Context, v interface{}) (*ent.AccountWhereInput, error) {
+func (ec *executionContext) unmarshalNAccountWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccountWhereInput(ctx context.Context, v interface{}) (*ent.AccountWhereInput, error) {
 	res, err := ec.unmarshalInputAccountWhereInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
@@ -5971,13 +5971,13 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNCursor2githubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐCursor(ctx context.Context, v interface{}) (ent.Cursor, error) {
+func (ec *executionContext) unmarshalNCursor2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐCursor(ctx context.Context, v interface{}) (ent.Cursor, error) {
 	var res ent.Cursor
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNCursor2githubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐCursor(ctx context.Context, sel ast.SelectionSet, v ent.Cursor) graphql.Marshaler {
+func (ec *executionContext) marshalNCursor2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐCursor(ctx context.Context, sel ast.SelectionSet, v ent.Cursor) graphql.Marshaler {
 	return v
 }
 
@@ -6043,7 +6043,7 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNNode2ᚕgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐNoder(ctx context.Context, sel ast.SelectionSet, v []ent.Noder) graphql.Marshaler {
+func (ec *executionContext) marshalNNode2ᚕgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐNoder(ctx context.Context, sel ast.SelectionSet, v []ent.Noder) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6067,7 +6067,7 @@ func (ec *executionContext) marshalNNode2ᚕgithubᚗcomᚋOSBCᚑLLCᚋapollo�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalONode2githubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐNoder(ctx, sel, v[i])
+			ret[i] = ec.marshalONode2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐNoder(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6081,7 +6081,7 @@ func (ec *executionContext) marshalNNode2ᚕgithubᚗcomᚋOSBCᚑLLCᚋapollo�
 	return ret
 }
 
-func (ec *executionContext) marshalNPageInfo2githubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v ent.PageInfo) graphql.Marshaler {
+func (ec *executionContext) marshalNPageInfo2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v ent.PageInfo) graphql.Marshaler {
 	return ec._PageInfo(ctx, sel, &v)
 }
 
@@ -6126,7 +6126,7 @@ func (ec *executionContext) marshalNString2ᚕᚖstring(ctx context.Context, sel
 	return ret
 }
 
-func (ec *executionContext) marshalNTennant2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennant(ctx context.Context, sel ast.SelectionSet, v *ent.Tennant) graphql.Marshaler {
+func (ec *executionContext) marshalNTennant2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennant(ctx context.Context, sel ast.SelectionSet, v *ent.Tennant) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -6136,11 +6136,11 @@ func (ec *executionContext) marshalNTennant2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapoll
 	return ec._Tennant(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNTennantConnection2githubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennantConnection(ctx context.Context, sel ast.SelectionSet, v ent.TennantConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNTennantConnection2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennantConnection(ctx context.Context, sel ast.SelectionSet, v ent.TennantConnection) graphql.Marshaler {
 	return ec._TennantConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTennantConnection2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennantConnection(ctx context.Context, sel ast.SelectionSet, v *ent.TennantConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNTennantConnection2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennantConnection(ctx context.Context, sel ast.SelectionSet, v *ent.TennantConnection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -6150,7 +6150,7 @@ func (ec *executionContext) marshalNTennantConnection2ᚖgithubᚗcomᚋOSBCᚑL
 	return ec._TennantConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNTennantWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennantWhereInput(ctx context.Context, v interface{}) (*ent.TennantWhereInput, error) {
+func (ec *executionContext) unmarshalNTennantWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennantWhereInput(ctx context.Context, v interface{}) (*ent.TennantWhereInput, error) {
 	res, err := ec.unmarshalInputTennantWhereInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
@@ -6442,14 +6442,14 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalOAccount2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccount(ctx context.Context, sel ast.SelectionSet, v *ent.Account) graphql.Marshaler {
+func (ec *executionContext) marshalOAccount2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccount(ctx context.Context, sel ast.SelectionSet, v *ent.Account) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Account(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOAccountEdge2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccountEdge(ctx context.Context, sel ast.SelectionSet, v []*ent.AccountEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOAccountEdge2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccountEdge(ctx context.Context, sel ast.SelectionSet, v []*ent.AccountEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -6476,7 +6476,7 @@ func (ec *executionContext) marshalOAccountEdge2ᚕᚖgithubᚗcomᚋOSBCᚑLLC�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOAccountEdge2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccountEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalOAccountEdge2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccountEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6490,14 +6490,14 @@ func (ec *executionContext) marshalOAccountEdge2ᚕᚖgithubᚗcomᚋOSBCᚑLLC�
 	return ret
 }
 
-func (ec *executionContext) marshalOAccountEdge2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccountEdge(ctx context.Context, sel ast.SelectionSet, v *ent.AccountEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOAccountEdge2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccountEdge(ctx context.Context, sel ast.SelectionSet, v *ent.AccountEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._AccountEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOAccountWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccountWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.AccountWhereInput, error) {
+func (ec *executionContext) unmarshalOAccountWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccountWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.AccountWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -6509,7 +6509,7 @@ func (ec *executionContext) unmarshalOAccountWhereInput2ᚕᚖgithubᚗcomᚋOSB
 	res := make([]*ent.AccountWhereInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNAccountWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccountWhereInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNAccountWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccountWhereInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -6517,7 +6517,7 @@ func (ec *executionContext) unmarshalOAccountWhereInput2ᚕᚖgithubᚗcomᚋOSB
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOAccountWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐAccountWhereInput(ctx context.Context, v interface{}) (*ent.AccountWhereInput, error) {
+func (ec *executionContext) unmarshalOAccountWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐAccountWhereInput(ctx context.Context, v interface{}) (*ent.AccountWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -6551,7 +6551,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) unmarshalOCursor2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐCursor(ctx context.Context, v interface{}) (*ent.Cursor, error) {
+func (ec *executionContext) unmarshalOCursor2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐCursor(ctx context.Context, v interface{}) (*ent.Cursor, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -6560,7 +6560,7 @@ func (ec *executionContext) unmarshalOCursor2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapol
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOCursor2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐCursor(ctx context.Context, sel ast.SelectionSet, v *ent.Cursor) graphql.Marshaler {
+func (ec *executionContext) marshalOCursor2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐCursor(ctx context.Context, sel ast.SelectionSet, v *ent.Cursor) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -6637,7 +6637,7 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return res
 }
 
-func (ec *executionContext) marshalONode2githubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐNoder(ctx context.Context, sel ast.SelectionSet, v ent.Noder) graphql.Marshaler {
+func (ec *executionContext) marshalONode2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐNoder(ctx context.Context, sel ast.SelectionSet, v ent.Noder) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -6708,7 +6708,7 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalOTennant2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennantᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Tennant) graphql.Marshaler {
+func (ec *executionContext) marshalOTennant2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennantᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Tennant) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -6735,7 +6735,7 @@ func (ec *executionContext) marshalOTennant2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋap
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNTennant2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennant(ctx, sel, v[i])
+			ret[i] = ec.marshalNTennant2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennant(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6755,14 +6755,14 @@ func (ec *executionContext) marshalOTennant2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋap
 	return ret
 }
 
-func (ec *executionContext) marshalOTennant2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennant(ctx context.Context, sel ast.SelectionSet, v *ent.Tennant) graphql.Marshaler {
+func (ec *executionContext) marshalOTennant2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennant(ctx context.Context, sel ast.SelectionSet, v *ent.Tennant) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Tennant(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOTennantEdge2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennantEdge(ctx context.Context, sel ast.SelectionSet, v []*ent.TennantEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOTennantEdge2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennantEdge(ctx context.Context, sel ast.SelectionSet, v []*ent.TennantEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -6789,7 +6789,7 @@ func (ec *executionContext) marshalOTennantEdge2ᚕᚖgithubᚗcomᚋOSBCᚑLLC�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOTennantEdge2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennantEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalOTennantEdge2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennantEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6803,14 +6803,14 @@ func (ec *executionContext) marshalOTennantEdge2ᚕᚖgithubᚗcomᚋOSBCᚑLLC�
 	return ret
 }
 
-func (ec *executionContext) marshalOTennantEdge2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennantEdge(ctx context.Context, sel ast.SelectionSet, v *ent.TennantEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOTennantEdge2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennantEdge(ctx context.Context, sel ast.SelectionSet, v *ent.TennantEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._TennantEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOTennantWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennantWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.TennantWhereInput, error) {
+func (ec *executionContext) unmarshalOTennantWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennantWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.TennantWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -6822,7 +6822,7 @@ func (ec *executionContext) unmarshalOTennantWhereInput2ᚕᚖgithubᚗcomᚋOSB
 	res := make([]*ent.TennantWhereInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNTennantWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennantWhereInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNTennantWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennantWhereInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -6830,7 +6830,7 @@ func (ec *executionContext) unmarshalOTennantWhereInput2ᚕᚖgithubᚗcomᚋOSB
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOTennantWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋapolloᚑsubgraphᚑtemplateᚋentᚐTennantWhereInput(ctx context.Context, v interface{}) (*ent.TennantWhereInput, error) {
+func (ec *executionContext) unmarshalOTennantWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐTennantWhereInput(ctx context.Context, v interface{}) (*ent.TennantWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}

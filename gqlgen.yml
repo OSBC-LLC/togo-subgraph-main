@@ -36,7 +36,7 @@ resolver:
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.
 autobind:
-  - "github.com/OSBC-LLC/apollo-subgraph-template/ent"
+  - "github.com/OSBC-LLC/togo-subgraph-main/ent"
 
 # This section declares type mapping between the GraphQL and go type systems
 #
@@ -46,7 +46,7 @@ autobind:
 models:
   ID:
     model:
-      - github.com/OSBC-LLC/apollo-subgraph-template/ent/schema/uuidgql.UUID
+      - github.com/OSBC-LLC/togo-subgraph-main/ent/schema/uuidgql.UUID
       - github.com/99designs/gqlgen/graphql.ID
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
@@ -58,4 +58,4 @@ models:
       - github.com/99designs/gqlgen/graphql.Int32
   Node:
     model:
-      - github.com/OSBC-LLC/apollo-subgraph-template/ent.Noder
+      - github.com/OSBC-LLC/togo-subgraph-main/ent.Noder

@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/OSBC-LLC/apollo-subgraph-template/ent/account"
-	"github.com/OSBC-LLC/apollo-subgraph-template/ent/tennant"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/account"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/tennant"
 )
 
 // ent aliases to avoid import conflicts in user's code.

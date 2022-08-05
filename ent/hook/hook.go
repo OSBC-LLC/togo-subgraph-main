@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OSBC-LLC/apollo-subgraph-template/ent"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent"
 )
 
 // The AccountFunc type is an adapter to allow the use of ordinary

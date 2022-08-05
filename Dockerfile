@@ -7,6 +7,6 @@ RUN make
 
 FROM alpine:3.14
 EXPOSE 8880
-COPY --from=build /app/bin/subgraph-app /subgraph-app
+COPY --from=build /app/bin/togo-subgraph-main /togo-subgraph-main
 COPY .env .env
-CMD [ "/subgraph-app"]
+CMD [ "/togo-subgraph-main"]
