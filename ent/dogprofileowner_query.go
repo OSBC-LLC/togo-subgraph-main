@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // DogProfileOwnerQuery is the builder for querying DogProfileOwner entities.
@@ -85,8 +86,8 @@ func (dpoq *DogProfileOwnerQuery) FirstX(ctx context.Context) *DogProfileOwner {
 
 // FirstID returns the first DogProfileOwner ID from the query.
 // Returns a *NotFoundError when no DogProfileOwner ID was found.
-func (dpoq *DogProfileOwnerQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (dpoq *DogProfileOwnerQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = dpoq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -98,7 +99,7 @@ func (dpoq *DogProfileOwnerQuery) FirstID(ctx context.Context) (id int, err erro
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (dpoq *DogProfileOwnerQuery) FirstIDX(ctx context.Context) int {
+func (dpoq *DogProfileOwnerQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := dpoq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -136,8 +137,8 @@ func (dpoq *DogProfileOwnerQuery) OnlyX(ctx context.Context) *DogProfileOwner {
 // OnlyID is like Only, but returns the only DogProfileOwner ID in the query.
 // Returns a *NotSingularError when more than one DogProfileOwner ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (dpoq *DogProfileOwnerQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (dpoq *DogProfileOwnerQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = dpoq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -153,7 +154,7 @@ func (dpoq *DogProfileOwnerQuery) OnlyID(ctx context.Context) (id int, err error
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (dpoq *DogProfileOwnerQuery) OnlyIDX(ctx context.Context) int {
+func (dpoq *DogProfileOwnerQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := dpoq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -179,8 +180,8 @@ func (dpoq *DogProfileOwnerQuery) AllX(ctx context.Context) []*DogProfileOwner {
 }
 
 // IDs executes the query and returns a list of DogProfileOwner IDs.
-func (dpoq *DogProfileOwnerQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (dpoq *DogProfileOwnerQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := dpoq.Select(dogprofileowner.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -188,7 +189,7 @@ func (dpoq *DogProfileOwnerQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (dpoq *DogProfileOwnerQuery) IDsX(ctx context.Context) []int {
+func (dpoq *DogProfileOwnerQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := dpoq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -251,6 +252,18 @@ func (dpoq *DogProfileOwnerQuery) Clone() *DogProfileOwnerQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		OwnerID uuid.UUID `json:"owner_id,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.DogProfileOwner.Query().
+//		GroupBy(dogprofileowner.FieldOwnerID).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
 func (dpoq *DogProfileOwnerQuery) GroupBy(field string, fields ...string) *DogProfileOwnerGroupBy {
 	grbuild := &DogProfileOwnerGroupBy{config: dpoq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -267,6 +280,16 @@ func (dpoq *DogProfileOwnerQuery) GroupBy(field string, fields ...string) *DogPr
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		OwnerID uuid.UUID `json:"owner_id,omitempty"`
+//	}
+//
+//	client.DogProfileOwner.Query().
+//		Select(dogprofileowner.FieldOwnerID).
+//		Scan(ctx, &v)
 func (dpoq *DogProfileOwnerQuery) Select(fields ...string) *DogProfileOwnerSelect {
 	dpoq.fields = append(dpoq.fields, fields...)
 	selbuild := &DogProfileOwnerSelect{DogProfileOwnerQuery: dpoq}
@@ -350,7 +373,7 @@ func (dpoq *DogProfileOwnerQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   dogprofileowner.Table,
 			Columns: dogprofileowner.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: dogprofileowner.FieldID,
 			},
 		},

@@ -3,33 +3,36 @@
 package dog
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Dog {
+func ID(id uuid.UUID) predicate.Dog {
 	return predicate.Dog(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Dog {
+func IDEQ(id uuid.UUID) predicate.Dog {
 	return predicate.Dog(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Dog {
+func IDNEQ(id uuid.UUID) predicate.Dog {
 	return predicate.Dog(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Dog {
+func IDIn(ids ...uuid.UUID) predicate.Dog {
 	return predicate.Dog(func(s *sql.Selector) {
 		v := make([]interface{}, len(ids))
 		for i := range v {
@@ -40,7 +43,7 @@ func IDIn(ids ...int) predicate.Dog {
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Dog {
+func IDNotIn(ids ...uuid.UUID) predicate.Dog {
 	return predicate.Dog(func(s *sql.Selector) {
 		v := make([]interface{}, len(ids))
 		for i := range v {
@@ -51,30 +54,847 @@ func IDNotIn(ids ...int) predicate.Dog {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Dog {
+func IDGT(id uuid.UUID) predicate.Dog {
 	return predicate.Dog(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Dog {
+func IDGTE(id uuid.UUID) predicate.Dog {
 	return predicate.Dog(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Dog {
+func IDLT(id uuid.UUID) predicate.Dog {
 	return predicate.Dog(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Dog {
+func IDLTE(id uuid.UUID) predicate.Dog {
 	return predicate.Dog(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
+	})
+}
+
+// FullName applies equality check predicate on the "full_name" field. It's identical to FullNameEQ.
+func FullName(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFullName), v))
+	})
+}
+
+// Age applies equality check predicate on the "age" field. It's identical to AgeEQ.
+func Age(v int) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAge), v))
+	})
+}
+
+// WeightLbs applies equality check predicate on the "weight_lbs" field. It's identical to WeightLbsEQ.
+func WeightLbs(v float64) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldWeightLbs), v))
+	})
+}
+
+// WeightKgs applies equality check predicate on the "weight_kgs" field. It's identical to WeightKgsEQ.
+func WeightKgs(v float64) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldWeightKgs), v))
+	})
+}
+
+// Size applies equality check predicate on the "size" field. It's identical to SizeEQ.
+func Size(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSize), v))
+	})
+}
+
+// Birthday applies equality check predicate on the "birthday" field. It's identical to BirthdayEQ.
+func Birthday(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldBirthday), v))
+	})
+}
+
+// DogImgID applies equality check predicate on the "dog_img_id" field. It's identical to DogImgIDEQ.
+func DogImgID(v uuid.UUID) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDogImgID), v))
+	})
+}
+
+// UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
+func UpdatedAt(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
+func CreatedAt(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// FullNameEQ applies the EQ predicate on the "full_name" field.
+func FullNameEQ(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFullName), v))
+	})
+}
+
+// FullNameNEQ applies the NEQ predicate on the "full_name" field.
+func FullNameNEQ(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldFullName), v))
+	})
+}
+
+// FullNameIn applies the In predicate on the "full_name" field.
+func FullNameIn(vs ...string) predicate.Dog {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Dog(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldFullName), v...))
+	})
+}
+
+// FullNameNotIn applies the NotIn predicate on the "full_name" field.
+func FullNameNotIn(vs ...string) predicate.Dog {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Dog(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldFullName), v...))
+	})
+}
+
+// FullNameGT applies the GT predicate on the "full_name" field.
+func FullNameGT(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldFullName), v))
+	})
+}
+
+// FullNameGTE applies the GTE predicate on the "full_name" field.
+func FullNameGTE(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldFullName), v))
+	})
+}
+
+// FullNameLT applies the LT predicate on the "full_name" field.
+func FullNameLT(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldFullName), v))
+	})
+}
+
+// FullNameLTE applies the LTE predicate on the "full_name" field.
+func FullNameLTE(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldFullName), v))
+	})
+}
+
+// FullNameContains applies the Contains predicate on the "full_name" field.
+func FullNameContains(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldFullName), v))
+	})
+}
+
+// FullNameHasPrefix applies the HasPrefix predicate on the "full_name" field.
+func FullNameHasPrefix(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldFullName), v))
+	})
+}
+
+// FullNameHasSuffix applies the HasSuffix predicate on the "full_name" field.
+func FullNameHasSuffix(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldFullName), v))
+	})
+}
+
+// FullNameEqualFold applies the EqualFold predicate on the "full_name" field.
+func FullNameEqualFold(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldFullName), v))
+	})
+}
+
+// FullNameContainsFold applies the ContainsFold predicate on the "full_name" field.
+func FullNameContainsFold(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldFullName), v))
+	})
+}
+
+// AgeEQ applies the EQ predicate on the "age" field.
+func AgeEQ(v int) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAge), v))
+	})
+}
+
+// AgeNEQ applies the NEQ predicate on the "age" field.
+func AgeNEQ(v int) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldAge), v))
+	})
+}
+
+// AgeIn applies the In predicate on the "age" field.
+func AgeIn(vs ...int) predicate.Dog {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Dog(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldAge), v...))
+	})
+}
+
+// AgeNotIn applies the NotIn predicate on the "age" field.
+func AgeNotIn(vs ...int) predicate.Dog {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Dog(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldAge), v...))
+	})
+}
+
+// AgeGT applies the GT predicate on the "age" field.
+func AgeGT(v int) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldAge), v))
+	})
+}
+
+// AgeGTE applies the GTE predicate on the "age" field.
+func AgeGTE(v int) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldAge), v))
+	})
+}
+
+// AgeLT applies the LT predicate on the "age" field.
+func AgeLT(v int) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldAge), v))
+	})
+}
+
+// AgeLTE applies the LTE predicate on the "age" field.
+func AgeLTE(v int) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldAge), v))
+	})
+}
+
+// WeightLbsEQ applies the EQ predicate on the "weight_lbs" field.
+func WeightLbsEQ(v float64) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldWeightLbs), v))
+	})
+}
+
+// WeightLbsNEQ applies the NEQ predicate on the "weight_lbs" field.
+func WeightLbsNEQ(v float64) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldWeightLbs), v))
+	})
+}
+
+// WeightLbsIn applies the In predicate on the "weight_lbs" field.
+func WeightLbsIn(vs ...float64) predicate.Dog {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Dog(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldWeightLbs), v...))
+	})
+}
+
+// WeightLbsNotIn applies the NotIn predicate on the "weight_lbs" field.
+func WeightLbsNotIn(vs ...float64) predicate.Dog {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Dog(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldWeightLbs), v...))
+	})
+}
+
+// WeightLbsGT applies the GT predicate on the "weight_lbs" field.
+func WeightLbsGT(v float64) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldWeightLbs), v))
+	})
+}
+
+// WeightLbsGTE applies the GTE predicate on the "weight_lbs" field.
+func WeightLbsGTE(v float64) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldWeightLbs), v))
+	})
+}
+
+// WeightLbsLT applies the LT predicate on the "weight_lbs" field.
+func WeightLbsLT(v float64) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldWeightLbs), v))
+	})
+}
+
+// WeightLbsLTE applies the LTE predicate on the "weight_lbs" field.
+func WeightLbsLTE(v float64) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldWeightLbs), v))
+	})
+}
+
+// WeightKgsEQ applies the EQ predicate on the "weight_kgs" field.
+func WeightKgsEQ(v float64) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldWeightKgs), v))
+	})
+}
+
+// WeightKgsNEQ applies the NEQ predicate on the "weight_kgs" field.
+func WeightKgsNEQ(v float64) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldWeightKgs), v))
+	})
+}
+
+// WeightKgsIn applies the In predicate on the "weight_kgs" field.
+func WeightKgsIn(vs ...float64) predicate.Dog {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Dog(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldWeightKgs), v...))
+	})
+}
+
+// WeightKgsNotIn applies the NotIn predicate on the "weight_kgs" field.
+func WeightKgsNotIn(vs ...float64) predicate.Dog {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Dog(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldWeightKgs), v...))
+	})
+}
+
+// WeightKgsGT applies the GT predicate on the "weight_kgs" field.
+func WeightKgsGT(v float64) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldWeightKgs), v))
+	})
+}
+
+// WeightKgsGTE applies the GTE predicate on the "weight_kgs" field.
+func WeightKgsGTE(v float64) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldWeightKgs), v))
+	})
+}
+
+// WeightKgsLT applies the LT predicate on the "weight_kgs" field.
+func WeightKgsLT(v float64) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldWeightKgs), v))
+	})
+}
+
+// WeightKgsLTE applies the LTE predicate on the "weight_kgs" field.
+func WeightKgsLTE(v float64) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldWeightKgs), v))
+	})
+}
+
+// SizeEQ applies the EQ predicate on the "size" field.
+func SizeEQ(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSize), v))
+	})
+}
+
+// SizeNEQ applies the NEQ predicate on the "size" field.
+func SizeNEQ(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldSize), v))
+	})
+}
+
+// SizeIn applies the In predicate on the "size" field.
+func SizeIn(vs ...string) predicate.Dog {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Dog(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldSize), v...))
+	})
+}
+
+// SizeNotIn applies the NotIn predicate on the "size" field.
+func SizeNotIn(vs ...string) predicate.Dog {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Dog(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldSize), v...))
+	})
+}
+
+// SizeGT applies the GT predicate on the "size" field.
+func SizeGT(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldSize), v))
+	})
+}
+
+// SizeGTE applies the GTE predicate on the "size" field.
+func SizeGTE(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldSize), v))
+	})
+}
+
+// SizeLT applies the LT predicate on the "size" field.
+func SizeLT(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldSize), v))
+	})
+}
+
+// SizeLTE applies the LTE predicate on the "size" field.
+func SizeLTE(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldSize), v))
+	})
+}
+
+// SizeContains applies the Contains predicate on the "size" field.
+func SizeContains(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldSize), v))
+	})
+}
+
+// SizeHasPrefix applies the HasPrefix predicate on the "size" field.
+func SizeHasPrefix(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldSize), v))
+	})
+}
+
+// SizeHasSuffix applies the HasSuffix predicate on the "size" field.
+func SizeHasSuffix(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldSize), v))
+	})
+}
+
+// SizeEqualFold applies the EqualFold predicate on the "size" field.
+func SizeEqualFold(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldSize), v))
+	})
+}
+
+// SizeContainsFold applies the ContainsFold predicate on the "size" field.
+func SizeContainsFold(v string) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldSize), v))
+	})
+}
+
+// BirthdayEQ applies the EQ predicate on the "birthday" field.
+func BirthdayEQ(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldBirthday), v))
+	})
+}
+
+// BirthdayNEQ applies the NEQ predicate on the "birthday" field.
+func BirthdayNEQ(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldBirthday), v))
+	})
+}
+
+// BirthdayIn applies the In predicate on the "birthday" field.
+func BirthdayIn(vs ...time.Time) predicate.Dog {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Dog(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldBirthday), v...))
+	})
+}
+
+// BirthdayNotIn applies the NotIn predicate on the "birthday" field.
+func BirthdayNotIn(vs ...time.Time) predicate.Dog {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Dog(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldBirthday), v...))
+	})
+}
+
+// BirthdayGT applies the GT predicate on the "birthday" field.
+func BirthdayGT(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldBirthday), v))
+	})
+}
+
+// BirthdayGTE applies the GTE predicate on the "birthday" field.
+func BirthdayGTE(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldBirthday), v))
+	})
+}
+
+// BirthdayLT applies the LT predicate on the "birthday" field.
+func BirthdayLT(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldBirthday), v))
+	})
+}
+
+// BirthdayLTE applies the LTE predicate on the "birthday" field.
+func BirthdayLTE(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldBirthday), v))
+	})
+}
+
+// DogImgIDEQ applies the EQ predicate on the "dog_img_id" field.
+func DogImgIDEQ(v uuid.UUID) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDogImgID), v))
+	})
+}
+
+// DogImgIDNEQ applies the NEQ predicate on the "dog_img_id" field.
+func DogImgIDNEQ(v uuid.UUID) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDogImgID), v))
+	})
+}
+
+// DogImgIDIn applies the In predicate on the "dog_img_id" field.
+func DogImgIDIn(vs ...uuid.UUID) predicate.Dog {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Dog(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldDogImgID), v...))
+	})
+}
+
+// DogImgIDNotIn applies the NotIn predicate on the "dog_img_id" field.
+func DogImgIDNotIn(vs ...uuid.UUID) predicate.Dog {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Dog(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldDogImgID), v...))
+	})
+}
+
+// DogImgIDGT applies the GT predicate on the "dog_img_id" field.
+func DogImgIDGT(v uuid.UUID) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldDogImgID), v))
+	})
+}
+
+// DogImgIDGTE applies the GTE predicate on the "dog_img_id" field.
+func DogImgIDGTE(v uuid.UUID) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldDogImgID), v))
+	})
+}
+
+// DogImgIDLT applies the LT predicate on the "dog_img_id" field.
+func DogImgIDLT(v uuid.UUID) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldDogImgID), v))
+	})
+}
+
+// DogImgIDLTE applies the LTE predicate on the "dog_img_id" field.
+func DogImgIDLTE(v uuid.UUID) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldDogImgID), v))
+	})
+}
+
+// UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
+func UpdatedAtEQ(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
+func UpdatedAtNEQ(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtIn applies the In predicate on the "updated_at" field.
+func UpdatedAtIn(vs ...time.Time) predicate.Dog {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Dog(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldUpdatedAt), v...))
+	})
+}
+
+// UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
+func UpdatedAtNotIn(vs ...time.Time) predicate.Dog {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Dog(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldUpdatedAt), v...))
+	})
+}
+
+// UpdatedAtGT applies the GT predicate on the "updated_at" field.
+func UpdatedAtGT(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
+func UpdatedAtGTE(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtLT applies the LT predicate on the "updated_at" field.
+func UpdatedAtLT(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
+func UpdatedAtLTE(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// CreatedAtEQ applies the EQ predicate on the "created_at" field.
+func CreatedAtEQ(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
+func CreatedAtNEQ(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtIn applies the In predicate on the "created_at" field.
+func CreatedAtIn(vs ...time.Time) predicate.Dog {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Dog(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldCreatedAt), v...))
+	})
+}
+
+// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
+func CreatedAtNotIn(vs ...time.Time) predicate.Dog {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Dog(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldCreatedAt), v...))
+	})
+}
+
+// CreatedAtGT applies the GT predicate on the "created_at" field.
+func CreatedAtGT(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtGTE applies the GTE predicate on the "created_at" field.
+func CreatedAtGTE(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtLT applies the LT predicate on the "created_at" field.
+func CreatedAtLT(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtLTE applies the LTE predicate on the "created_at" field.
+func CreatedAtLTE(v time.Time) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
 	})
 }
 

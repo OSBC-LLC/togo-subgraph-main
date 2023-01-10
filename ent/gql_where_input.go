@@ -5,6 +5,7 @@ package ent
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/breed"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
@@ -14,6 +15,7 @@ import (
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/profile"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
+	"github.com/google/uuid"
 )
 
 // BreedWhereInput represents a where input for filtering Breed queries.
@@ -24,14 +26,49 @@ type BreedWhereInput struct {
 	And        []*BreedWhereInput `json:"and,omitempty"`
 
 	// "id" field predicates.
-	ID      *int  `json:"id,omitempty"`
-	IDNEQ   *int  `json:"idNEQ,omitempty"`
-	IDIn    []int `json:"idIn,omitempty"`
-	IDNotIn []int `json:"idNotIn,omitempty"`
-	IDGT    *int  `json:"idGT,omitempty"`
-	IDGTE   *int  `json:"idGTE,omitempty"`
-	IDLT    *int  `json:"idLT,omitempty"`
-	IDLTE   *int  `json:"idLTE,omitempty"`
+	ID      *uuid.UUID  `json:"id,omitempty"`
+	IDNEQ   *uuid.UUID  `json:"idNEQ,omitempty"`
+	IDIn    []uuid.UUID `json:"idIn,omitempty"`
+	IDNotIn []uuid.UUID `json:"idNotIn,omitempty"`
+	IDGT    *uuid.UUID  `json:"idGT,omitempty"`
+	IDGTE   *uuid.UUID  `json:"idGTE,omitempty"`
+	IDLT    *uuid.UUID  `json:"idLT,omitempty"`
+	IDLTE   *uuid.UUID  `json:"idLTE,omitempty"`
+
+	// "name" field predicates.
+	Name             *string  `json:"name,omitempty"`
+	NameNEQ          *string  `json:"nameNEQ,omitempty"`
+	NameIn           []string `json:"nameIn,omitempty"`
+	NameNotIn        []string `json:"nameNotIn,omitempty"`
+	NameGT           *string  `json:"nameGT,omitempty"`
+	NameGTE          *string  `json:"nameGTE,omitempty"`
+	NameLT           *string  `json:"nameLT,omitempty"`
+	NameLTE          *string  `json:"nameLTE,omitempty"`
+	NameContains     *string  `json:"nameContains,omitempty"`
+	NameHasPrefix    *string  `json:"nameHasPrefix,omitempty"`
+	NameHasSuffix    *string  `json:"nameHasSuffix,omitempty"`
+	NameEqualFold    *string  `json:"nameEqualFold,omitempty"`
+	NameContainsFold *string  `json:"nameContainsFold,omitempty"`
+
+	// "updated_at" field predicates.
+	UpdatedAt      *time.Time  `json:"updatedAt,omitempty"`
+	UpdatedAtNEQ   *time.Time  `json:"updatedAtNEQ,omitempty"`
+	UpdatedAtIn    []time.Time `json:"updatedAtIn,omitempty"`
+	UpdatedAtNotIn []time.Time `json:"updatedAtNotIn,omitempty"`
+	UpdatedAtGT    *time.Time  `json:"updatedAtGT,omitempty"`
+	UpdatedAtGTE   *time.Time  `json:"updatedAtGTE,omitempty"`
+	UpdatedAtLT    *time.Time  `json:"updatedAtLT,omitempty"`
+	UpdatedAtLTE   *time.Time  `json:"updatedAtLTE,omitempty"`
+
+	// "created_at" field predicates.
+	CreatedAt      *time.Time  `json:"createdAt,omitempty"`
+	CreatedAtNEQ   *time.Time  `json:"createdAtNEQ,omitempty"`
+	CreatedAtIn    []time.Time `json:"createdAtIn,omitempty"`
+	CreatedAtNotIn []time.Time `json:"createdAtNotIn,omitempty"`
+	CreatedAtGT    *time.Time  `json:"createdAtGT,omitempty"`
+	CreatedAtGTE   *time.Time  `json:"createdAtGTE,omitempty"`
+	CreatedAtLT    *time.Time  `json:"createdAtLT,omitempty"`
+	CreatedAtLTE   *time.Time  `json:"createdAtLTE,omitempty"`
 }
 
 // AddPredicates adds custom predicates to the where input to be used during the filtering phase.
@@ -129,6 +166,93 @@ func (i *BreedWhereInput) P() (predicate.Breed, error) {
 	if i.IDLTE != nil {
 		predicates = append(predicates, breed.IDLTE(*i.IDLTE))
 	}
+	if i.Name != nil {
+		predicates = append(predicates, breed.NameEQ(*i.Name))
+	}
+	if i.NameNEQ != nil {
+		predicates = append(predicates, breed.NameNEQ(*i.NameNEQ))
+	}
+	if len(i.NameIn) > 0 {
+		predicates = append(predicates, breed.NameIn(i.NameIn...))
+	}
+	if len(i.NameNotIn) > 0 {
+		predicates = append(predicates, breed.NameNotIn(i.NameNotIn...))
+	}
+	if i.NameGT != nil {
+		predicates = append(predicates, breed.NameGT(*i.NameGT))
+	}
+	if i.NameGTE != nil {
+		predicates = append(predicates, breed.NameGTE(*i.NameGTE))
+	}
+	if i.NameLT != nil {
+		predicates = append(predicates, breed.NameLT(*i.NameLT))
+	}
+	if i.NameLTE != nil {
+		predicates = append(predicates, breed.NameLTE(*i.NameLTE))
+	}
+	if i.NameContains != nil {
+		predicates = append(predicates, breed.NameContains(*i.NameContains))
+	}
+	if i.NameHasPrefix != nil {
+		predicates = append(predicates, breed.NameHasPrefix(*i.NameHasPrefix))
+	}
+	if i.NameHasSuffix != nil {
+		predicates = append(predicates, breed.NameHasSuffix(*i.NameHasSuffix))
+	}
+	if i.NameEqualFold != nil {
+		predicates = append(predicates, breed.NameEqualFold(*i.NameEqualFold))
+	}
+	if i.NameContainsFold != nil {
+		predicates = append(predicates, breed.NameContainsFold(*i.NameContainsFold))
+	}
+	if i.UpdatedAt != nil {
+		predicates = append(predicates, breed.UpdatedAtEQ(*i.UpdatedAt))
+	}
+	if i.UpdatedAtNEQ != nil {
+		predicates = append(predicates, breed.UpdatedAtNEQ(*i.UpdatedAtNEQ))
+	}
+	if len(i.UpdatedAtIn) > 0 {
+		predicates = append(predicates, breed.UpdatedAtIn(i.UpdatedAtIn...))
+	}
+	if len(i.UpdatedAtNotIn) > 0 {
+		predicates = append(predicates, breed.UpdatedAtNotIn(i.UpdatedAtNotIn...))
+	}
+	if i.UpdatedAtGT != nil {
+		predicates = append(predicates, breed.UpdatedAtGT(*i.UpdatedAtGT))
+	}
+	if i.UpdatedAtGTE != nil {
+		predicates = append(predicates, breed.UpdatedAtGTE(*i.UpdatedAtGTE))
+	}
+	if i.UpdatedAtLT != nil {
+		predicates = append(predicates, breed.UpdatedAtLT(*i.UpdatedAtLT))
+	}
+	if i.UpdatedAtLTE != nil {
+		predicates = append(predicates, breed.UpdatedAtLTE(*i.UpdatedAtLTE))
+	}
+	if i.CreatedAt != nil {
+		predicates = append(predicates, breed.CreatedAtEQ(*i.CreatedAt))
+	}
+	if i.CreatedAtNEQ != nil {
+		predicates = append(predicates, breed.CreatedAtNEQ(*i.CreatedAtNEQ))
+	}
+	if len(i.CreatedAtIn) > 0 {
+		predicates = append(predicates, breed.CreatedAtIn(i.CreatedAtIn...))
+	}
+	if len(i.CreatedAtNotIn) > 0 {
+		predicates = append(predicates, breed.CreatedAtNotIn(i.CreatedAtNotIn...))
+	}
+	if i.CreatedAtGT != nil {
+		predicates = append(predicates, breed.CreatedAtGT(*i.CreatedAtGT))
+	}
+	if i.CreatedAtGTE != nil {
+		predicates = append(predicates, breed.CreatedAtGTE(*i.CreatedAtGTE))
+	}
+	if i.CreatedAtLT != nil {
+		predicates = append(predicates, breed.CreatedAtLT(*i.CreatedAtLT))
+	}
+	if i.CreatedAtLTE != nil {
+		predicates = append(predicates, breed.CreatedAtLTE(*i.CreatedAtLTE))
+	}
 
 	switch len(predicates) {
 	case 0:
@@ -148,14 +272,114 @@ type DogWhereInput struct {
 	And        []*DogWhereInput `json:"and,omitempty"`
 
 	// "id" field predicates.
-	ID      *int  `json:"id,omitempty"`
-	IDNEQ   *int  `json:"idNEQ,omitempty"`
-	IDIn    []int `json:"idIn,omitempty"`
-	IDNotIn []int `json:"idNotIn,omitempty"`
-	IDGT    *int  `json:"idGT,omitempty"`
-	IDGTE   *int  `json:"idGTE,omitempty"`
-	IDLT    *int  `json:"idLT,omitempty"`
-	IDLTE   *int  `json:"idLTE,omitempty"`
+	ID      *uuid.UUID  `json:"id,omitempty"`
+	IDNEQ   *uuid.UUID  `json:"idNEQ,omitempty"`
+	IDIn    []uuid.UUID `json:"idIn,omitempty"`
+	IDNotIn []uuid.UUID `json:"idNotIn,omitempty"`
+	IDGT    *uuid.UUID  `json:"idGT,omitempty"`
+	IDGTE   *uuid.UUID  `json:"idGTE,omitempty"`
+	IDLT    *uuid.UUID  `json:"idLT,omitempty"`
+	IDLTE   *uuid.UUID  `json:"idLTE,omitempty"`
+
+	// "full_name" field predicates.
+	FullName             *string  `json:"fullName,omitempty"`
+	FullNameNEQ          *string  `json:"fullNameNEQ,omitempty"`
+	FullNameIn           []string `json:"fullNameIn,omitempty"`
+	FullNameNotIn        []string `json:"fullNameNotIn,omitempty"`
+	FullNameGT           *string  `json:"fullNameGT,omitempty"`
+	FullNameGTE          *string  `json:"fullNameGTE,omitempty"`
+	FullNameLT           *string  `json:"fullNameLT,omitempty"`
+	FullNameLTE          *string  `json:"fullNameLTE,omitempty"`
+	FullNameContains     *string  `json:"fullNameContains,omitempty"`
+	FullNameHasPrefix    *string  `json:"fullNameHasPrefix,omitempty"`
+	FullNameHasSuffix    *string  `json:"fullNameHasSuffix,omitempty"`
+	FullNameEqualFold    *string  `json:"fullNameEqualFold,omitempty"`
+	FullNameContainsFold *string  `json:"fullNameContainsFold,omitempty"`
+
+	// "age" field predicates.
+	Age      *int  `json:"age,omitempty"`
+	AgeNEQ   *int  `json:"ageNEQ,omitempty"`
+	AgeIn    []int `json:"ageIn,omitempty"`
+	AgeNotIn []int `json:"ageNotIn,omitempty"`
+	AgeGT    *int  `json:"ageGT,omitempty"`
+	AgeGTE   *int  `json:"ageGTE,omitempty"`
+	AgeLT    *int  `json:"ageLT,omitempty"`
+	AgeLTE   *int  `json:"ageLTE,omitempty"`
+
+	// "weight_lbs" field predicates.
+	WeightLbs      *float64  `json:"weightLbs,omitempty"`
+	WeightLbsNEQ   *float64  `json:"weightLbsNEQ,omitempty"`
+	WeightLbsIn    []float64 `json:"weightLbsIn,omitempty"`
+	WeightLbsNotIn []float64 `json:"weightLbsNotIn,omitempty"`
+	WeightLbsGT    *float64  `json:"weightLbsGT,omitempty"`
+	WeightLbsGTE   *float64  `json:"weightLbsGTE,omitempty"`
+	WeightLbsLT    *float64  `json:"weightLbsLT,omitempty"`
+	WeightLbsLTE   *float64  `json:"weightLbsLTE,omitempty"`
+
+	// "weight_kgs" field predicates.
+	WeightKgs      *float64  `json:"weightKgs,omitempty"`
+	WeightKgsNEQ   *float64  `json:"weightKgsNEQ,omitempty"`
+	WeightKgsIn    []float64 `json:"weightKgsIn,omitempty"`
+	WeightKgsNotIn []float64 `json:"weightKgsNotIn,omitempty"`
+	WeightKgsGT    *float64  `json:"weightKgsGT,omitempty"`
+	WeightKgsGTE   *float64  `json:"weightKgsGTE,omitempty"`
+	WeightKgsLT    *float64  `json:"weightKgsLT,omitempty"`
+	WeightKgsLTE   *float64  `json:"weightKgsLTE,omitempty"`
+
+	// "size" field predicates.
+	Size             *string  `json:"size,omitempty"`
+	SizeNEQ          *string  `json:"sizeNEQ,omitempty"`
+	SizeIn           []string `json:"sizeIn,omitempty"`
+	SizeNotIn        []string `json:"sizeNotIn,omitempty"`
+	SizeGT           *string  `json:"sizeGT,omitempty"`
+	SizeGTE          *string  `json:"sizeGTE,omitempty"`
+	SizeLT           *string  `json:"sizeLT,omitempty"`
+	SizeLTE          *string  `json:"sizeLTE,omitempty"`
+	SizeContains     *string  `json:"sizeContains,omitempty"`
+	SizeHasPrefix    *string  `json:"sizeHasPrefix,omitempty"`
+	SizeHasSuffix    *string  `json:"sizeHasSuffix,omitempty"`
+	SizeEqualFold    *string  `json:"sizeEqualFold,omitempty"`
+	SizeContainsFold *string  `json:"sizeContainsFold,omitempty"`
+
+	// "birthday" field predicates.
+	Birthday      *time.Time  `json:"birthday,omitempty"`
+	BirthdayNEQ   *time.Time  `json:"birthdayNEQ,omitempty"`
+	BirthdayIn    []time.Time `json:"birthdayIn,omitempty"`
+	BirthdayNotIn []time.Time `json:"birthdayNotIn,omitempty"`
+	BirthdayGT    *time.Time  `json:"birthdayGT,omitempty"`
+	BirthdayGTE   *time.Time  `json:"birthdayGTE,omitempty"`
+	BirthdayLT    *time.Time  `json:"birthdayLT,omitempty"`
+	BirthdayLTE   *time.Time  `json:"birthdayLTE,omitempty"`
+
+	// "dog_img_id" field predicates.
+	DogImgID      *uuid.UUID  `json:"dogImgID,omitempty"`
+	DogImgIDNEQ   *uuid.UUID  `json:"dogImgIDNEQ,omitempty"`
+	DogImgIDIn    []uuid.UUID `json:"dogImgIDIn,omitempty"`
+	DogImgIDNotIn []uuid.UUID `json:"dogImgIDNotIn,omitempty"`
+	DogImgIDGT    *uuid.UUID  `json:"dogImgIDGT,omitempty"`
+	DogImgIDGTE   *uuid.UUID  `json:"dogImgIDGTE,omitempty"`
+	DogImgIDLT    *uuid.UUID  `json:"dogImgIDLT,omitempty"`
+	DogImgIDLTE   *uuid.UUID  `json:"dogImgIDLTE,omitempty"`
+
+	// "updated_at" field predicates.
+	UpdatedAt      *time.Time  `json:"updatedAt,omitempty"`
+	UpdatedAtNEQ   *time.Time  `json:"updatedAtNEQ,omitempty"`
+	UpdatedAtIn    []time.Time `json:"updatedAtIn,omitempty"`
+	UpdatedAtNotIn []time.Time `json:"updatedAtNotIn,omitempty"`
+	UpdatedAtGT    *time.Time  `json:"updatedAtGT,omitempty"`
+	UpdatedAtGTE   *time.Time  `json:"updatedAtGTE,omitempty"`
+	UpdatedAtLT    *time.Time  `json:"updatedAtLT,omitempty"`
+	UpdatedAtLTE   *time.Time  `json:"updatedAtLTE,omitempty"`
+
+	// "created_at" field predicates.
+	CreatedAt      *time.Time  `json:"createdAt,omitempty"`
+	CreatedAtNEQ   *time.Time  `json:"createdAtNEQ,omitempty"`
+	CreatedAtIn    []time.Time `json:"createdAtIn,omitempty"`
+	CreatedAtNotIn []time.Time `json:"createdAtNotIn,omitempty"`
+	CreatedAtGT    *time.Time  `json:"createdAtGT,omitempty"`
+	CreatedAtGTE   *time.Time  `json:"createdAtGTE,omitempty"`
+	CreatedAtLT    *time.Time  `json:"createdAtLT,omitempty"`
+	CreatedAtLTE   *time.Time  `json:"createdAtLTE,omitempty"`
 }
 
 // AddPredicates adds custom predicates to the where input to be used during the filtering phase.
@@ -253,6 +477,252 @@ func (i *DogWhereInput) P() (predicate.Dog, error) {
 	if i.IDLTE != nil {
 		predicates = append(predicates, dog.IDLTE(*i.IDLTE))
 	}
+	if i.FullName != nil {
+		predicates = append(predicates, dog.FullNameEQ(*i.FullName))
+	}
+	if i.FullNameNEQ != nil {
+		predicates = append(predicates, dog.FullNameNEQ(*i.FullNameNEQ))
+	}
+	if len(i.FullNameIn) > 0 {
+		predicates = append(predicates, dog.FullNameIn(i.FullNameIn...))
+	}
+	if len(i.FullNameNotIn) > 0 {
+		predicates = append(predicates, dog.FullNameNotIn(i.FullNameNotIn...))
+	}
+	if i.FullNameGT != nil {
+		predicates = append(predicates, dog.FullNameGT(*i.FullNameGT))
+	}
+	if i.FullNameGTE != nil {
+		predicates = append(predicates, dog.FullNameGTE(*i.FullNameGTE))
+	}
+	if i.FullNameLT != nil {
+		predicates = append(predicates, dog.FullNameLT(*i.FullNameLT))
+	}
+	if i.FullNameLTE != nil {
+		predicates = append(predicates, dog.FullNameLTE(*i.FullNameLTE))
+	}
+	if i.FullNameContains != nil {
+		predicates = append(predicates, dog.FullNameContains(*i.FullNameContains))
+	}
+	if i.FullNameHasPrefix != nil {
+		predicates = append(predicates, dog.FullNameHasPrefix(*i.FullNameHasPrefix))
+	}
+	if i.FullNameHasSuffix != nil {
+		predicates = append(predicates, dog.FullNameHasSuffix(*i.FullNameHasSuffix))
+	}
+	if i.FullNameEqualFold != nil {
+		predicates = append(predicates, dog.FullNameEqualFold(*i.FullNameEqualFold))
+	}
+	if i.FullNameContainsFold != nil {
+		predicates = append(predicates, dog.FullNameContainsFold(*i.FullNameContainsFold))
+	}
+	if i.Age != nil {
+		predicates = append(predicates, dog.AgeEQ(*i.Age))
+	}
+	if i.AgeNEQ != nil {
+		predicates = append(predicates, dog.AgeNEQ(*i.AgeNEQ))
+	}
+	if len(i.AgeIn) > 0 {
+		predicates = append(predicates, dog.AgeIn(i.AgeIn...))
+	}
+	if len(i.AgeNotIn) > 0 {
+		predicates = append(predicates, dog.AgeNotIn(i.AgeNotIn...))
+	}
+	if i.AgeGT != nil {
+		predicates = append(predicates, dog.AgeGT(*i.AgeGT))
+	}
+	if i.AgeGTE != nil {
+		predicates = append(predicates, dog.AgeGTE(*i.AgeGTE))
+	}
+	if i.AgeLT != nil {
+		predicates = append(predicates, dog.AgeLT(*i.AgeLT))
+	}
+	if i.AgeLTE != nil {
+		predicates = append(predicates, dog.AgeLTE(*i.AgeLTE))
+	}
+	if i.WeightLbs != nil {
+		predicates = append(predicates, dog.WeightLbsEQ(*i.WeightLbs))
+	}
+	if i.WeightLbsNEQ != nil {
+		predicates = append(predicates, dog.WeightLbsNEQ(*i.WeightLbsNEQ))
+	}
+	if len(i.WeightLbsIn) > 0 {
+		predicates = append(predicates, dog.WeightLbsIn(i.WeightLbsIn...))
+	}
+	if len(i.WeightLbsNotIn) > 0 {
+		predicates = append(predicates, dog.WeightLbsNotIn(i.WeightLbsNotIn...))
+	}
+	if i.WeightLbsGT != nil {
+		predicates = append(predicates, dog.WeightLbsGT(*i.WeightLbsGT))
+	}
+	if i.WeightLbsGTE != nil {
+		predicates = append(predicates, dog.WeightLbsGTE(*i.WeightLbsGTE))
+	}
+	if i.WeightLbsLT != nil {
+		predicates = append(predicates, dog.WeightLbsLT(*i.WeightLbsLT))
+	}
+	if i.WeightLbsLTE != nil {
+		predicates = append(predicates, dog.WeightLbsLTE(*i.WeightLbsLTE))
+	}
+	if i.WeightKgs != nil {
+		predicates = append(predicates, dog.WeightKgsEQ(*i.WeightKgs))
+	}
+	if i.WeightKgsNEQ != nil {
+		predicates = append(predicates, dog.WeightKgsNEQ(*i.WeightKgsNEQ))
+	}
+	if len(i.WeightKgsIn) > 0 {
+		predicates = append(predicates, dog.WeightKgsIn(i.WeightKgsIn...))
+	}
+	if len(i.WeightKgsNotIn) > 0 {
+		predicates = append(predicates, dog.WeightKgsNotIn(i.WeightKgsNotIn...))
+	}
+	if i.WeightKgsGT != nil {
+		predicates = append(predicates, dog.WeightKgsGT(*i.WeightKgsGT))
+	}
+	if i.WeightKgsGTE != nil {
+		predicates = append(predicates, dog.WeightKgsGTE(*i.WeightKgsGTE))
+	}
+	if i.WeightKgsLT != nil {
+		predicates = append(predicates, dog.WeightKgsLT(*i.WeightKgsLT))
+	}
+	if i.WeightKgsLTE != nil {
+		predicates = append(predicates, dog.WeightKgsLTE(*i.WeightKgsLTE))
+	}
+	if i.Size != nil {
+		predicates = append(predicates, dog.SizeEQ(*i.Size))
+	}
+	if i.SizeNEQ != nil {
+		predicates = append(predicates, dog.SizeNEQ(*i.SizeNEQ))
+	}
+	if len(i.SizeIn) > 0 {
+		predicates = append(predicates, dog.SizeIn(i.SizeIn...))
+	}
+	if len(i.SizeNotIn) > 0 {
+		predicates = append(predicates, dog.SizeNotIn(i.SizeNotIn...))
+	}
+	if i.SizeGT != nil {
+		predicates = append(predicates, dog.SizeGT(*i.SizeGT))
+	}
+	if i.SizeGTE != nil {
+		predicates = append(predicates, dog.SizeGTE(*i.SizeGTE))
+	}
+	if i.SizeLT != nil {
+		predicates = append(predicates, dog.SizeLT(*i.SizeLT))
+	}
+	if i.SizeLTE != nil {
+		predicates = append(predicates, dog.SizeLTE(*i.SizeLTE))
+	}
+	if i.SizeContains != nil {
+		predicates = append(predicates, dog.SizeContains(*i.SizeContains))
+	}
+	if i.SizeHasPrefix != nil {
+		predicates = append(predicates, dog.SizeHasPrefix(*i.SizeHasPrefix))
+	}
+	if i.SizeHasSuffix != nil {
+		predicates = append(predicates, dog.SizeHasSuffix(*i.SizeHasSuffix))
+	}
+	if i.SizeEqualFold != nil {
+		predicates = append(predicates, dog.SizeEqualFold(*i.SizeEqualFold))
+	}
+	if i.SizeContainsFold != nil {
+		predicates = append(predicates, dog.SizeContainsFold(*i.SizeContainsFold))
+	}
+	if i.Birthday != nil {
+		predicates = append(predicates, dog.BirthdayEQ(*i.Birthday))
+	}
+	if i.BirthdayNEQ != nil {
+		predicates = append(predicates, dog.BirthdayNEQ(*i.BirthdayNEQ))
+	}
+	if len(i.BirthdayIn) > 0 {
+		predicates = append(predicates, dog.BirthdayIn(i.BirthdayIn...))
+	}
+	if len(i.BirthdayNotIn) > 0 {
+		predicates = append(predicates, dog.BirthdayNotIn(i.BirthdayNotIn...))
+	}
+	if i.BirthdayGT != nil {
+		predicates = append(predicates, dog.BirthdayGT(*i.BirthdayGT))
+	}
+	if i.BirthdayGTE != nil {
+		predicates = append(predicates, dog.BirthdayGTE(*i.BirthdayGTE))
+	}
+	if i.BirthdayLT != nil {
+		predicates = append(predicates, dog.BirthdayLT(*i.BirthdayLT))
+	}
+	if i.BirthdayLTE != nil {
+		predicates = append(predicates, dog.BirthdayLTE(*i.BirthdayLTE))
+	}
+	if i.DogImgID != nil {
+		predicates = append(predicates, dog.DogImgIDEQ(*i.DogImgID))
+	}
+	if i.DogImgIDNEQ != nil {
+		predicates = append(predicates, dog.DogImgIDNEQ(*i.DogImgIDNEQ))
+	}
+	if len(i.DogImgIDIn) > 0 {
+		predicates = append(predicates, dog.DogImgIDIn(i.DogImgIDIn...))
+	}
+	if len(i.DogImgIDNotIn) > 0 {
+		predicates = append(predicates, dog.DogImgIDNotIn(i.DogImgIDNotIn...))
+	}
+	if i.DogImgIDGT != nil {
+		predicates = append(predicates, dog.DogImgIDGT(*i.DogImgIDGT))
+	}
+	if i.DogImgIDGTE != nil {
+		predicates = append(predicates, dog.DogImgIDGTE(*i.DogImgIDGTE))
+	}
+	if i.DogImgIDLT != nil {
+		predicates = append(predicates, dog.DogImgIDLT(*i.DogImgIDLT))
+	}
+	if i.DogImgIDLTE != nil {
+		predicates = append(predicates, dog.DogImgIDLTE(*i.DogImgIDLTE))
+	}
+	if i.UpdatedAt != nil {
+		predicates = append(predicates, dog.UpdatedAtEQ(*i.UpdatedAt))
+	}
+	if i.UpdatedAtNEQ != nil {
+		predicates = append(predicates, dog.UpdatedAtNEQ(*i.UpdatedAtNEQ))
+	}
+	if len(i.UpdatedAtIn) > 0 {
+		predicates = append(predicates, dog.UpdatedAtIn(i.UpdatedAtIn...))
+	}
+	if len(i.UpdatedAtNotIn) > 0 {
+		predicates = append(predicates, dog.UpdatedAtNotIn(i.UpdatedAtNotIn...))
+	}
+	if i.UpdatedAtGT != nil {
+		predicates = append(predicates, dog.UpdatedAtGT(*i.UpdatedAtGT))
+	}
+	if i.UpdatedAtGTE != nil {
+		predicates = append(predicates, dog.UpdatedAtGTE(*i.UpdatedAtGTE))
+	}
+	if i.UpdatedAtLT != nil {
+		predicates = append(predicates, dog.UpdatedAtLT(*i.UpdatedAtLT))
+	}
+	if i.UpdatedAtLTE != nil {
+		predicates = append(predicates, dog.UpdatedAtLTE(*i.UpdatedAtLTE))
+	}
+	if i.CreatedAt != nil {
+		predicates = append(predicates, dog.CreatedAtEQ(*i.CreatedAt))
+	}
+	if i.CreatedAtNEQ != nil {
+		predicates = append(predicates, dog.CreatedAtNEQ(*i.CreatedAtNEQ))
+	}
+	if len(i.CreatedAtIn) > 0 {
+		predicates = append(predicates, dog.CreatedAtIn(i.CreatedAtIn...))
+	}
+	if len(i.CreatedAtNotIn) > 0 {
+		predicates = append(predicates, dog.CreatedAtNotIn(i.CreatedAtNotIn...))
+	}
+	if i.CreatedAtGT != nil {
+		predicates = append(predicates, dog.CreatedAtGT(*i.CreatedAtGT))
+	}
+	if i.CreatedAtGTE != nil {
+		predicates = append(predicates, dog.CreatedAtGTE(*i.CreatedAtGTE))
+	}
+	if i.CreatedAtLT != nil {
+		predicates = append(predicates, dog.CreatedAtLT(*i.CreatedAtLT))
+	}
+	if i.CreatedAtLTE != nil {
+		predicates = append(predicates, dog.CreatedAtLTE(*i.CreatedAtLTE))
+	}
 
 	switch len(predicates) {
 	case 0:
@@ -272,14 +742,64 @@ type DogProfileBreedWhereInput struct {
 	And        []*DogProfileBreedWhereInput `json:"and,omitempty"`
 
 	// "id" field predicates.
-	ID      *int  `json:"id,omitempty"`
-	IDNEQ   *int  `json:"idNEQ,omitempty"`
-	IDIn    []int `json:"idIn,omitempty"`
-	IDNotIn []int `json:"idNotIn,omitempty"`
-	IDGT    *int  `json:"idGT,omitempty"`
-	IDGTE   *int  `json:"idGTE,omitempty"`
-	IDLT    *int  `json:"idLT,omitempty"`
-	IDLTE   *int  `json:"idLTE,omitempty"`
+	ID      *uuid.UUID  `json:"id,omitempty"`
+	IDNEQ   *uuid.UUID  `json:"idNEQ,omitempty"`
+	IDIn    []uuid.UUID `json:"idIn,omitempty"`
+	IDNotIn []uuid.UUID `json:"idNotIn,omitempty"`
+	IDGT    *uuid.UUID  `json:"idGT,omitempty"`
+	IDGTE   *uuid.UUID  `json:"idGTE,omitempty"`
+	IDLT    *uuid.UUID  `json:"idLT,omitempty"`
+	IDLTE   *uuid.UUID  `json:"idLTE,omitempty"`
+
+	// "breed_id" field predicates.
+	BreedID      *uuid.UUID  `json:"breedID,omitempty"`
+	BreedIDNEQ   *uuid.UUID  `json:"breedIDNEQ,omitempty"`
+	BreedIDIn    []uuid.UUID `json:"breedIDIn,omitempty"`
+	BreedIDNotIn []uuid.UUID `json:"breedIDNotIn,omitempty"`
+	BreedIDGT    *uuid.UUID  `json:"breedIDGT,omitempty"`
+	BreedIDGTE   *uuid.UUID  `json:"breedIDGTE,omitempty"`
+	BreedIDLT    *uuid.UUID  `json:"breedIDLT,omitempty"`
+	BreedIDLTE   *uuid.UUID  `json:"breedIDLTE,omitempty"`
+
+	// "dog_id" field predicates.
+	DogID      *uuid.UUID  `json:"dogID,omitempty"`
+	DogIDNEQ   *uuid.UUID  `json:"dogIDNEQ,omitempty"`
+	DogIDIn    []uuid.UUID `json:"dogIDIn,omitempty"`
+	DogIDNotIn []uuid.UUID `json:"dogIDNotIn,omitempty"`
+	DogIDGT    *uuid.UUID  `json:"dogIDGT,omitempty"`
+	DogIDGTE   *uuid.UUID  `json:"dogIDGTE,omitempty"`
+	DogIDLT    *uuid.UUID  `json:"dogIDLT,omitempty"`
+	DogIDLTE   *uuid.UUID  `json:"dogIDLTE,omitempty"`
+
+	// "percentage" field predicates.
+	Percentage      *float64  `json:"percentage,omitempty"`
+	PercentageNEQ   *float64  `json:"percentageNEQ,omitempty"`
+	PercentageIn    []float64 `json:"percentageIn,omitempty"`
+	PercentageNotIn []float64 `json:"percentageNotIn,omitempty"`
+	PercentageGT    *float64  `json:"percentageGT,omitempty"`
+	PercentageGTE   *float64  `json:"percentageGTE,omitempty"`
+	PercentageLT    *float64  `json:"percentageLT,omitempty"`
+	PercentageLTE   *float64  `json:"percentageLTE,omitempty"`
+
+	// "updated_at" field predicates.
+	UpdatedAt      *time.Time  `json:"updatedAt,omitempty"`
+	UpdatedAtNEQ   *time.Time  `json:"updatedAtNEQ,omitempty"`
+	UpdatedAtIn    []time.Time `json:"updatedAtIn,omitempty"`
+	UpdatedAtNotIn []time.Time `json:"updatedAtNotIn,omitempty"`
+	UpdatedAtGT    *time.Time  `json:"updatedAtGT,omitempty"`
+	UpdatedAtGTE   *time.Time  `json:"updatedAtGTE,omitempty"`
+	UpdatedAtLT    *time.Time  `json:"updatedAtLT,omitempty"`
+	UpdatedAtLTE   *time.Time  `json:"updatedAtLTE,omitempty"`
+
+	// "created_at" field predicates.
+	CreatedAt      *time.Time  `json:"createdAt,omitempty"`
+	CreatedAtNEQ   *time.Time  `json:"createdAtNEQ,omitempty"`
+	CreatedAtIn    []time.Time `json:"createdAtIn,omitempty"`
+	CreatedAtNotIn []time.Time `json:"createdAtNotIn,omitempty"`
+	CreatedAtGT    *time.Time  `json:"createdAtGT,omitempty"`
+	CreatedAtGTE   *time.Time  `json:"createdAtGTE,omitempty"`
+	CreatedAtLT    *time.Time  `json:"createdAtLT,omitempty"`
+	CreatedAtLTE   *time.Time  `json:"createdAtLTE,omitempty"`
 }
 
 // AddPredicates adds custom predicates to the where input to be used during the filtering phase.
@@ -377,6 +897,126 @@ func (i *DogProfileBreedWhereInput) P() (predicate.DogProfileBreed, error) {
 	if i.IDLTE != nil {
 		predicates = append(predicates, dogprofilebreed.IDLTE(*i.IDLTE))
 	}
+	if i.BreedID != nil {
+		predicates = append(predicates, dogprofilebreed.BreedIDEQ(*i.BreedID))
+	}
+	if i.BreedIDNEQ != nil {
+		predicates = append(predicates, dogprofilebreed.BreedIDNEQ(*i.BreedIDNEQ))
+	}
+	if len(i.BreedIDIn) > 0 {
+		predicates = append(predicates, dogprofilebreed.BreedIDIn(i.BreedIDIn...))
+	}
+	if len(i.BreedIDNotIn) > 0 {
+		predicates = append(predicates, dogprofilebreed.BreedIDNotIn(i.BreedIDNotIn...))
+	}
+	if i.BreedIDGT != nil {
+		predicates = append(predicates, dogprofilebreed.BreedIDGT(*i.BreedIDGT))
+	}
+	if i.BreedIDGTE != nil {
+		predicates = append(predicates, dogprofilebreed.BreedIDGTE(*i.BreedIDGTE))
+	}
+	if i.BreedIDLT != nil {
+		predicates = append(predicates, dogprofilebreed.BreedIDLT(*i.BreedIDLT))
+	}
+	if i.BreedIDLTE != nil {
+		predicates = append(predicates, dogprofilebreed.BreedIDLTE(*i.BreedIDLTE))
+	}
+	if i.DogID != nil {
+		predicates = append(predicates, dogprofilebreed.DogIDEQ(*i.DogID))
+	}
+	if i.DogIDNEQ != nil {
+		predicates = append(predicates, dogprofilebreed.DogIDNEQ(*i.DogIDNEQ))
+	}
+	if len(i.DogIDIn) > 0 {
+		predicates = append(predicates, dogprofilebreed.DogIDIn(i.DogIDIn...))
+	}
+	if len(i.DogIDNotIn) > 0 {
+		predicates = append(predicates, dogprofilebreed.DogIDNotIn(i.DogIDNotIn...))
+	}
+	if i.DogIDGT != nil {
+		predicates = append(predicates, dogprofilebreed.DogIDGT(*i.DogIDGT))
+	}
+	if i.DogIDGTE != nil {
+		predicates = append(predicates, dogprofilebreed.DogIDGTE(*i.DogIDGTE))
+	}
+	if i.DogIDLT != nil {
+		predicates = append(predicates, dogprofilebreed.DogIDLT(*i.DogIDLT))
+	}
+	if i.DogIDLTE != nil {
+		predicates = append(predicates, dogprofilebreed.DogIDLTE(*i.DogIDLTE))
+	}
+	if i.Percentage != nil {
+		predicates = append(predicates, dogprofilebreed.PercentageEQ(*i.Percentage))
+	}
+	if i.PercentageNEQ != nil {
+		predicates = append(predicates, dogprofilebreed.PercentageNEQ(*i.PercentageNEQ))
+	}
+	if len(i.PercentageIn) > 0 {
+		predicates = append(predicates, dogprofilebreed.PercentageIn(i.PercentageIn...))
+	}
+	if len(i.PercentageNotIn) > 0 {
+		predicates = append(predicates, dogprofilebreed.PercentageNotIn(i.PercentageNotIn...))
+	}
+	if i.PercentageGT != nil {
+		predicates = append(predicates, dogprofilebreed.PercentageGT(*i.PercentageGT))
+	}
+	if i.PercentageGTE != nil {
+		predicates = append(predicates, dogprofilebreed.PercentageGTE(*i.PercentageGTE))
+	}
+	if i.PercentageLT != nil {
+		predicates = append(predicates, dogprofilebreed.PercentageLT(*i.PercentageLT))
+	}
+	if i.PercentageLTE != nil {
+		predicates = append(predicates, dogprofilebreed.PercentageLTE(*i.PercentageLTE))
+	}
+	if i.UpdatedAt != nil {
+		predicates = append(predicates, dogprofilebreed.UpdatedAtEQ(*i.UpdatedAt))
+	}
+	if i.UpdatedAtNEQ != nil {
+		predicates = append(predicates, dogprofilebreed.UpdatedAtNEQ(*i.UpdatedAtNEQ))
+	}
+	if len(i.UpdatedAtIn) > 0 {
+		predicates = append(predicates, dogprofilebreed.UpdatedAtIn(i.UpdatedAtIn...))
+	}
+	if len(i.UpdatedAtNotIn) > 0 {
+		predicates = append(predicates, dogprofilebreed.UpdatedAtNotIn(i.UpdatedAtNotIn...))
+	}
+	if i.UpdatedAtGT != nil {
+		predicates = append(predicates, dogprofilebreed.UpdatedAtGT(*i.UpdatedAtGT))
+	}
+	if i.UpdatedAtGTE != nil {
+		predicates = append(predicates, dogprofilebreed.UpdatedAtGTE(*i.UpdatedAtGTE))
+	}
+	if i.UpdatedAtLT != nil {
+		predicates = append(predicates, dogprofilebreed.UpdatedAtLT(*i.UpdatedAtLT))
+	}
+	if i.UpdatedAtLTE != nil {
+		predicates = append(predicates, dogprofilebreed.UpdatedAtLTE(*i.UpdatedAtLTE))
+	}
+	if i.CreatedAt != nil {
+		predicates = append(predicates, dogprofilebreed.CreatedAtEQ(*i.CreatedAt))
+	}
+	if i.CreatedAtNEQ != nil {
+		predicates = append(predicates, dogprofilebreed.CreatedAtNEQ(*i.CreatedAtNEQ))
+	}
+	if len(i.CreatedAtIn) > 0 {
+		predicates = append(predicates, dogprofilebreed.CreatedAtIn(i.CreatedAtIn...))
+	}
+	if len(i.CreatedAtNotIn) > 0 {
+		predicates = append(predicates, dogprofilebreed.CreatedAtNotIn(i.CreatedAtNotIn...))
+	}
+	if i.CreatedAtGT != nil {
+		predicates = append(predicates, dogprofilebreed.CreatedAtGT(*i.CreatedAtGT))
+	}
+	if i.CreatedAtGTE != nil {
+		predicates = append(predicates, dogprofilebreed.CreatedAtGTE(*i.CreatedAtGTE))
+	}
+	if i.CreatedAtLT != nil {
+		predicates = append(predicates, dogprofilebreed.CreatedAtLT(*i.CreatedAtLT))
+	}
+	if i.CreatedAtLTE != nil {
+		predicates = append(predicates, dogprofilebreed.CreatedAtLTE(*i.CreatedAtLTE))
+	}
 
 	switch len(predicates) {
 	case 0:
@@ -396,14 +1036,54 @@ type DogProfileOwnerWhereInput struct {
 	And        []*DogProfileOwnerWhereInput `json:"and,omitempty"`
 
 	// "id" field predicates.
-	ID      *int  `json:"id,omitempty"`
-	IDNEQ   *int  `json:"idNEQ,omitempty"`
-	IDIn    []int `json:"idIn,omitempty"`
-	IDNotIn []int `json:"idNotIn,omitempty"`
-	IDGT    *int  `json:"idGT,omitempty"`
-	IDGTE   *int  `json:"idGTE,omitempty"`
-	IDLT    *int  `json:"idLT,omitempty"`
-	IDLTE   *int  `json:"idLTE,omitempty"`
+	ID      *uuid.UUID  `json:"id,omitempty"`
+	IDNEQ   *uuid.UUID  `json:"idNEQ,omitempty"`
+	IDIn    []uuid.UUID `json:"idIn,omitempty"`
+	IDNotIn []uuid.UUID `json:"idNotIn,omitempty"`
+	IDGT    *uuid.UUID  `json:"idGT,omitempty"`
+	IDGTE   *uuid.UUID  `json:"idGTE,omitempty"`
+	IDLT    *uuid.UUID  `json:"idLT,omitempty"`
+	IDLTE   *uuid.UUID  `json:"idLTE,omitempty"`
+
+	// "owner_id" field predicates.
+	OwnerID      *uuid.UUID  `json:"ownerID,omitempty"`
+	OwnerIDNEQ   *uuid.UUID  `json:"ownerIDNEQ,omitempty"`
+	OwnerIDIn    []uuid.UUID `json:"ownerIDIn,omitempty"`
+	OwnerIDNotIn []uuid.UUID `json:"ownerIDNotIn,omitempty"`
+	OwnerIDGT    *uuid.UUID  `json:"ownerIDGT,omitempty"`
+	OwnerIDGTE   *uuid.UUID  `json:"ownerIDGTE,omitempty"`
+	OwnerIDLT    *uuid.UUID  `json:"ownerIDLT,omitempty"`
+	OwnerIDLTE   *uuid.UUID  `json:"ownerIDLTE,omitempty"`
+
+	// "dog_id" field predicates.
+	DogID      *uuid.UUID  `json:"dogID,omitempty"`
+	DogIDNEQ   *uuid.UUID  `json:"dogIDNEQ,omitempty"`
+	DogIDIn    []uuid.UUID `json:"dogIDIn,omitempty"`
+	DogIDNotIn []uuid.UUID `json:"dogIDNotIn,omitempty"`
+	DogIDGT    *uuid.UUID  `json:"dogIDGT,omitempty"`
+	DogIDGTE   *uuid.UUID  `json:"dogIDGTE,omitempty"`
+	DogIDLT    *uuid.UUID  `json:"dogIDLT,omitempty"`
+	DogIDLTE   *uuid.UUID  `json:"dogIDLTE,omitempty"`
+
+	// "updated_at" field predicates.
+	UpdatedAt      *time.Time  `json:"updatedAt,omitempty"`
+	UpdatedAtNEQ   *time.Time  `json:"updatedAtNEQ,omitempty"`
+	UpdatedAtIn    []time.Time `json:"updatedAtIn,omitempty"`
+	UpdatedAtNotIn []time.Time `json:"updatedAtNotIn,omitempty"`
+	UpdatedAtGT    *time.Time  `json:"updatedAtGT,omitempty"`
+	UpdatedAtGTE   *time.Time  `json:"updatedAtGTE,omitempty"`
+	UpdatedAtLT    *time.Time  `json:"updatedAtLT,omitempty"`
+	UpdatedAtLTE   *time.Time  `json:"updatedAtLTE,omitempty"`
+
+	// "created_at" field predicates.
+	CreatedAt      *time.Time  `json:"createdAt,omitempty"`
+	CreatedAtNEQ   *time.Time  `json:"createdAtNEQ,omitempty"`
+	CreatedAtIn    []time.Time `json:"createdAtIn,omitempty"`
+	CreatedAtNotIn []time.Time `json:"createdAtNotIn,omitempty"`
+	CreatedAtGT    *time.Time  `json:"createdAtGT,omitempty"`
+	CreatedAtGTE   *time.Time  `json:"createdAtGTE,omitempty"`
+	CreatedAtLT    *time.Time  `json:"createdAtLT,omitempty"`
+	CreatedAtLTE   *time.Time  `json:"createdAtLTE,omitempty"`
 }
 
 // AddPredicates adds custom predicates to the where input to be used during the filtering phase.
@@ -501,6 +1181,102 @@ func (i *DogProfileOwnerWhereInput) P() (predicate.DogProfileOwner, error) {
 	if i.IDLTE != nil {
 		predicates = append(predicates, dogprofileowner.IDLTE(*i.IDLTE))
 	}
+	if i.OwnerID != nil {
+		predicates = append(predicates, dogprofileowner.OwnerIDEQ(*i.OwnerID))
+	}
+	if i.OwnerIDNEQ != nil {
+		predicates = append(predicates, dogprofileowner.OwnerIDNEQ(*i.OwnerIDNEQ))
+	}
+	if len(i.OwnerIDIn) > 0 {
+		predicates = append(predicates, dogprofileowner.OwnerIDIn(i.OwnerIDIn...))
+	}
+	if len(i.OwnerIDNotIn) > 0 {
+		predicates = append(predicates, dogprofileowner.OwnerIDNotIn(i.OwnerIDNotIn...))
+	}
+	if i.OwnerIDGT != nil {
+		predicates = append(predicates, dogprofileowner.OwnerIDGT(*i.OwnerIDGT))
+	}
+	if i.OwnerIDGTE != nil {
+		predicates = append(predicates, dogprofileowner.OwnerIDGTE(*i.OwnerIDGTE))
+	}
+	if i.OwnerIDLT != nil {
+		predicates = append(predicates, dogprofileowner.OwnerIDLT(*i.OwnerIDLT))
+	}
+	if i.OwnerIDLTE != nil {
+		predicates = append(predicates, dogprofileowner.OwnerIDLTE(*i.OwnerIDLTE))
+	}
+	if i.DogID != nil {
+		predicates = append(predicates, dogprofileowner.DogIDEQ(*i.DogID))
+	}
+	if i.DogIDNEQ != nil {
+		predicates = append(predicates, dogprofileowner.DogIDNEQ(*i.DogIDNEQ))
+	}
+	if len(i.DogIDIn) > 0 {
+		predicates = append(predicates, dogprofileowner.DogIDIn(i.DogIDIn...))
+	}
+	if len(i.DogIDNotIn) > 0 {
+		predicates = append(predicates, dogprofileowner.DogIDNotIn(i.DogIDNotIn...))
+	}
+	if i.DogIDGT != nil {
+		predicates = append(predicates, dogprofileowner.DogIDGT(*i.DogIDGT))
+	}
+	if i.DogIDGTE != nil {
+		predicates = append(predicates, dogprofileowner.DogIDGTE(*i.DogIDGTE))
+	}
+	if i.DogIDLT != nil {
+		predicates = append(predicates, dogprofileowner.DogIDLT(*i.DogIDLT))
+	}
+	if i.DogIDLTE != nil {
+		predicates = append(predicates, dogprofileowner.DogIDLTE(*i.DogIDLTE))
+	}
+	if i.UpdatedAt != nil {
+		predicates = append(predicates, dogprofileowner.UpdatedAtEQ(*i.UpdatedAt))
+	}
+	if i.UpdatedAtNEQ != nil {
+		predicates = append(predicates, dogprofileowner.UpdatedAtNEQ(*i.UpdatedAtNEQ))
+	}
+	if len(i.UpdatedAtIn) > 0 {
+		predicates = append(predicates, dogprofileowner.UpdatedAtIn(i.UpdatedAtIn...))
+	}
+	if len(i.UpdatedAtNotIn) > 0 {
+		predicates = append(predicates, dogprofileowner.UpdatedAtNotIn(i.UpdatedAtNotIn...))
+	}
+	if i.UpdatedAtGT != nil {
+		predicates = append(predicates, dogprofileowner.UpdatedAtGT(*i.UpdatedAtGT))
+	}
+	if i.UpdatedAtGTE != nil {
+		predicates = append(predicates, dogprofileowner.UpdatedAtGTE(*i.UpdatedAtGTE))
+	}
+	if i.UpdatedAtLT != nil {
+		predicates = append(predicates, dogprofileowner.UpdatedAtLT(*i.UpdatedAtLT))
+	}
+	if i.UpdatedAtLTE != nil {
+		predicates = append(predicates, dogprofileowner.UpdatedAtLTE(*i.UpdatedAtLTE))
+	}
+	if i.CreatedAt != nil {
+		predicates = append(predicates, dogprofileowner.CreatedAtEQ(*i.CreatedAt))
+	}
+	if i.CreatedAtNEQ != nil {
+		predicates = append(predicates, dogprofileowner.CreatedAtNEQ(*i.CreatedAtNEQ))
+	}
+	if len(i.CreatedAtIn) > 0 {
+		predicates = append(predicates, dogprofileowner.CreatedAtIn(i.CreatedAtIn...))
+	}
+	if len(i.CreatedAtNotIn) > 0 {
+		predicates = append(predicates, dogprofileowner.CreatedAtNotIn(i.CreatedAtNotIn...))
+	}
+	if i.CreatedAtGT != nil {
+		predicates = append(predicates, dogprofileowner.CreatedAtGT(*i.CreatedAtGT))
+	}
+	if i.CreatedAtGTE != nil {
+		predicates = append(predicates, dogprofileowner.CreatedAtGTE(*i.CreatedAtGTE))
+	}
+	if i.CreatedAtLT != nil {
+		predicates = append(predicates, dogprofileowner.CreatedAtLT(*i.CreatedAtLT))
+	}
+	if i.CreatedAtLTE != nil {
+		predicates = append(predicates, dogprofileowner.CreatedAtLTE(*i.CreatedAtLTE))
+	}
 
 	switch len(predicates) {
 	case 0:
@@ -520,14 +1296,84 @@ type ImageWhereInput struct {
 	And        []*ImageWhereInput `json:"and,omitempty"`
 
 	// "id" field predicates.
-	ID      *int  `json:"id,omitempty"`
-	IDNEQ   *int  `json:"idNEQ,omitempty"`
-	IDIn    []int `json:"idIn,omitempty"`
-	IDNotIn []int `json:"idNotIn,omitempty"`
-	IDGT    *int  `json:"idGT,omitempty"`
-	IDGTE   *int  `json:"idGTE,omitempty"`
-	IDLT    *int  `json:"idLT,omitempty"`
-	IDLTE   *int  `json:"idLTE,omitempty"`
+	ID      *uuid.UUID  `json:"id,omitempty"`
+	IDNEQ   *uuid.UUID  `json:"idNEQ,omitempty"`
+	IDIn    []uuid.UUID `json:"idIn,omitempty"`
+	IDNotIn []uuid.UUID `json:"idNotIn,omitempty"`
+	IDGT    *uuid.UUID  `json:"idGT,omitempty"`
+	IDGTE   *uuid.UUID  `json:"idGTE,omitempty"`
+	IDLT    *uuid.UUID  `json:"idLT,omitempty"`
+	IDLTE   *uuid.UUID  `json:"idLTE,omitempty"`
+
+	// "url" field predicates.
+	URL             *string  `json:"url,omitempty"`
+	URLNEQ          *string  `json:"urlNEQ,omitempty"`
+	URLIn           []string `json:"urlIn,omitempty"`
+	URLNotIn        []string `json:"urlNotIn,omitempty"`
+	URLGT           *string  `json:"urlGT,omitempty"`
+	URLGTE          *string  `json:"urlGTE,omitempty"`
+	URLLT           *string  `json:"urlLT,omitempty"`
+	URLLTE          *string  `json:"urlLTE,omitempty"`
+	URLContains     *string  `json:"urlContains,omitempty"`
+	URLHasPrefix    *string  `json:"urlHasPrefix,omitempty"`
+	URLHasSuffix    *string  `json:"urlHasSuffix,omitempty"`
+	URLEqualFold    *string  `json:"urlEqualFold,omitempty"`
+	URLContainsFold *string  `json:"urlContainsFold,omitempty"`
+
+	// "width" field predicates.
+	Width      *int  `json:"width,omitempty"`
+	WidthNEQ   *int  `json:"widthNEQ,omitempty"`
+	WidthIn    []int `json:"widthIn,omitempty"`
+	WidthNotIn []int `json:"widthNotIn,omitempty"`
+	WidthGT    *int  `json:"widthGT,omitempty"`
+	WidthGTE   *int  `json:"widthGTE,omitempty"`
+	WidthLT    *int  `json:"widthLT,omitempty"`
+	WidthLTE   *int  `json:"widthLTE,omitempty"`
+
+	// "height" field predicates.
+	Height      *int  `json:"height,omitempty"`
+	HeightNEQ   *int  `json:"heightNEQ,omitempty"`
+	HeightIn    []int `json:"heightIn,omitempty"`
+	HeightNotIn []int `json:"heightNotIn,omitempty"`
+	HeightGT    *int  `json:"heightGT,omitempty"`
+	HeightGTE   *int  `json:"heightGTE,omitempty"`
+	HeightLT    *int  `json:"heightLT,omitempty"`
+	HeightLTE   *int  `json:"heightLTE,omitempty"`
+
+	// "type" field predicates.
+	Type             *string  `json:"type,omitempty"`
+	TypeNEQ          *string  `json:"typeNEQ,omitempty"`
+	TypeIn           []string `json:"typeIn,omitempty"`
+	TypeNotIn        []string `json:"typeNotIn,omitempty"`
+	TypeGT           *string  `json:"typeGT,omitempty"`
+	TypeGTE          *string  `json:"typeGTE,omitempty"`
+	TypeLT           *string  `json:"typeLT,omitempty"`
+	TypeLTE          *string  `json:"typeLTE,omitempty"`
+	TypeContains     *string  `json:"typeContains,omitempty"`
+	TypeHasPrefix    *string  `json:"typeHasPrefix,omitempty"`
+	TypeHasSuffix    *string  `json:"typeHasSuffix,omitempty"`
+	TypeEqualFold    *string  `json:"typeEqualFold,omitempty"`
+	TypeContainsFold *string  `json:"typeContainsFold,omitempty"`
+
+	// "updated_at" field predicates.
+	UpdatedAt      *time.Time  `json:"updatedAt,omitempty"`
+	UpdatedAtNEQ   *time.Time  `json:"updatedAtNEQ,omitempty"`
+	UpdatedAtIn    []time.Time `json:"updatedAtIn,omitempty"`
+	UpdatedAtNotIn []time.Time `json:"updatedAtNotIn,omitempty"`
+	UpdatedAtGT    *time.Time  `json:"updatedAtGT,omitempty"`
+	UpdatedAtGTE   *time.Time  `json:"updatedAtGTE,omitempty"`
+	UpdatedAtLT    *time.Time  `json:"updatedAtLT,omitempty"`
+	UpdatedAtLTE   *time.Time  `json:"updatedAtLTE,omitempty"`
+
+	// "created_at" field predicates.
+	CreatedAt      *time.Time  `json:"createdAt,omitempty"`
+	CreatedAtNEQ   *time.Time  `json:"createdAtNEQ,omitempty"`
+	CreatedAtIn    []time.Time `json:"createdAtIn,omitempty"`
+	CreatedAtNotIn []time.Time `json:"createdAtNotIn,omitempty"`
+	CreatedAtGT    *time.Time  `json:"createdAtGT,omitempty"`
+	CreatedAtGTE   *time.Time  `json:"createdAtGTE,omitempty"`
+	CreatedAtLT    *time.Time  `json:"createdAtLT,omitempty"`
+	CreatedAtLTE   *time.Time  `json:"createdAtLTE,omitempty"`
 }
 
 // AddPredicates adds custom predicates to the where input to be used during the filtering phase.
@@ -625,6 +1471,180 @@ func (i *ImageWhereInput) P() (predicate.Image, error) {
 	if i.IDLTE != nil {
 		predicates = append(predicates, image.IDLTE(*i.IDLTE))
 	}
+	if i.URL != nil {
+		predicates = append(predicates, image.URLEQ(*i.URL))
+	}
+	if i.URLNEQ != nil {
+		predicates = append(predicates, image.URLNEQ(*i.URLNEQ))
+	}
+	if len(i.URLIn) > 0 {
+		predicates = append(predicates, image.URLIn(i.URLIn...))
+	}
+	if len(i.URLNotIn) > 0 {
+		predicates = append(predicates, image.URLNotIn(i.URLNotIn...))
+	}
+	if i.URLGT != nil {
+		predicates = append(predicates, image.URLGT(*i.URLGT))
+	}
+	if i.URLGTE != nil {
+		predicates = append(predicates, image.URLGTE(*i.URLGTE))
+	}
+	if i.URLLT != nil {
+		predicates = append(predicates, image.URLLT(*i.URLLT))
+	}
+	if i.URLLTE != nil {
+		predicates = append(predicates, image.URLLTE(*i.URLLTE))
+	}
+	if i.URLContains != nil {
+		predicates = append(predicates, image.URLContains(*i.URLContains))
+	}
+	if i.URLHasPrefix != nil {
+		predicates = append(predicates, image.URLHasPrefix(*i.URLHasPrefix))
+	}
+	if i.URLHasSuffix != nil {
+		predicates = append(predicates, image.URLHasSuffix(*i.URLHasSuffix))
+	}
+	if i.URLEqualFold != nil {
+		predicates = append(predicates, image.URLEqualFold(*i.URLEqualFold))
+	}
+	if i.URLContainsFold != nil {
+		predicates = append(predicates, image.URLContainsFold(*i.URLContainsFold))
+	}
+	if i.Width != nil {
+		predicates = append(predicates, image.WidthEQ(*i.Width))
+	}
+	if i.WidthNEQ != nil {
+		predicates = append(predicates, image.WidthNEQ(*i.WidthNEQ))
+	}
+	if len(i.WidthIn) > 0 {
+		predicates = append(predicates, image.WidthIn(i.WidthIn...))
+	}
+	if len(i.WidthNotIn) > 0 {
+		predicates = append(predicates, image.WidthNotIn(i.WidthNotIn...))
+	}
+	if i.WidthGT != nil {
+		predicates = append(predicates, image.WidthGT(*i.WidthGT))
+	}
+	if i.WidthGTE != nil {
+		predicates = append(predicates, image.WidthGTE(*i.WidthGTE))
+	}
+	if i.WidthLT != nil {
+		predicates = append(predicates, image.WidthLT(*i.WidthLT))
+	}
+	if i.WidthLTE != nil {
+		predicates = append(predicates, image.WidthLTE(*i.WidthLTE))
+	}
+	if i.Height != nil {
+		predicates = append(predicates, image.HeightEQ(*i.Height))
+	}
+	if i.HeightNEQ != nil {
+		predicates = append(predicates, image.HeightNEQ(*i.HeightNEQ))
+	}
+	if len(i.HeightIn) > 0 {
+		predicates = append(predicates, image.HeightIn(i.HeightIn...))
+	}
+	if len(i.HeightNotIn) > 0 {
+		predicates = append(predicates, image.HeightNotIn(i.HeightNotIn...))
+	}
+	if i.HeightGT != nil {
+		predicates = append(predicates, image.HeightGT(*i.HeightGT))
+	}
+	if i.HeightGTE != nil {
+		predicates = append(predicates, image.HeightGTE(*i.HeightGTE))
+	}
+	if i.HeightLT != nil {
+		predicates = append(predicates, image.HeightLT(*i.HeightLT))
+	}
+	if i.HeightLTE != nil {
+		predicates = append(predicates, image.HeightLTE(*i.HeightLTE))
+	}
+	if i.Type != nil {
+		predicates = append(predicates, image.TypeEQ(*i.Type))
+	}
+	if i.TypeNEQ != nil {
+		predicates = append(predicates, image.TypeNEQ(*i.TypeNEQ))
+	}
+	if len(i.TypeIn) > 0 {
+		predicates = append(predicates, image.TypeIn(i.TypeIn...))
+	}
+	if len(i.TypeNotIn) > 0 {
+		predicates = append(predicates, image.TypeNotIn(i.TypeNotIn...))
+	}
+	if i.TypeGT != nil {
+		predicates = append(predicates, image.TypeGT(*i.TypeGT))
+	}
+	if i.TypeGTE != nil {
+		predicates = append(predicates, image.TypeGTE(*i.TypeGTE))
+	}
+	if i.TypeLT != nil {
+		predicates = append(predicates, image.TypeLT(*i.TypeLT))
+	}
+	if i.TypeLTE != nil {
+		predicates = append(predicates, image.TypeLTE(*i.TypeLTE))
+	}
+	if i.TypeContains != nil {
+		predicates = append(predicates, image.TypeContains(*i.TypeContains))
+	}
+	if i.TypeHasPrefix != nil {
+		predicates = append(predicates, image.TypeHasPrefix(*i.TypeHasPrefix))
+	}
+	if i.TypeHasSuffix != nil {
+		predicates = append(predicates, image.TypeHasSuffix(*i.TypeHasSuffix))
+	}
+	if i.TypeEqualFold != nil {
+		predicates = append(predicates, image.TypeEqualFold(*i.TypeEqualFold))
+	}
+	if i.TypeContainsFold != nil {
+		predicates = append(predicates, image.TypeContainsFold(*i.TypeContainsFold))
+	}
+	if i.UpdatedAt != nil {
+		predicates = append(predicates, image.UpdatedAtEQ(*i.UpdatedAt))
+	}
+	if i.UpdatedAtNEQ != nil {
+		predicates = append(predicates, image.UpdatedAtNEQ(*i.UpdatedAtNEQ))
+	}
+	if len(i.UpdatedAtIn) > 0 {
+		predicates = append(predicates, image.UpdatedAtIn(i.UpdatedAtIn...))
+	}
+	if len(i.UpdatedAtNotIn) > 0 {
+		predicates = append(predicates, image.UpdatedAtNotIn(i.UpdatedAtNotIn...))
+	}
+	if i.UpdatedAtGT != nil {
+		predicates = append(predicates, image.UpdatedAtGT(*i.UpdatedAtGT))
+	}
+	if i.UpdatedAtGTE != nil {
+		predicates = append(predicates, image.UpdatedAtGTE(*i.UpdatedAtGTE))
+	}
+	if i.UpdatedAtLT != nil {
+		predicates = append(predicates, image.UpdatedAtLT(*i.UpdatedAtLT))
+	}
+	if i.UpdatedAtLTE != nil {
+		predicates = append(predicates, image.UpdatedAtLTE(*i.UpdatedAtLTE))
+	}
+	if i.CreatedAt != nil {
+		predicates = append(predicates, image.CreatedAtEQ(*i.CreatedAt))
+	}
+	if i.CreatedAtNEQ != nil {
+		predicates = append(predicates, image.CreatedAtNEQ(*i.CreatedAtNEQ))
+	}
+	if len(i.CreatedAtIn) > 0 {
+		predicates = append(predicates, image.CreatedAtIn(i.CreatedAtIn...))
+	}
+	if len(i.CreatedAtNotIn) > 0 {
+		predicates = append(predicates, image.CreatedAtNotIn(i.CreatedAtNotIn...))
+	}
+	if i.CreatedAtGT != nil {
+		predicates = append(predicates, image.CreatedAtGT(*i.CreatedAtGT))
+	}
+	if i.CreatedAtGTE != nil {
+		predicates = append(predicates, image.CreatedAtGTE(*i.CreatedAtGTE))
+	}
+	if i.CreatedAtLT != nil {
+		predicates = append(predicates, image.CreatedAtLT(*i.CreatedAtLT))
+	}
+	if i.CreatedAtLTE != nil {
+		predicates = append(predicates, image.CreatedAtLTE(*i.CreatedAtLTE))
+	}
 
 	switch len(predicates) {
 	case 0:
@@ -644,14 +1664,64 @@ type ProfileWhereInput struct {
 	And        []*ProfileWhereInput `json:"and,omitempty"`
 
 	// "id" field predicates.
-	ID      *int  `json:"id,omitempty"`
-	IDNEQ   *int  `json:"idNEQ,omitempty"`
-	IDIn    []int `json:"idIn,omitempty"`
-	IDNotIn []int `json:"idNotIn,omitempty"`
-	IDGT    *int  `json:"idGT,omitempty"`
-	IDGTE   *int  `json:"idGTE,omitempty"`
-	IDLT    *int  `json:"idLT,omitempty"`
-	IDLTE   *int  `json:"idLTE,omitempty"`
+	ID      *uuid.UUID  `json:"id,omitempty"`
+	IDNEQ   *uuid.UUID  `json:"idNEQ,omitempty"`
+	IDIn    []uuid.UUID `json:"idIn,omitempty"`
+	IDNotIn []uuid.UUID `json:"idNotIn,omitempty"`
+	IDGT    *uuid.UUID  `json:"idGT,omitempty"`
+	IDGTE   *uuid.UUID  `json:"idGTE,omitempty"`
+	IDLT    *uuid.UUID  `json:"idLT,omitempty"`
+	IDLTE   *uuid.UUID  `json:"idLTE,omitempty"`
+
+	// "name" field predicates.
+	Name             *string  `json:"name,omitempty"`
+	NameNEQ          *string  `json:"nameNEQ,omitempty"`
+	NameIn           []string `json:"nameIn,omitempty"`
+	NameNotIn        []string `json:"nameNotIn,omitempty"`
+	NameGT           *string  `json:"nameGT,omitempty"`
+	NameGTE          *string  `json:"nameGTE,omitempty"`
+	NameLT           *string  `json:"nameLT,omitempty"`
+	NameLTE          *string  `json:"nameLTE,omitempty"`
+	NameContains     *string  `json:"nameContains,omitempty"`
+	NameHasPrefix    *string  `json:"nameHasPrefix,omitempty"`
+	NameHasSuffix    *string  `json:"nameHasSuffix,omitempty"`
+	NameEqualFold    *string  `json:"nameEqualFold,omitempty"`
+	NameContainsFold *string  `json:"nameContainsFold,omitempty"`
+
+	// "description" field predicates.
+	Description             *string  `json:"description,omitempty"`
+	DescriptionNEQ          *string  `json:"descriptionNEQ,omitempty"`
+	DescriptionIn           []string `json:"descriptionIn,omitempty"`
+	DescriptionNotIn        []string `json:"descriptionNotIn,omitempty"`
+	DescriptionGT           *string  `json:"descriptionGT,omitempty"`
+	DescriptionGTE          *string  `json:"descriptionGTE,omitempty"`
+	DescriptionLT           *string  `json:"descriptionLT,omitempty"`
+	DescriptionLTE          *string  `json:"descriptionLTE,omitempty"`
+	DescriptionContains     *string  `json:"descriptionContains,omitempty"`
+	DescriptionHasPrefix    *string  `json:"descriptionHasPrefix,omitempty"`
+	DescriptionHasSuffix    *string  `json:"descriptionHasSuffix,omitempty"`
+	DescriptionEqualFold    *string  `json:"descriptionEqualFold,omitempty"`
+	DescriptionContainsFold *string  `json:"descriptionContainsFold,omitempty"`
+
+	// "updated_at" field predicates.
+	UpdatedAt      *time.Time  `json:"updatedAt,omitempty"`
+	UpdatedAtNEQ   *time.Time  `json:"updatedAtNEQ,omitempty"`
+	UpdatedAtIn    []time.Time `json:"updatedAtIn,omitempty"`
+	UpdatedAtNotIn []time.Time `json:"updatedAtNotIn,omitempty"`
+	UpdatedAtGT    *time.Time  `json:"updatedAtGT,omitempty"`
+	UpdatedAtGTE   *time.Time  `json:"updatedAtGTE,omitempty"`
+	UpdatedAtLT    *time.Time  `json:"updatedAtLT,omitempty"`
+	UpdatedAtLTE   *time.Time  `json:"updatedAtLTE,omitempty"`
+
+	// "created_at" field predicates.
+	CreatedAt      *time.Time  `json:"createdAt,omitempty"`
+	CreatedAtNEQ   *time.Time  `json:"createdAtNEQ,omitempty"`
+	CreatedAtIn    []time.Time `json:"createdAtIn,omitempty"`
+	CreatedAtNotIn []time.Time `json:"createdAtNotIn,omitempty"`
+	CreatedAtGT    *time.Time  `json:"createdAtGT,omitempty"`
+	CreatedAtGTE   *time.Time  `json:"createdAtGTE,omitempty"`
+	CreatedAtLT    *time.Time  `json:"createdAtLT,omitempty"`
+	CreatedAtLTE   *time.Time  `json:"createdAtLTE,omitempty"`
 }
 
 // AddPredicates adds custom predicates to the where input to be used during the filtering phase.
@@ -749,6 +1819,132 @@ func (i *ProfileWhereInput) P() (predicate.Profile, error) {
 	if i.IDLTE != nil {
 		predicates = append(predicates, profile.IDLTE(*i.IDLTE))
 	}
+	if i.Name != nil {
+		predicates = append(predicates, profile.NameEQ(*i.Name))
+	}
+	if i.NameNEQ != nil {
+		predicates = append(predicates, profile.NameNEQ(*i.NameNEQ))
+	}
+	if len(i.NameIn) > 0 {
+		predicates = append(predicates, profile.NameIn(i.NameIn...))
+	}
+	if len(i.NameNotIn) > 0 {
+		predicates = append(predicates, profile.NameNotIn(i.NameNotIn...))
+	}
+	if i.NameGT != nil {
+		predicates = append(predicates, profile.NameGT(*i.NameGT))
+	}
+	if i.NameGTE != nil {
+		predicates = append(predicates, profile.NameGTE(*i.NameGTE))
+	}
+	if i.NameLT != nil {
+		predicates = append(predicates, profile.NameLT(*i.NameLT))
+	}
+	if i.NameLTE != nil {
+		predicates = append(predicates, profile.NameLTE(*i.NameLTE))
+	}
+	if i.NameContains != nil {
+		predicates = append(predicates, profile.NameContains(*i.NameContains))
+	}
+	if i.NameHasPrefix != nil {
+		predicates = append(predicates, profile.NameHasPrefix(*i.NameHasPrefix))
+	}
+	if i.NameHasSuffix != nil {
+		predicates = append(predicates, profile.NameHasSuffix(*i.NameHasSuffix))
+	}
+	if i.NameEqualFold != nil {
+		predicates = append(predicates, profile.NameEqualFold(*i.NameEqualFold))
+	}
+	if i.NameContainsFold != nil {
+		predicates = append(predicates, profile.NameContainsFold(*i.NameContainsFold))
+	}
+	if i.Description != nil {
+		predicates = append(predicates, profile.DescriptionEQ(*i.Description))
+	}
+	if i.DescriptionNEQ != nil {
+		predicates = append(predicates, profile.DescriptionNEQ(*i.DescriptionNEQ))
+	}
+	if len(i.DescriptionIn) > 0 {
+		predicates = append(predicates, profile.DescriptionIn(i.DescriptionIn...))
+	}
+	if len(i.DescriptionNotIn) > 0 {
+		predicates = append(predicates, profile.DescriptionNotIn(i.DescriptionNotIn...))
+	}
+	if i.DescriptionGT != nil {
+		predicates = append(predicates, profile.DescriptionGT(*i.DescriptionGT))
+	}
+	if i.DescriptionGTE != nil {
+		predicates = append(predicates, profile.DescriptionGTE(*i.DescriptionGTE))
+	}
+	if i.DescriptionLT != nil {
+		predicates = append(predicates, profile.DescriptionLT(*i.DescriptionLT))
+	}
+	if i.DescriptionLTE != nil {
+		predicates = append(predicates, profile.DescriptionLTE(*i.DescriptionLTE))
+	}
+	if i.DescriptionContains != nil {
+		predicates = append(predicates, profile.DescriptionContains(*i.DescriptionContains))
+	}
+	if i.DescriptionHasPrefix != nil {
+		predicates = append(predicates, profile.DescriptionHasPrefix(*i.DescriptionHasPrefix))
+	}
+	if i.DescriptionHasSuffix != nil {
+		predicates = append(predicates, profile.DescriptionHasSuffix(*i.DescriptionHasSuffix))
+	}
+	if i.DescriptionEqualFold != nil {
+		predicates = append(predicates, profile.DescriptionEqualFold(*i.DescriptionEqualFold))
+	}
+	if i.DescriptionContainsFold != nil {
+		predicates = append(predicates, profile.DescriptionContainsFold(*i.DescriptionContainsFold))
+	}
+	if i.UpdatedAt != nil {
+		predicates = append(predicates, profile.UpdatedAtEQ(*i.UpdatedAt))
+	}
+	if i.UpdatedAtNEQ != nil {
+		predicates = append(predicates, profile.UpdatedAtNEQ(*i.UpdatedAtNEQ))
+	}
+	if len(i.UpdatedAtIn) > 0 {
+		predicates = append(predicates, profile.UpdatedAtIn(i.UpdatedAtIn...))
+	}
+	if len(i.UpdatedAtNotIn) > 0 {
+		predicates = append(predicates, profile.UpdatedAtNotIn(i.UpdatedAtNotIn...))
+	}
+	if i.UpdatedAtGT != nil {
+		predicates = append(predicates, profile.UpdatedAtGT(*i.UpdatedAtGT))
+	}
+	if i.UpdatedAtGTE != nil {
+		predicates = append(predicates, profile.UpdatedAtGTE(*i.UpdatedAtGTE))
+	}
+	if i.UpdatedAtLT != nil {
+		predicates = append(predicates, profile.UpdatedAtLT(*i.UpdatedAtLT))
+	}
+	if i.UpdatedAtLTE != nil {
+		predicates = append(predicates, profile.UpdatedAtLTE(*i.UpdatedAtLTE))
+	}
+	if i.CreatedAt != nil {
+		predicates = append(predicates, profile.CreatedAtEQ(*i.CreatedAt))
+	}
+	if i.CreatedAtNEQ != nil {
+		predicates = append(predicates, profile.CreatedAtNEQ(*i.CreatedAtNEQ))
+	}
+	if len(i.CreatedAtIn) > 0 {
+		predicates = append(predicates, profile.CreatedAtIn(i.CreatedAtIn...))
+	}
+	if len(i.CreatedAtNotIn) > 0 {
+		predicates = append(predicates, profile.CreatedAtNotIn(i.CreatedAtNotIn...))
+	}
+	if i.CreatedAtGT != nil {
+		predicates = append(predicates, profile.CreatedAtGT(*i.CreatedAtGT))
+	}
+	if i.CreatedAtGTE != nil {
+		predicates = append(predicates, profile.CreatedAtGTE(*i.CreatedAtGTE))
+	}
+	if i.CreatedAtLT != nil {
+		predicates = append(predicates, profile.CreatedAtLT(*i.CreatedAtLT))
+	}
+	if i.CreatedAtLTE != nil {
+		predicates = append(predicates, profile.CreatedAtLTE(*i.CreatedAtLTE))
+	}
 
 	switch len(predicates) {
 	case 0:
@@ -768,14 +1964,84 @@ type UserWhereInput struct {
 	And        []*UserWhereInput `json:"and,omitempty"`
 
 	// "id" field predicates.
-	ID      *int  `json:"id,omitempty"`
-	IDNEQ   *int  `json:"idNEQ,omitempty"`
-	IDIn    []int `json:"idIn,omitempty"`
-	IDNotIn []int `json:"idNotIn,omitempty"`
-	IDGT    *int  `json:"idGT,omitempty"`
-	IDGTE   *int  `json:"idGTE,omitempty"`
-	IDLT    *int  `json:"idLT,omitempty"`
-	IDLTE   *int  `json:"idLTE,omitempty"`
+	ID      *uuid.UUID  `json:"id,omitempty"`
+	IDNEQ   *uuid.UUID  `json:"idNEQ,omitempty"`
+	IDIn    []uuid.UUID `json:"idIn,omitempty"`
+	IDNotIn []uuid.UUID `json:"idNotIn,omitempty"`
+	IDGT    *uuid.UUID  `json:"idGT,omitempty"`
+	IDGTE   *uuid.UUID  `json:"idGTE,omitempty"`
+	IDLT    *uuid.UUID  `json:"idLT,omitempty"`
+	IDLTE   *uuid.UUID  `json:"idLTE,omitempty"`
+
+	// "first_name" field predicates.
+	FirstName             *string  `json:"firstName,omitempty"`
+	FirstNameNEQ          *string  `json:"firstNameNEQ,omitempty"`
+	FirstNameIn           []string `json:"firstNameIn,omitempty"`
+	FirstNameNotIn        []string `json:"firstNameNotIn,omitempty"`
+	FirstNameGT           *string  `json:"firstNameGT,omitempty"`
+	FirstNameGTE          *string  `json:"firstNameGTE,omitempty"`
+	FirstNameLT           *string  `json:"firstNameLT,omitempty"`
+	FirstNameLTE          *string  `json:"firstNameLTE,omitempty"`
+	FirstNameContains     *string  `json:"firstNameContains,omitempty"`
+	FirstNameHasPrefix    *string  `json:"firstNameHasPrefix,omitempty"`
+	FirstNameHasSuffix    *string  `json:"firstNameHasSuffix,omitempty"`
+	FirstNameEqualFold    *string  `json:"firstNameEqualFold,omitempty"`
+	FirstNameContainsFold *string  `json:"firstNameContainsFold,omitempty"`
+
+	// "last_name" field predicates.
+	LastName             *string  `json:"lastName,omitempty"`
+	LastNameNEQ          *string  `json:"lastNameNEQ,omitempty"`
+	LastNameIn           []string `json:"lastNameIn,omitempty"`
+	LastNameNotIn        []string `json:"lastNameNotIn,omitempty"`
+	LastNameGT           *string  `json:"lastNameGT,omitempty"`
+	LastNameGTE          *string  `json:"lastNameGTE,omitempty"`
+	LastNameLT           *string  `json:"lastNameLT,omitempty"`
+	LastNameLTE          *string  `json:"lastNameLTE,omitempty"`
+	LastNameContains     *string  `json:"lastNameContains,omitempty"`
+	LastNameHasPrefix    *string  `json:"lastNameHasPrefix,omitempty"`
+	LastNameHasSuffix    *string  `json:"lastNameHasSuffix,omitempty"`
+	LastNameEqualFold    *string  `json:"lastNameEqualFold,omitempty"`
+	LastNameContainsFold *string  `json:"lastNameContainsFold,omitempty"`
+
+	// "user_image_id" field predicates.
+	UserImageID      *uuid.UUID  `json:"userImageID,omitempty"`
+	UserImageIDNEQ   *uuid.UUID  `json:"userImageIDNEQ,omitempty"`
+	UserImageIDIn    []uuid.UUID `json:"userImageIDIn,omitempty"`
+	UserImageIDNotIn []uuid.UUID `json:"userImageIDNotIn,omitempty"`
+	UserImageIDGT    *uuid.UUID  `json:"userImageIDGT,omitempty"`
+	UserImageIDGTE   *uuid.UUID  `json:"userImageIDGTE,omitempty"`
+	UserImageIDLT    *uuid.UUID  `json:"userImageIDLT,omitempty"`
+	UserImageIDLTE   *uuid.UUID  `json:"userImageIDLTE,omitempty"`
+
+	// "profile_id" field predicates.
+	ProfileID      *uuid.UUID  `json:"profileID,omitempty"`
+	ProfileIDNEQ   *uuid.UUID  `json:"profileIDNEQ,omitempty"`
+	ProfileIDIn    []uuid.UUID `json:"profileIDIn,omitempty"`
+	ProfileIDNotIn []uuid.UUID `json:"profileIDNotIn,omitempty"`
+	ProfileIDGT    *uuid.UUID  `json:"profileIDGT,omitempty"`
+	ProfileIDGTE   *uuid.UUID  `json:"profileIDGTE,omitempty"`
+	ProfileIDLT    *uuid.UUID  `json:"profileIDLT,omitempty"`
+	ProfileIDLTE   *uuid.UUID  `json:"profileIDLTE,omitempty"`
+
+	// "updated_at" field predicates.
+	UpdatedAt      *time.Time  `json:"updatedAt,omitempty"`
+	UpdatedAtNEQ   *time.Time  `json:"updatedAtNEQ,omitempty"`
+	UpdatedAtIn    []time.Time `json:"updatedAtIn,omitempty"`
+	UpdatedAtNotIn []time.Time `json:"updatedAtNotIn,omitempty"`
+	UpdatedAtGT    *time.Time  `json:"updatedAtGT,omitempty"`
+	UpdatedAtGTE   *time.Time  `json:"updatedAtGTE,omitempty"`
+	UpdatedAtLT    *time.Time  `json:"updatedAtLT,omitempty"`
+	UpdatedAtLTE   *time.Time  `json:"updatedAtLTE,omitempty"`
+
+	// "created_at" field predicates.
+	CreatedAt      *time.Time  `json:"createdAt,omitempty"`
+	CreatedAtNEQ   *time.Time  `json:"createdAtNEQ,omitempty"`
+	CreatedAtIn    []time.Time `json:"createdAtIn,omitempty"`
+	CreatedAtNotIn []time.Time `json:"createdAtNotIn,omitempty"`
+	CreatedAtGT    *time.Time  `json:"createdAtGT,omitempty"`
+	CreatedAtGTE   *time.Time  `json:"createdAtGTE,omitempty"`
+	CreatedAtLT    *time.Time  `json:"createdAtLT,omitempty"`
+	CreatedAtLTE   *time.Time  `json:"createdAtLTE,omitempty"`
 }
 
 // AddPredicates adds custom predicates to the where input to be used during the filtering phase.
@@ -872,6 +2138,180 @@ func (i *UserWhereInput) P() (predicate.User, error) {
 	}
 	if i.IDLTE != nil {
 		predicates = append(predicates, user.IDLTE(*i.IDLTE))
+	}
+	if i.FirstName != nil {
+		predicates = append(predicates, user.FirstNameEQ(*i.FirstName))
+	}
+	if i.FirstNameNEQ != nil {
+		predicates = append(predicates, user.FirstNameNEQ(*i.FirstNameNEQ))
+	}
+	if len(i.FirstNameIn) > 0 {
+		predicates = append(predicates, user.FirstNameIn(i.FirstNameIn...))
+	}
+	if len(i.FirstNameNotIn) > 0 {
+		predicates = append(predicates, user.FirstNameNotIn(i.FirstNameNotIn...))
+	}
+	if i.FirstNameGT != nil {
+		predicates = append(predicates, user.FirstNameGT(*i.FirstNameGT))
+	}
+	if i.FirstNameGTE != nil {
+		predicates = append(predicates, user.FirstNameGTE(*i.FirstNameGTE))
+	}
+	if i.FirstNameLT != nil {
+		predicates = append(predicates, user.FirstNameLT(*i.FirstNameLT))
+	}
+	if i.FirstNameLTE != nil {
+		predicates = append(predicates, user.FirstNameLTE(*i.FirstNameLTE))
+	}
+	if i.FirstNameContains != nil {
+		predicates = append(predicates, user.FirstNameContains(*i.FirstNameContains))
+	}
+	if i.FirstNameHasPrefix != nil {
+		predicates = append(predicates, user.FirstNameHasPrefix(*i.FirstNameHasPrefix))
+	}
+	if i.FirstNameHasSuffix != nil {
+		predicates = append(predicates, user.FirstNameHasSuffix(*i.FirstNameHasSuffix))
+	}
+	if i.FirstNameEqualFold != nil {
+		predicates = append(predicates, user.FirstNameEqualFold(*i.FirstNameEqualFold))
+	}
+	if i.FirstNameContainsFold != nil {
+		predicates = append(predicates, user.FirstNameContainsFold(*i.FirstNameContainsFold))
+	}
+	if i.LastName != nil {
+		predicates = append(predicates, user.LastNameEQ(*i.LastName))
+	}
+	if i.LastNameNEQ != nil {
+		predicates = append(predicates, user.LastNameNEQ(*i.LastNameNEQ))
+	}
+	if len(i.LastNameIn) > 0 {
+		predicates = append(predicates, user.LastNameIn(i.LastNameIn...))
+	}
+	if len(i.LastNameNotIn) > 0 {
+		predicates = append(predicates, user.LastNameNotIn(i.LastNameNotIn...))
+	}
+	if i.LastNameGT != nil {
+		predicates = append(predicates, user.LastNameGT(*i.LastNameGT))
+	}
+	if i.LastNameGTE != nil {
+		predicates = append(predicates, user.LastNameGTE(*i.LastNameGTE))
+	}
+	if i.LastNameLT != nil {
+		predicates = append(predicates, user.LastNameLT(*i.LastNameLT))
+	}
+	if i.LastNameLTE != nil {
+		predicates = append(predicates, user.LastNameLTE(*i.LastNameLTE))
+	}
+	if i.LastNameContains != nil {
+		predicates = append(predicates, user.LastNameContains(*i.LastNameContains))
+	}
+	if i.LastNameHasPrefix != nil {
+		predicates = append(predicates, user.LastNameHasPrefix(*i.LastNameHasPrefix))
+	}
+	if i.LastNameHasSuffix != nil {
+		predicates = append(predicates, user.LastNameHasSuffix(*i.LastNameHasSuffix))
+	}
+	if i.LastNameEqualFold != nil {
+		predicates = append(predicates, user.LastNameEqualFold(*i.LastNameEqualFold))
+	}
+	if i.LastNameContainsFold != nil {
+		predicates = append(predicates, user.LastNameContainsFold(*i.LastNameContainsFold))
+	}
+	if i.UserImageID != nil {
+		predicates = append(predicates, user.UserImageIDEQ(*i.UserImageID))
+	}
+	if i.UserImageIDNEQ != nil {
+		predicates = append(predicates, user.UserImageIDNEQ(*i.UserImageIDNEQ))
+	}
+	if len(i.UserImageIDIn) > 0 {
+		predicates = append(predicates, user.UserImageIDIn(i.UserImageIDIn...))
+	}
+	if len(i.UserImageIDNotIn) > 0 {
+		predicates = append(predicates, user.UserImageIDNotIn(i.UserImageIDNotIn...))
+	}
+	if i.UserImageIDGT != nil {
+		predicates = append(predicates, user.UserImageIDGT(*i.UserImageIDGT))
+	}
+	if i.UserImageIDGTE != nil {
+		predicates = append(predicates, user.UserImageIDGTE(*i.UserImageIDGTE))
+	}
+	if i.UserImageIDLT != nil {
+		predicates = append(predicates, user.UserImageIDLT(*i.UserImageIDLT))
+	}
+	if i.UserImageIDLTE != nil {
+		predicates = append(predicates, user.UserImageIDLTE(*i.UserImageIDLTE))
+	}
+	if i.ProfileID != nil {
+		predicates = append(predicates, user.ProfileIDEQ(*i.ProfileID))
+	}
+	if i.ProfileIDNEQ != nil {
+		predicates = append(predicates, user.ProfileIDNEQ(*i.ProfileIDNEQ))
+	}
+	if len(i.ProfileIDIn) > 0 {
+		predicates = append(predicates, user.ProfileIDIn(i.ProfileIDIn...))
+	}
+	if len(i.ProfileIDNotIn) > 0 {
+		predicates = append(predicates, user.ProfileIDNotIn(i.ProfileIDNotIn...))
+	}
+	if i.ProfileIDGT != nil {
+		predicates = append(predicates, user.ProfileIDGT(*i.ProfileIDGT))
+	}
+	if i.ProfileIDGTE != nil {
+		predicates = append(predicates, user.ProfileIDGTE(*i.ProfileIDGTE))
+	}
+	if i.ProfileIDLT != nil {
+		predicates = append(predicates, user.ProfileIDLT(*i.ProfileIDLT))
+	}
+	if i.ProfileIDLTE != nil {
+		predicates = append(predicates, user.ProfileIDLTE(*i.ProfileIDLTE))
+	}
+	if i.UpdatedAt != nil {
+		predicates = append(predicates, user.UpdatedAtEQ(*i.UpdatedAt))
+	}
+	if i.UpdatedAtNEQ != nil {
+		predicates = append(predicates, user.UpdatedAtNEQ(*i.UpdatedAtNEQ))
+	}
+	if len(i.UpdatedAtIn) > 0 {
+		predicates = append(predicates, user.UpdatedAtIn(i.UpdatedAtIn...))
+	}
+	if len(i.UpdatedAtNotIn) > 0 {
+		predicates = append(predicates, user.UpdatedAtNotIn(i.UpdatedAtNotIn...))
+	}
+	if i.UpdatedAtGT != nil {
+		predicates = append(predicates, user.UpdatedAtGT(*i.UpdatedAtGT))
+	}
+	if i.UpdatedAtGTE != nil {
+		predicates = append(predicates, user.UpdatedAtGTE(*i.UpdatedAtGTE))
+	}
+	if i.UpdatedAtLT != nil {
+		predicates = append(predicates, user.UpdatedAtLT(*i.UpdatedAtLT))
+	}
+	if i.UpdatedAtLTE != nil {
+		predicates = append(predicates, user.UpdatedAtLTE(*i.UpdatedAtLTE))
+	}
+	if i.CreatedAt != nil {
+		predicates = append(predicates, user.CreatedAtEQ(*i.CreatedAt))
+	}
+	if i.CreatedAtNEQ != nil {
+		predicates = append(predicates, user.CreatedAtNEQ(*i.CreatedAtNEQ))
+	}
+	if len(i.CreatedAtIn) > 0 {
+		predicates = append(predicates, user.CreatedAtIn(i.CreatedAtIn...))
+	}
+	if len(i.CreatedAtNotIn) > 0 {
+		predicates = append(predicates, user.CreatedAtNotIn(i.CreatedAtNotIn...))
+	}
+	if i.CreatedAtGT != nil {
+		predicates = append(predicates, user.CreatedAtGT(*i.CreatedAtGT))
+	}
+	if i.CreatedAtGTE != nil {
+		predicates = append(predicates, user.CreatedAtGTE(*i.CreatedAtGTE))
+	}
+	if i.CreatedAtLT != nil {
+		predicates = append(predicates, user.CreatedAtLT(*i.CreatedAtLT))
+	}
+	if i.CreatedAtLTE != nil {
+		predicates = append(predicates, user.CreatedAtLTE(*i.CreatedAtLTE))
 	}
 
 	switch len(predicates) {

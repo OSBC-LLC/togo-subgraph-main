@@ -6,12 +6,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // DogProfileOwnerUpdate is the builder for updating DogProfileOwner entities.
@@ -24,6 +26,46 @@ type DogProfileOwnerUpdate struct {
 // Where appends a list predicates to the DogProfileOwnerUpdate builder.
 func (dpou *DogProfileOwnerUpdate) Where(ps ...predicate.DogProfileOwner) *DogProfileOwnerUpdate {
 	dpou.mutation.Where(ps...)
+	return dpou
+}
+
+// SetOwnerID sets the "owner_id" field.
+func (dpou *DogProfileOwnerUpdate) SetOwnerID(u uuid.UUID) *DogProfileOwnerUpdate {
+	dpou.mutation.SetOwnerID(u)
+	return dpou
+}
+
+// SetDogID sets the "dog_id" field.
+func (dpou *DogProfileOwnerUpdate) SetDogID(u uuid.UUID) *DogProfileOwnerUpdate {
+	dpou.mutation.SetDogID(u)
+	return dpou
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (dpou *DogProfileOwnerUpdate) SetUpdatedAt(t time.Time) *DogProfileOwnerUpdate {
+	dpou.mutation.SetUpdatedAt(t)
+	return dpou
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (dpou *DogProfileOwnerUpdate) SetNillableUpdatedAt(t *time.Time) *DogProfileOwnerUpdate {
+	if t != nil {
+		dpou.SetUpdatedAt(*t)
+	}
+	return dpou
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (dpou *DogProfileOwnerUpdate) SetCreatedAt(t time.Time) *DogProfileOwnerUpdate {
+	dpou.mutation.SetCreatedAt(t)
+	return dpou
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (dpou *DogProfileOwnerUpdate) SetNillableCreatedAt(t *time.Time) *DogProfileOwnerUpdate {
+	if t != nil {
+		dpou.SetCreatedAt(*t)
+	}
 	return dpou
 }
 
@@ -92,7 +134,7 @@ func (dpou *DogProfileOwnerUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Table:   dogprofileowner.Table,
 			Columns: dogprofileowner.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: dogprofileowner.FieldID,
 			},
 		},
@@ -103,6 +145,34 @@ func (dpou *DogProfileOwnerUpdate) sqlSave(ctx context.Context) (n int, err erro
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := dpou.mutation.OwnerID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: dogprofileowner.FieldOwnerID,
+		})
+	}
+	if value, ok := dpou.mutation.DogID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: dogprofileowner.FieldDogID,
+		})
+	}
+	if value, ok := dpou.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dogprofileowner.FieldUpdatedAt,
+		})
+	}
+	if value, ok := dpou.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dogprofileowner.FieldCreatedAt,
+		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, dpou.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -121,6 +191,46 @@ type DogProfileOwnerUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *DogProfileOwnerMutation
+}
+
+// SetOwnerID sets the "owner_id" field.
+func (dpouo *DogProfileOwnerUpdateOne) SetOwnerID(u uuid.UUID) *DogProfileOwnerUpdateOne {
+	dpouo.mutation.SetOwnerID(u)
+	return dpouo
+}
+
+// SetDogID sets the "dog_id" field.
+func (dpouo *DogProfileOwnerUpdateOne) SetDogID(u uuid.UUID) *DogProfileOwnerUpdateOne {
+	dpouo.mutation.SetDogID(u)
+	return dpouo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (dpouo *DogProfileOwnerUpdateOne) SetUpdatedAt(t time.Time) *DogProfileOwnerUpdateOne {
+	dpouo.mutation.SetUpdatedAt(t)
+	return dpouo
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (dpouo *DogProfileOwnerUpdateOne) SetNillableUpdatedAt(t *time.Time) *DogProfileOwnerUpdateOne {
+	if t != nil {
+		dpouo.SetUpdatedAt(*t)
+	}
+	return dpouo
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (dpouo *DogProfileOwnerUpdateOne) SetCreatedAt(t time.Time) *DogProfileOwnerUpdateOne {
+	dpouo.mutation.SetCreatedAt(t)
+	return dpouo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (dpouo *DogProfileOwnerUpdateOne) SetNillableCreatedAt(t *time.Time) *DogProfileOwnerUpdateOne {
+	if t != nil {
+		dpouo.SetCreatedAt(*t)
+	}
+	return dpouo
 }
 
 // Mutation returns the DogProfileOwnerMutation object of the builder.
@@ -201,7 +311,7 @@ func (dpouo *DogProfileOwnerUpdateOne) sqlSave(ctx context.Context) (_node *DogP
 			Table:   dogprofileowner.Table,
 			Columns: dogprofileowner.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: dogprofileowner.FieldID,
 			},
 		},
@@ -229,6 +339,34 @@ func (dpouo *DogProfileOwnerUpdateOne) sqlSave(ctx context.Context) (_node *DogP
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := dpouo.mutation.OwnerID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: dogprofileowner.FieldOwnerID,
+		})
+	}
+	if value, ok := dpouo.mutation.DogID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: dogprofileowner.FieldDogID,
+		})
+	}
+	if value, ok := dpouo.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dogprofileowner.FieldUpdatedAt,
+		})
+	}
+	if value, ok := dpouo.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dogprofileowner.FieldCreatedAt,
+		})
 	}
 	_node = &DogProfileOwner{config: dpouo.config}
 	_spec.Assign = _node.assignValues

@@ -5,16 +5,26 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
+	"github.com/google/uuid"
 )
 
 // DogProfileOwner is the model entity for the DogProfileOwner schema.
 type DogProfileOwner struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// OwnerID holds the value of the "owner_id" field.
+	OwnerID uuid.UUID `json:"owner_id,omitempty"`
+	// DogID holds the value of the "dog_id" field.
+	DogID uuid.UUID `json:"dog_id,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -22,8 +32,10 @@ func (*DogProfileOwner) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case dogprofileowner.FieldID:
-			values[i] = new(sql.NullInt64)
+		case dogprofileowner.FieldUpdatedAt, dogprofileowner.FieldCreatedAt:
+			values[i] = new(sql.NullTime)
+		case dogprofileowner.FieldID, dogprofileowner.FieldOwnerID, dogprofileowner.FieldDogID:
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type DogProfileOwner", columns[i])
 		}
@@ -40,11 +52,35 @@ func (dpo *DogProfileOwner) assignValues(columns []string, values []interface{})
 	for i := range columns {
 		switch columns[i] {
 		case dogprofileowner.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				dpo.ID = *value
 			}
-			dpo.ID = int(value.Int64)
+		case dogprofileowner.FieldOwnerID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field owner_id", values[i])
+			} else if value != nil {
+				dpo.OwnerID = *value
+			}
+		case dogprofileowner.FieldDogID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field dog_id", values[i])
+			} else if value != nil {
+				dpo.DogID = *value
+			}
+		case dogprofileowner.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				dpo.UpdatedAt = value.Time
+			}
+		case dogprofileowner.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				dpo.CreatedAt = value.Time
+			}
 		}
 	}
 	return nil
@@ -72,7 +108,18 @@ func (dpo *DogProfileOwner) Unwrap() *DogProfileOwner {
 func (dpo *DogProfileOwner) String() string {
 	var builder strings.Builder
 	builder.WriteString("DogProfileOwner(")
-	builder.WriteString(fmt.Sprintf("id=%v", dpo.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", dpo.ID))
+	builder.WriteString("owner_id=")
+	builder.WriteString(fmt.Sprintf("%v", dpo.OwnerID))
+	builder.WriteString(", ")
+	builder.WriteString("dog_id=")
+	builder.WriteString(fmt.Sprintf("%v", dpo.DogID))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(dpo.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("created_at=")
+	builder.WriteString(dpo.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

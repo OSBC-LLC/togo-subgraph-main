@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // DogQuery is the builder for querying Dog entities.
@@ -85,8 +86,8 @@ func (dq *DogQuery) FirstX(ctx context.Context) *Dog {
 
 // FirstID returns the first Dog ID from the query.
 // Returns a *NotFoundError when no Dog ID was found.
-func (dq *DogQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (dq *DogQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = dq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -98,7 +99,7 @@ func (dq *DogQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (dq *DogQuery) FirstIDX(ctx context.Context) int {
+func (dq *DogQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := dq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -136,8 +137,8 @@ func (dq *DogQuery) OnlyX(ctx context.Context) *Dog {
 // OnlyID is like Only, but returns the only Dog ID in the query.
 // Returns a *NotSingularError when more than one Dog ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (dq *DogQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (dq *DogQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = dq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -153,7 +154,7 @@ func (dq *DogQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (dq *DogQuery) OnlyIDX(ctx context.Context) int {
+func (dq *DogQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := dq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -179,8 +180,8 @@ func (dq *DogQuery) AllX(ctx context.Context) []*Dog {
 }
 
 // IDs executes the query and returns a list of Dog IDs.
-func (dq *DogQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (dq *DogQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := dq.Select(dog.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -188,7 +189,7 @@ func (dq *DogQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (dq *DogQuery) IDsX(ctx context.Context) []int {
+func (dq *DogQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := dq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -251,6 +252,18 @@ func (dq *DogQuery) Clone() *DogQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		FullName string `json:"full_name,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Dog.Query().
+//		GroupBy(dog.FieldFullName).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
 func (dq *DogQuery) GroupBy(field string, fields ...string) *DogGroupBy {
 	grbuild := &DogGroupBy{config: dq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -267,6 +280,16 @@ func (dq *DogQuery) GroupBy(field string, fields ...string) *DogGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		FullName string `json:"full_name,omitempty"`
+//	}
+//
+//	client.Dog.Query().
+//		Select(dog.FieldFullName).
+//		Scan(ctx, &v)
 func (dq *DogQuery) Select(fields ...string) *DogSelect {
 	dq.fields = append(dq.fields, fields...)
 	selbuild := &DogSelect{DogQuery: dq}
@@ -350,7 +373,7 @@ func (dq *DogQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   dog.Table,
 			Columns: dog.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: dog.FieldID,
 			},
 		},

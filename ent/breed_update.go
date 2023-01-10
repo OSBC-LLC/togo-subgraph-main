@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -24,6 +25,40 @@ type BreedUpdate struct {
 // Where appends a list predicates to the BreedUpdate builder.
 func (bu *BreedUpdate) Where(ps ...predicate.Breed) *BreedUpdate {
 	bu.mutation.Where(ps...)
+	return bu
+}
+
+// SetName sets the "name" field.
+func (bu *BreedUpdate) SetName(s string) *BreedUpdate {
+	bu.mutation.SetName(s)
+	return bu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (bu *BreedUpdate) SetUpdatedAt(t time.Time) *BreedUpdate {
+	bu.mutation.SetUpdatedAt(t)
+	return bu
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (bu *BreedUpdate) SetNillableUpdatedAt(t *time.Time) *BreedUpdate {
+	if t != nil {
+		bu.SetUpdatedAt(*t)
+	}
+	return bu
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (bu *BreedUpdate) SetCreatedAt(t time.Time) *BreedUpdate {
+	bu.mutation.SetCreatedAt(t)
+	return bu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (bu *BreedUpdate) SetNillableCreatedAt(t *time.Time) *BreedUpdate {
+	if t != nil {
+		bu.SetCreatedAt(*t)
+	}
 	return bu
 }
 
@@ -92,7 +127,7 @@ func (bu *BreedUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   breed.Table,
 			Columns: breed.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: breed.FieldID,
 			},
 		},
@@ -103,6 +138,27 @@ func (bu *BreedUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := bu.mutation.Name(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: breed.FieldName,
+		})
+	}
+	if value, ok := bu.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: breed.FieldUpdatedAt,
+		})
+	}
+	if value, ok := bu.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: breed.FieldCreatedAt,
+		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, bu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -121,6 +177,40 @@ type BreedUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *BreedMutation
+}
+
+// SetName sets the "name" field.
+func (buo *BreedUpdateOne) SetName(s string) *BreedUpdateOne {
+	buo.mutation.SetName(s)
+	return buo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (buo *BreedUpdateOne) SetUpdatedAt(t time.Time) *BreedUpdateOne {
+	buo.mutation.SetUpdatedAt(t)
+	return buo
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (buo *BreedUpdateOne) SetNillableUpdatedAt(t *time.Time) *BreedUpdateOne {
+	if t != nil {
+		buo.SetUpdatedAt(*t)
+	}
+	return buo
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (buo *BreedUpdateOne) SetCreatedAt(t time.Time) *BreedUpdateOne {
+	buo.mutation.SetCreatedAt(t)
+	return buo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (buo *BreedUpdateOne) SetNillableCreatedAt(t *time.Time) *BreedUpdateOne {
+	if t != nil {
+		buo.SetCreatedAt(*t)
+	}
+	return buo
 }
 
 // Mutation returns the BreedMutation object of the builder.
@@ -201,7 +291,7 @@ func (buo *BreedUpdateOne) sqlSave(ctx context.Context) (_node *Breed, err error
 			Table:   breed.Table,
 			Columns: breed.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: breed.FieldID,
 			},
 		},
@@ -229,6 +319,27 @@ func (buo *BreedUpdateOne) sqlSave(ctx context.Context) (_node *Breed, err error
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := buo.mutation.Name(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: breed.FieldName,
+		})
+	}
+	if value, ok := buo.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: breed.FieldUpdatedAt,
+		})
+	}
+	if value, ok := buo.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: breed.FieldCreatedAt,
+		})
 	}
 	_node = &Breed{config: buo.config}
 	_spec.Assign = _node.assignValues

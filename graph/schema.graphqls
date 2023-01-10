@@ -3,3 +3,5 @@
 # https://gqlgen.com/getting-started/
 
 scalar Time
+
+scalar UUID

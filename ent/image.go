@@ -5,16 +5,30 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
+	"github.com/google/uuid"
 )
 
 // Image is the model entity for the Image schema.
 type Image struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// URL holds the value of the "url" field.
+	URL string `json:"url,omitempty"`
+	// Width holds the value of the "width" field.
+	Width int `json:"width,omitempty"`
+	// Height holds the value of the "height" field.
+	Height int `json:"height,omitempty"`
+	// Type holds the value of the "type" field.
+	Type string `json:"type,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -22,8 +36,14 @@ func (*Image) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case image.FieldID:
+		case image.FieldWidth, image.FieldHeight:
 			values[i] = new(sql.NullInt64)
+		case image.FieldURL, image.FieldType:
+			values[i] = new(sql.NullString)
+		case image.FieldUpdatedAt, image.FieldCreatedAt:
+			values[i] = new(sql.NullTime)
+		case image.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Image", columns[i])
 		}
@@ -40,11 +60,47 @@ func (i *Image) assignValues(columns []string, values []interface{}) error {
 	for j := range columns {
 		switch columns[j] {
 		case image.FieldID:
-			value, ok := values[j].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[j].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[j])
+			} else if value != nil {
+				i.ID = *value
 			}
-			i.ID = int(value.Int64)
+		case image.FieldURL:
+			if value, ok := values[j].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field url", values[j])
+			} else if value.Valid {
+				i.URL = value.String
+			}
+		case image.FieldWidth:
+			if value, ok := values[j].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field width", values[j])
+			} else if value.Valid {
+				i.Width = int(value.Int64)
+			}
+		case image.FieldHeight:
+			if value, ok := values[j].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field height", values[j])
+			} else if value.Valid {
+				i.Height = int(value.Int64)
+			}
+		case image.FieldType:
+			if value, ok := values[j].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field type", values[j])
+			} else if value.Valid {
+				i.Type = value.String
+			}
+		case image.FieldUpdatedAt:
+			if value, ok := values[j].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[j])
+			} else if value.Valid {
+				i.UpdatedAt = value.Time
+			}
+		case image.FieldCreatedAt:
+			if value, ok := values[j].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[j])
+			} else if value.Valid {
+				i.CreatedAt = value.Time
+			}
 		}
 	}
 	return nil
@@ -72,7 +128,24 @@ func (i *Image) Unwrap() *Image {
 func (i *Image) String() string {
 	var builder strings.Builder
 	builder.WriteString("Image(")
-	builder.WriteString(fmt.Sprintf("id=%v", i.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", i.ID))
+	builder.WriteString("url=")
+	builder.WriteString(i.URL)
+	builder.WriteString(", ")
+	builder.WriteString("width=")
+	builder.WriteString(fmt.Sprintf("%v", i.Width))
+	builder.WriteString(", ")
+	builder.WriteString("height=")
+	builder.WriteString(fmt.Sprintf("%v", i.Height))
+	builder.WriteString(", ")
+	builder.WriteString("type=")
+	builder.WriteString(i.Type)
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(i.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("created_at=")
+	builder.WriteString(i.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

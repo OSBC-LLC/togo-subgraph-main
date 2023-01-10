@@ -2,11 +2,35 @@
 
 package dog
 
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
 const (
 	// Label holds the string label denoting the dog type in the database.
 	Label = "dog"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldFullName holds the string denoting the full_name field in the database.
+	FieldFullName = "full_name"
+	// FieldAge holds the string denoting the age field in the database.
+	FieldAge = "age"
+	// FieldWeightLbs holds the string denoting the weight_lbs field in the database.
+	FieldWeightLbs = "weight_lbs"
+	// FieldWeightKgs holds the string denoting the weight_kgs field in the database.
+	FieldWeightKgs = "weight_kgs"
+	// FieldSize holds the string denoting the size field in the database.
+	FieldSize = "size"
+	// FieldBirthday holds the string denoting the birthday field in the database.
+	FieldBirthday = "birthday"
+	// FieldDogImgID holds the string denoting the dog_img_id field in the database.
+	FieldDogImgID = "dog_img_id"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
 	// Table holds the table name of the dog in the database.
 	Table = "dogs"
 )
@@ -14,6 +38,15 @@ const (
 // Columns holds all SQL columns for dog fields.
 var Columns = []string{
 	FieldID,
+	FieldFullName,
+	FieldAge,
+	FieldWeightLbs,
+	FieldWeightKgs,
+	FieldSize,
+	FieldBirthday,
+	FieldDogImgID,
+	FieldUpdatedAt,
+	FieldCreatedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -25,3 +58,18 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// AgeValidator is a validator for the "age" field. It is called by the builders before save.
+	AgeValidator func(int) error
+	// WeightLbsValidator is a validator for the "weight_lbs" field. It is called by the builders before save.
+	WeightLbsValidator func(float64) error
+	// WeightKgsValidator is a validator for the "weight_kgs" field. It is called by the builders before save.
+	WeightKgsValidator func(float64) error
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
+)

@@ -5,16 +5,26 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/profile"
+	"github.com/google/uuid"
 )
 
 // Profile is the model entity for the Profile schema.
 type Profile struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
+	// Description holds the value of the "description" field.
+	Description string `json:"description,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -22,8 +32,12 @@ func (*Profile) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case profile.FieldName, profile.FieldDescription:
+			values[i] = new(sql.NullString)
+		case profile.FieldUpdatedAt, profile.FieldCreatedAt:
+			values[i] = new(sql.NullTime)
 		case profile.FieldID:
-			values[i] = new(sql.NullInt64)
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Profile", columns[i])
 		}
@@ -40,11 +54,35 @@ func (pr *Profile) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case profile.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				pr.ID = *value
 			}
-			pr.ID = int(value.Int64)
+		case profile.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				pr.Name = value.String
+			}
+		case profile.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				pr.Description = value.String
+			}
+		case profile.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				pr.UpdatedAt = value.Time
+			}
+		case profile.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				pr.CreatedAt = value.Time
+			}
 		}
 	}
 	return nil
@@ -72,7 +110,18 @@ func (pr *Profile) Unwrap() *Profile {
 func (pr *Profile) String() string {
 	var builder strings.Builder
 	builder.WriteString("Profile(")
-	builder.WriteString(fmt.Sprintf("id=%v", pr.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", pr.ID))
+	builder.WriteString("name=")
+	builder.WriteString(pr.Name)
+	builder.WriteString(", ")
+	builder.WriteString("description=")
+	builder.WriteString(pr.Description)
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(pr.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("created_at=")
+	builder.WriteString(pr.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

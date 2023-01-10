@@ -6,12 +6,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // DogUpdate is the builder for updating Dog entities.
@@ -27,6 +29,97 @@ func (du *DogUpdate) Where(ps ...predicate.Dog) *DogUpdate {
 	return du
 }
 
+// SetFullName sets the "full_name" field.
+func (du *DogUpdate) SetFullName(s string) *DogUpdate {
+	du.mutation.SetFullName(s)
+	return du
+}
+
+// SetAge sets the "age" field.
+func (du *DogUpdate) SetAge(i int) *DogUpdate {
+	du.mutation.ResetAge()
+	du.mutation.SetAge(i)
+	return du
+}
+
+// AddAge adds i to the "age" field.
+func (du *DogUpdate) AddAge(i int) *DogUpdate {
+	du.mutation.AddAge(i)
+	return du
+}
+
+// SetWeightLbs sets the "weight_lbs" field.
+func (du *DogUpdate) SetWeightLbs(f float64) *DogUpdate {
+	du.mutation.ResetWeightLbs()
+	du.mutation.SetWeightLbs(f)
+	return du
+}
+
+// AddWeightLbs adds f to the "weight_lbs" field.
+func (du *DogUpdate) AddWeightLbs(f float64) *DogUpdate {
+	du.mutation.AddWeightLbs(f)
+	return du
+}
+
+// SetWeightKgs sets the "weight_kgs" field.
+func (du *DogUpdate) SetWeightKgs(f float64) *DogUpdate {
+	du.mutation.ResetWeightKgs()
+	du.mutation.SetWeightKgs(f)
+	return du
+}
+
+// AddWeightKgs adds f to the "weight_kgs" field.
+func (du *DogUpdate) AddWeightKgs(f float64) *DogUpdate {
+	du.mutation.AddWeightKgs(f)
+	return du
+}
+
+// SetSize sets the "size" field.
+func (du *DogUpdate) SetSize(s string) *DogUpdate {
+	du.mutation.SetSize(s)
+	return du
+}
+
+// SetBirthday sets the "birthday" field.
+func (du *DogUpdate) SetBirthday(t time.Time) *DogUpdate {
+	du.mutation.SetBirthday(t)
+	return du
+}
+
+// SetDogImgID sets the "dog_img_id" field.
+func (du *DogUpdate) SetDogImgID(u uuid.UUID) *DogUpdate {
+	du.mutation.SetDogImgID(u)
+	return du
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (du *DogUpdate) SetUpdatedAt(t time.Time) *DogUpdate {
+	du.mutation.SetUpdatedAt(t)
+	return du
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (du *DogUpdate) SetNillableUpdatedAt(t *time.Time) *DogUpdate {
+	if t != nil {
+		du.SetUpdatedAt(*t)
+	}
+	return du
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (du *DogUpdate) SetCreatedAt(t time.Time) *DogUpdate {
+	du.mutation.SetCreatedAt(t)
+	return du
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (du *DogUpdate) SetNillableCreatedAt(t *time.Time) *DogUpdate {
+	if t != nil {
+		du.SetCreatedAt(*t)
+	}
+	return du
+}
+
 // Mutation returns the DogMutation object of the builder.
 func (du *DogUpdate) Mutation() *DogMutation {
 	return du.mutation
@@ -39,12 +132,18 @@ func (du *DogUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(du.hooks) == 0 {
+		if err = du.check(); err != nil {
+			return 0, err
+		}
 		affected, err = du.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*DogMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = du.check(); err != nil {
+				return 0, err
 			}
 			du.mutation = mutation
 			affected, err = du.sqlSave(ctx)
@@ -86,13 +185,33 @@ func (du *DogUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (du *DogUpdate) check() error {
+	if v, ok := du.mutation.Age(); ok {
+		if err := dog.AgeValidator(v); err != nil {
+			return &ValidationError{Name: "age", err: fmt.Errorf(`ent: validator failed for field "Dog.age": %w`, err)}
+		}
+	}
+	if v, ok := du.mutation.WeightLbs(); ok {
+		if err := dog.WeightLbsValidator(v); err != nil {
+			return &ValidationError{Name: "weight_lbs", err: fmt.Errorf(`ent: validator failed for field "Dog.weight_lbs": %w`, err)}
+		}
+	}
+	if v, ok := du.mutation.WeightKgs(); ok {
+		if err := dog.WeightKgsValidator(v); err != nil {
+			return &ValidationError{Name: "weight_kgs", err: fmt.Errorf(`ent: validator failed for field "Dog.weight_kgs": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (du *DogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   dog.Table,
 			Columns: dog.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: dog.FieldID,
 			},
 		},
@@ -103,6 +222,90 @@ func (du *DogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := du.mutation.FullName(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: dog.FieldFullName,
+		})
+	}
+	if value, ok := du.mutation.Age(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: dog.FieldAge,
+		})
+	}
+	if value, ok := du.mutation.AddedAge(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: dog.FieldAge,
+		})
+	}
+	if value, ok := du.mutation.WeightLbs(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: dog.FieldWeightLbs,
+		})
+	}
+	if value, ok := du.mutation.AddedWeightLbs(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: dog.FieldWeightLbs,
+		})
+	}
+	if value, ok := du.mutation.WeightKgs(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: dog.FieldWeightKgs,
+		})
+	}
+	if value, ok := du.mutation.AddedWeightKgs(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: dog.FieldWeightKgs,
+		})
+	}
+	if value, ok := du.mutation.Size(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: dog.FieldSize,
+		})
+	}
+	if value, ok := du.mutation.Birthday(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dog.FieldBirthday,
+		})
+	}
+	if value, ok := du.mutation.DogImgID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: dog.FieldDogImgID,
+		})
+	}
+	if value, ok := du.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dog.FieldUpdatedAt,
+		})
+	}
+	if value, ok := du.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dog.FieldCreatedAt,
+		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, du.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -121,6 +324,97 @@ type DogUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *DogMutation
+}
+
+// SetFullName sets the "full_name" field.
+func (duo *DogUpdateOne) SetFullName(s string) *DogUpdateOne {
+	duo.mutation.SetFullName(s)
+	return duo
+}
+
+// SetAge sets the "age" field.
+func (duo *DogUpdateOne) SetAge(i int) *DogUpdateOne {
+	duo.mutation.ResetAge()
+	duo.mutation.SetAge(i)
+	return duo
+}
+
+// AddAge adds i to the "age" field.
+func (duo *DogUpdateOne) AddAge(i int) *DogUpdateOne {
+	duo.mutation.AddAge(i)
+	return duo
+}
+
+// SetWeightLbs sets the "weight_lbs" field.
+func (duo *DogUpdateOne) SetWeightLbs(f float64) *DogUpdateOne {
+	duo.mutation.ResetWeightLbs()
+	duo.mutation.SetWeightLbs(f)
+	return duo
+}
+
+// AddWeightLbs adds f to the "weight_lbs" field.
+func (duo *DogUpdateOne) AddWeightLbs(f float64) *DogUpdateOne {
+	duo.mutation.AddWeightLbs(f)
+	return duo
+}
+
+// SetWeightKgs sets the "weight_kgs" field.
+func (duo *DogUpdateOne) SetWeightKgs(f float64) *DogUpdateOne {
+	duo.mutation.ResetWeightKgs()
+	duo.mutation.SetWeightKgs(f)
+	return duo
+}
+
+// AddWeightKgs adds f to the "weight_kgs" field.
+func (duo *DogUpdateOne) AddWeightKgs(f float64) *DogUpdateOne {
+	duo.mutation.AddWeightKgs(f)
+	return duo
+}
+
+// SetSize sets the "size" field.
+func (duo *DogUpdateOne) SetSize(s string) *DogUpdateOne {
+	duo.mutation.SetSize(s)
+	return duo
+}
+
+// SetBirthday sets the "birthday" field.
+func (duo *DogUpdateOne) SetBirthday(t time.Time) *DogUpdateOne {
+	duo.mutation.SetBirthday(t)
+	return duo
+}
+
+// SetDogImgID sets the "dog_img_id" field.
+func (duo *DogUpdateOne) SetDogImgID(u uuid.UUID) *DogUpdateOne {
+	duo.mutation.SetDogImgID(u)
+	return duo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (duo *DogUpdateOne) SetUpdatedAt(t time.Time) *DogUpdateOne {
+	duo.mutation.SetUpdatedAt(t)
+	return duo
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (duo *DogUpdateOne) SetNillableUpdatedAt(t *time.Time) *DogUpdateOne {
+	if t != nil {
+		duo.SetUpdatedAt(*t)
+	}
+	return duo
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (duo *DogUpdateOne) SetCreatedAt(t time.Time) *DogUpdateOne {
+	duo.mutation.SetCreatedAt(t)
+	return duo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (duo *DogUpdateOne) SetNillableCreatedAt(t *time.Time) *DogUpdateOne {
+	if t != nil {
+		duo.SetCreatedAt(*t)
+	}
+	return duo
 }
 
 // Mutation returns the DogMutation object of the builder.
@@ -142,12 +436,18 @@ func (duo *DogUpdateOne) Save(ctx context.Context) (*Dog, error) {
 		node *Dog
 	)
 	if len(duo.hooks) == 0 {
+		if err = duo.check(); err != nil {
+			return nil, err
+		}
 		node, err = duo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*DogMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = duo.check(); err != nil {
+				return nil, err
 			}
 			duo.mutation = mutation
 			node, err = duo.sqlSave(ctx)
@@ -195,13 +495,33 @@ func (duo *DogUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (duo *DogUpdateOne) check() error {
+	if v, ok := duo.mutation.Age(); ok {
+		if err := dog.AgeValidator(v); err != nil {
+			return &ValidationError{Name: "age", err: fmt.Errorf(`ent: validator failed for field "Dog.age": %w`, err)}
+		}
+	}
+	if v, ok := duo.mutation.WeightLbs(); ok {
+		if err := dog.WeightLbsValidator(v); err != nil {
+			return &ValidationError{Name: "weight_lbs", err: fmt.Errorf(`ent: validator failed for field "Dog.weight_lbs": %w`, err)}
+		}
+	}
+	if v, ok := duo.mutation.WeightKgs(); ok {
+		if err := dog.WeightKgsValidator(v); err != nil {
+			return &ValidationError{Name: "weight_kgs", err: fmt.Errorf(`ent: validator failed for field "Dog.weight_kgs": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (duo *DogUpdateOne) sqlSave(ctx context.Context) (_node *Dog, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   dog.Table,
 			Columns: dog.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: dog.FieldID,
 			},
 		},
@@ -229,6 +549,90 @@ func (duo *DogUpdateOne) sqlSave(ctx context.Context) (_node *Dog, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := duo.mutation.FullName(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: dog.FieldFullName,
+		})
+	}
+	if value, ok := duo.mutation.Age(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: dog.FieldAge,
+		})
+	}
+	if value, ok := duo.mutation.AddedAge(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: dog.FieldAge,
+		})
+	}
+	if value, ok := duo.mutation.WeightLbs(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: dog.FieldWeightLbs,
+		})
+	}
+	if value, ok := duo.mutation.AddedWeightLbs(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: dog.FieldWeightLbs,
+		})
+	}
+	if value, ok := duo.mutation.WeightKgs(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: dog.FieldWeightKgs,
+		})
+	}
+	if value, ok := duo.mutation.AddedWeightKgs(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: dog.FieldWeightKgs,
+		})
+	}
+	if value, ok := duo.mutation.Size(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: dog.FieldSize,
+		})
+	}
+	if value, ok := duo.mutation.Birthday(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dog.FieldBirthday,
+		})
+	}
+	if value, ok := duo.mutation.DogImgID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: dog.FieldDogImgID,
+		})
+	}
+	if value, ok := duo.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dog.FieldUpdatedAt,
+		})
+	}
+	if value, ok := duo.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dog.FieldCreatedAt,
+		})
 	}
 	_node = &Dog{config: duo.config}
 	_spec.Assign = _node.assignValues

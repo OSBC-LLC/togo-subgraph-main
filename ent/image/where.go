@@ -3,33 +3,36 @@
 package image
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Image {
+func ID(id uuid.UUID) predicate.Image {
 	return predicate.Image(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Image {
+func IDEQ(id uuid.UUID) predicate.Image {
 	return predicate.Image(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Image {
+func IDNEQ(id uuid.UUID) predicate.Image {
 	return predicate.Image(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Image {
+func IDIn(ids ...uuid.UUID) predicate.Image {
 	return predicate.Image(func(s *sql.Selector) {
 		v := make([]interface{}, len(ids))
 		for i := range v {
@@ -40,7 +43,7 @@ func IDIn(ids ...int) predicate.Image {
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Image {
+func IDNotIn(ids ...uuid.UUID) predicate.Image {
 	return predicate.Image(func(s *sql.Selector) {
 		v := make([]interface{}, len(ids))
 		for i := range v {
@@ -51,30 +54,598 @@ func IDNotIn(ids ...int) predicate.Image {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Image {
+func IDGT(id uuid.UUID) predicate.Image {
 	return predicate.Image(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Image {
+func IDGTE(id uuid.UUID) predicate.Image {
 	return predicate.Image(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Image {
+func IDLT(id uuid.UUID) predicate.Image {
 	return predicate.Image(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Image {
+func IDLTE(id uuid.UUID) predicate.Image {
 	return predicate.Image(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
+	})
+}
+
+// URL applies equality check predicate on the "url" field. It's identical to URLEQ.
+func URL(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldURL), v))
+	})
+}
+
+// Width applies equality check predicate on the "width" field. It's identical to WidthEQ.
+func Width(v int) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldWidth), v))
+	})
+}
+
+// Height applies equality check predicate on the "height" field. It's identical to HeightEQ.
+func Height(v int) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldHeight), v))
+	})
+}
+
+// Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
+func Type(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldType), v))
+	})
+}
+
+// UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
+func UpdatedAt(v time.Time) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
+func CreatedAt(v time.Time) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// URLEQ applies the EQ predicate on the "url" field.
+func URLEQ(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldURL), v))
+	})
+}
+
+// URLNEQ applies the NEQ predicate on the "url" field.
+func URLNEQ(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldURL), v))
+	})
+}
+
+// URLIn applies the In predicate on the "url" field.
+func URLIn(vs ...string) predicate.Image {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Image(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldURL), v...))
+	})
+}
+
+// URLNotIn applies the NotIn predicate on the "url" field.
+func URLNotIn(vs ...string) predicate.Image {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Image(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldURL), v...))
+	})
+}
+
+// URLGT applies the GT predicate on the "url" field.
+func URLGT(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldURL), v))
+	})
+}
+
+// URLGTE applies the GTE predicate on the "url" field.
+func URLGTE(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldURL), v))
+	})
+}
+
+// URLLT applies the LT predicate on the "url" field.
+func URLLT(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldURL), v))
+	})
+}
+
+// URLLTE applies the LTE predicate on the "url" field.
+func URLLTE(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldURL), v))
+	})
+}
+
+// URLContains applies the Contains predicate on the "url" field.
+func URLContains(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldURL), v))
+	})
+}
+
+// URLHasPrefix applies the HasPrefix predicate on the "url" field.
+func URLHasPrefix(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldURL), v))
+	})
+}
+
+// URLHasSuffix applies the HasSuffix predicate on the "url" field.
+func URLHasSuffix(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldURL), v))
+	})
+}
+
+// URLEqualFold applies the EqualFold predicate on the "url" field.
+func URLEqualFold(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldURL), v))
+	})
+}
+
+// URLContainsFold applies the ContainsFold predicate on the "url" field.
+func URLContainsFold(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldURL), v))
+	})
+}
+
+// WidthEQ applies the EQ predicate on the "width" field.
+func WidthEQ(v int) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldWidth), v))
+	})
+}
+
+// WidthNEQ applies the NEQ predicate on the "width" field.
+func WidthNEQ(v int) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldWidth), v))
+	})
+}
+
+// WidthIn applies the In predicate on the "width" field.
+func WidthIn(vs ...int) predicate.Image {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Image(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldWidth), v...))
+	})
+}
+
+// WidthNotIn applies the NotIn predicate on the "width" field.
+func WidthNotIn(vs ...int) predicate.Image {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Image(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldWidth), v...))
+	})
+}
+
+// WidthGT applies the GT predicate on the "width" field.
+func WidthGT(v int) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldWidth), v))
+	})
+}
+
+// WidthGTE applies the GTE predicate on the "width" field.
+func WidthGTE(v int) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldWidth), v))
+	})
+}
+
+// WidthLT applies the LT predicate on the "width" field.
+func WidthLT(v int) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldWidth), v))
+	})
+}
+
+// WidthLTE applies the LTE predicate on the "width" field.
+func WidthLTE(v int) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldWidth), v))
+	})
+}
+
+// HeightEQ applies the EQ predicate on the "height" field.
+func HeightEQ(v int) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldHeight), v))
+	})
+}
+
+// HeightNEQ applies the NEQ predicate on the "height" field.
+func HeightNEQ(v int) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldHeight), v))
+	})
+}
+
+// HeightIn applies the In predicate on the "height" field.
+func HeightIn(vs ...int) predicate.Image {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Image(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldHeight), v...))
+	})
+}
+
+// HeightNotIn applies the NotIn predicate on the "height" field.
+func HeightNotIn(vs ...int) predicate.Image {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Image(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldHeight), v...))
+	})
+}
+
+// HeightGT applies the GT predicate on the "height" field.
+func HeightGT(v int) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldHeight), v))
+	})
+}
+
+// HeightGTE applies the GTE predicate on the "height" field.
+func HeightGTE(v int) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldHeight), v))
+	})
+}
+
+// HeightLT applies the LT predicate on the "height" field.
+func HeightLT(v int) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldHeight), v))
+	})
+}
+
+// HeightLTE applies the LTE predicate on the "height" field.
+func HeightLTE(v int) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldHeight), v))
+	})
+}
+
+// TypeEQ applies the EQ predicate on the "type" field.
+func TypeEQ(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldType), v))
+	})
+}
+
+// TypeNEQ applies the NEQ predicate on the "type" field.
+func TypeNEQ(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldType), v))
+	})
+}
+
+// TypeIn applies the In predicate on the "type" field.
+func TypeIn(vs ...string) predicate.Image {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Image(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldType), v...))
+	})
+}
+
+// TypeNotIn applies the NotIn predicate on the "type" field.
+func TypeNotIn(vs ...string) predicate.Image {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Image(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldType), v...))
+	})
+}
+
+// TypeGT applies the GT predicate on the "type" field.
+func TypeGT(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldType), v))
+	})
+}
+
+// TypeGTE applies the GTE predicate on the "type" field.
+func TypeGTE(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldType), v))
+	})
+}
+
+// TypeLT applies the LT predicate on the "type" field.
+func TypeLT(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldType), v))
+	})
+}
+
+// TypeLTE applies the LTE predicate on the "type" field.
+func TypeLTE(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldType), v))
+	})
+}
+
+// TypeContains applies the Contains predicate on the "type" field.
+func TypeContains(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldType), v))
+	})
+}
+
+// TypeHasPrefix applies the HasPrefix predicate on the "type" field.
+func TypeHasPrefix(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldType), v))
+	})
+}
+
+// TypeHasSuffix applies the HasSuffix predicate on the "type" field.
+func TypeHasSuffix(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldType), v))
+	})
+}
+
+// TypeEqualFold applies the EqualFold predicate on the "type" field.
+func TypeEqualFold(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldType), v))
+	})
+}
+
+// TypeContainsFold applies the ContainsFold predicate on the "type" field.
+func TypeContainsFold(v string) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldType), v))
+	})
+}
+
+// UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
+func UpdatedAtEQ(v time.Time) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
+func UpdatedAtNEQ(v time.Time) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtIn applies the In predicate on the "updated_at" field.
+func UpdatedAtIn(vs ...time.Time) predicate.Image {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Image(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldUpdatedAt), v...))
+	})
+}
+
+// UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
+func UpdatedAtNotIn(vs ...time.Time) predicate.Image {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Image(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldUpdatedAt), v...))
+	})
+}
+
+// UpdatedAtGT applies the GT predicate on the "updated_at" field.
+func UpdatedAtGT(v time.Time) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
+func UpdatedAtGTE(v time.Time) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtLT applies the LT predicate on the "updated_at" field.
+func UpdatedAtLT(v time.Time) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
+func UpdatedAtLTE(v time.Time) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// CreatedAtEQ applies the EQ predicate on the "created_at" field.
+func CreatedAtEQ(v time.Time) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
+func CreatedAtNEQ(v time.Time) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtIn applies the In predicate on the "created_at" field.
+func CreatedAtIn(vs ...time.Time) predicate.Image {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Image(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldCreatedAt), v...))
+	})
+}
+
+// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
+func CreatedAtNotIn(vs ...time.Time) predicate.Image {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Image(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldCreatedAt), v...))
+	})
+}
+
+// CreatedAtGT applies the GT predicate on the "created_at" field.
+func CreatedAtGT(v time.Time) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtGTE applies the GTE predicate on the "created_at" field.
+func CreatedAtGTE(v time.Time) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtLT applies the LT predicate on the "created_at" field.
+func CreatedAtLT(v time.Time) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtLTE applies the LTE predicate on the "created_at" field.
+func CreatedAtLTE(v time.Time) predicate.Image {
+	return predicate.Image(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
 	})
 }
 

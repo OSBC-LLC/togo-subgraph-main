@@ -53,7 +53,7 @@ func main() {
 		newrelic.ConfigLicense(os.Getenv("NEW_RELIC_APP_LICENSE")),
 	)
 	if err != nil {
-		log.Fatalf("new relic init failed: %v", err)
+		log.Printf("new relic init failed: %v", err)
 	}
 
 	srv := handler.NewDefaultServer(graph.NewSchema(client))

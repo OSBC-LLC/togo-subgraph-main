@@ -4,11 +4,14 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/profile"
+	"github.com/google/uuid"
 )
 
 // ProfileCreate is the builder for creating a Profile entity.
@@ -16,6 +19,60 @@ type ProfileCreate struct {
 	config
 	mutation *ProfileMutation
 	hooks    []Hook
+}
+
+// SetName sets the "name" field.
+func (pc *ProfileCreate) SetName(s string) *ProfileCreate {
+	pc.mutation.SetName(s)
+	return pc
+}
+
+// SetDescription sets the "description" field.
+func (pc *ProfileCreate) SetDescription(s string) *ProfileCreate {
+	pc.mutation.SetDescription(s)
+	return pc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (pc *ProfileCreate) SetUpdatedAt(t time.Time) *ProfileCreate {
+	pc.mutation.SetUpdatedAt(t)
+	return pc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (pc *ProfileCreate) SetNillableUpdatedAt(t *time.Time) *ProfileCreate {
+	if t != nil {
+		pc.SetUpdatedAt(*t)
+	}
+	return pc
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (pc *ProfileCreate) SetCreatedAt(t time.Time) *ProfileCreate {
+	pc.mutation.SetCreatedAt(t)
+	return pc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (pc *ProfileCreate) SetNillableCreatedAt(t *time.Time) *ProfileCreate {
+	if t != nil {
+		pc.SetCreatedAt(*t)
+	}
+	return pc
+}
+
+// SetID sets the "id" field.
+func (pc *ProfileCreate) SetID(u uuid.UUID) *ProfileCreate {
+	pc.mutation.SetID(u)
+	return pc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (pc *ProfileCreate) SetNillableID(u *uuid.UUID) *ProfileCreate {
+	if u != nil {
+		pc.SetID(*u)
+	}
+	return pc
 }
 
 // Mutation returns the ProfileMutation object of the builder.
@@ -29,6 +86,7 @@ func (pc *ProfileCreate) Save(ctx context.Context) (*Profile, error) {
 		err  error
 		node *Profile
 	)
+	pc.defaults()
 	if len(pc.hooks) == 0 {
 		if err = pc.check(); err != nil {
 			return nil, err
@@ -92,8 +150,36 @@ func (pc *ProfileCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (pc *ProfileCreate) defaults() {
+	if _, ok := pc.mutation.UpdatedAt(); !ok {
+		v := profile.DefaultUpdatedAt()
+		pc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := pc.mutation.CreatedAt(); !ok {
+		v := profile.DefaultCreatedAt()
+		pc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := pc.mutation.ID(); !ok {
+		v := profile.DefaultID()
+		pc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (pc *ProfileCreate) check() error {
+	if _, ok := pc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Profile.name"`)}
+	}
+	if _, ok := pc.mutation.Description(); !ok {
+		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "Profile.description"`)}
+	}
+	if _, ok := pc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Profile.updated_at"`)}
+	}
+	if _, ok := pc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Profile.created_at"`)}
+	}
 	return nil
 }
 
@@ -105,8 +191,13 @@ func (pc *ProfileCreate) sqlSave(ctx context.Context) (*Profile, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	return _node, nil
 }
 
@@ -116,11 +207,47 @@ func (pc *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: profile.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: profile.FieldID,
 			},
 		}
 	)
+	if id, ok := pc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
+	if value, ok := pc.mutation.Name(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: profile.FieldName,
+		})
+		_node.Name = value
+	}
+	if value, ok := pc.mutation.Description(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: profile.FieldDescription,
+		})
+		_node.Description = value
+	}
+	if value, ok := pc.mutation.UpdatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: profile.FieldUpdatedAt,
+		})
+		_node.UpdatedAt = value
+	}
+	if value, ok := pc.mutation.CreatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: profile.FieldCreatedAt,
+		})
+		_node.CreatedAt = value
+	}
 	return _node, _spec
 }
 
@@ -138,6 +265,7 @@ func (pcb *ProfileCreateBulk) Save(ctx context.Context) ([]*Profile, error) {
 	for i := range pcb.builders {
 		func(i int, root context.Context) {
 			builder := pcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ProfileMutation)
 				if !ok {
@@ -164,10 +292,6 @@ func (pcb *ProfileCreateBulk) Save(ctx context.Context) ([]*Profile, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

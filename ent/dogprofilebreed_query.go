@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofilebreed"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // DogProfileBreedQuery is the builder for querying DogProfileBreed entities.
@@ -85,8 +86,8 @@ func (dpbq *DogProfileBreedQuery) FirstX(ctx context.Context) *DogProfileBreed {
 
 // FirstID returns the first DogProfileBreed ID from the query.
 // Returns a *NotFoundError when no DogProfileBreed ID was found.
-func (dpbq *DogProfileBreedQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (dpbq *DogProfileBreedQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = dpbq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -98,7 +99,7 @@ func (dpbq *DogProfileBreedQuery) FirstID(ctx context.Context) (id int, err erro
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (dpbq *DogProfileBreedQuery) FirstIDX(ctx context.Context) int {
+func (dpbq *DogProfileBreedQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := dpbq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -136,8 +137,8 @@ func (dpbq *DogProfileBreedQuery) OnlyX(ctx context.Context) *DogProfileBreed {
 // OnlyID is like Only, but returns the only DogProfileBreed ID in the query.
 // Returns a *NotSingularError when more than one DogProfileBreed ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (dpbq *DogProfileBreedQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (dpbq *DogProfileBreedQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = dpbq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -153,7 +154,7 @@ func (dpbq *DogProfileBreedQuery) OnlyID(ctx context.Context) (id int, err error
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (dpbq *DogProfileBreedQuery) OnlyIDX(ctx context.Context) int {
+func (dpbq *DogProfileBreedQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := dpbq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -179,8 +180,8 @@ func (dpbq *DogProfileBreedQuery) AllX(ctx context.Context) []*DogProfileBreed {
 }
 
 // IDs executes the query and returns a list of DogProfileBreed IDs.
-func (dpbq *DogProfileBreedQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (dpbq *DogProfileBreedQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := dpbq.Select(dogprofilebreed.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -188,7 +189,7 @@ func (dpbq *DogProfileBreedQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (dpbq *DogProfileBreedQuery) IDsX(ctx context.Context) []int {
+func (dpbq *DogProfileBreedQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := dpbq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -251,6 +252,18 @@ func (dpbq *DogProfileBreedQuery) Clone() *DogProfileBreedQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		BreedID uuid.UUID `json:"breed_id,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.DogProfileBreed.Query().
+//		GroupBy(dogprofilebreed.FieldBreedID).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
 func (dpbq *DogProfileBreedQuery) GroupBy(field string, fields ...string) *DogProfileBreedGroupBy {
 	grbuild := &DogProfileBreedGroupBy{config: dpbq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -267,6 +280,16 @@ func (dpbq *DogProfileBreedQuery) GroupBy(field string, fields ...string) *DogPr
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		BreedID uuid.UUID `json:"breed_id,omitempty"`
+//	}
+//
+//	client.DogProfileBreed.Query().
+//		Select(dogprofilebreed.FieldBreedID).
+//		Scan(ctx, &v)
 func (dpbq *DogProfileBreedQuery) Select(fields ...string) *DogProfileBreedSelect {
 	dpbq.fields = append(dpbq.fields, fields...)
 	selbuild := &DogProfileBreedSelect{DogProfileBreedQuery: dpbq}
@@ -350,7 +373,7 @@ func (dpbq *DogProfileBreedQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   dogprofilebreed.Table,
 			Columns: dogprofilebreed.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: dogprofilebreed.FieldID,
 			},
 		},

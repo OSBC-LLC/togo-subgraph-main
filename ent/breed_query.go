@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/breed"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // BreedQuery is the builder for querying Breed entities.
@@ -85,8 +86,8 @@ func (bq *BreedQuery) FirstX(ctx context.Context) *Breed {
 
 // FirstID returns the first Breed ID from the query.
 // Returns a *NotFoundError when no Breed ID was found.
-func (bq *BreedQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (bq *BreedQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = bq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -98,7 +99,7 @@ func (bq *BreedQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (bq *BreedQuery) FirstIDX(ctx context.Context) int {
+func (bq *BreedQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := bq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -136,8 +137,8 @@ func (bq *BreedQuery) OnlyX(ctx context.Context) *Breed {
 // OnlyID is like Only, but returns the only Breed ID in the query.
 // Returns a *NotSingularError when more than one Breed ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (bq *BreedQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (bq *BreedQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = bq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -153,7 +154,7 @@ func (bq *BreedQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (bq *BreedQuery) OnlyIDX(ctx context.Context) int {
+func (bq *BreedQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := bq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -179,8 +180,8 @@ func (bq *BreedQuery) AllX(ctx context.Context) []*Breed {
 }
 
 // IDs executes the query and returns a list of Breed IDs.
-func (bq *BreedQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (bq *BreedQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := bq.Select(breed.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -188,7 +189,7 @@ func (bq *BreedQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (bq *BreedQuery) IDsX(ctx context.Context) []int {
+func (bq *BreedQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := bq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -251,6 +252,18 @@ func (bq *BreedQuery) Clone() *BreedQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		Name string `json:"name,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Breed.Query().
+//		GroupBy(breed.FieldName).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
 func (bq *BreedQuery) GroupBy(field string, fields ...string) *BreedGroupBy {
 	grbuild := &BreedGroupBy{config: bq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -267,6 +280,16 @@ func (bq *BreedQuery) GroupBy(field string, fields ...string) *BreedGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		Name string `json:"name,omitempty"`
+//	}
+//
+//	client.Breed.Query().
+//		Select(breed.FieldName).
+//		Scan(ctx, &v)
 func (bq *BreedQuery) Select(fields ...string) *BreedSelect {
 	bq.fields = append(bq.fields, fields...)
 	selbuild := &BreedSelect{BreedQuery: bq}
@@ -350,7 +373,7 @@ func (bq *BreedQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   breed.Table,
 			Columns: breed.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: breed.FieldID,
 			},
 		},

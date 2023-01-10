@@ -4,11 +4,14 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofilebreed"
+	"github.com/google/uuid"
 )
 
 // DogProfileBreedCreate is the builder for creating a DogProfileBreed entity.
@@ -16,6 +19,66 @@ type DogProfileBreedCreate struct {
 	config
 	mutation *DogProfileBreedMutation
 	hooks    []Hook
+}
+
+// SetBreedID sets the "breed_id" field.
+func (dpbc *DogProfileBreedCreate) SetBreedID(u uuid.UUID) *DogProfileBreedCreate {
+	dpbc.mutation.SetBreedID(u)
+	return dpbc
+}
+
+// SetDogID sets the "dog_id" field.
+func (dpbc *DogProfileBreedCreate) SetDogID(u uuid.UUID) *DogProfileBreedCreate {
+	dpbc.mutation.SetDogID(u)
+	return dpbc
+}
+
+// SetPercentage sets the "percentage" field.
+func (dpbc *DogProfileBreedCreate) SetPercentage(f float64) *DogProfileBreedCreate {
+	dpbc.mutation.SetPercentage(f)
+	return dpbc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (dpbc *DogProfileBreedCreate) SetUpdatedAt(t time.Time) *DogProfileBreedCreate {
+	dpbc.mutation.SetUpdatedAt(t)
+	return dpbc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (dpbc *DogProfileBreedCreate) SetNillableUpdatedAt(t *time.Time) *DogProfileBreedCreate {
+	if t != nil {
+		dpbc.SetUpdatedAt(*t)
+	}
+	return dpbc
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (dpbc *DogProfileBreedCreate) SetCreatedAt(t time.Time) *DogProfileBreedCreate {
+	dpbc.mutation.SetCreatedAt(t)
+	return dpbc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (dpbc *DogProfileBreedCreate) SetNillableCreatedAt(t *time.Time) *DogProfileBreedCreate {
+	if t != nil {
+		dpbc.SetCreatedAt(*t)
+	}
+	return dpbc
+}
+
+// SetID sets the "id" field.
+func (dpbc *DogProfileBreedCreate) SetID(u uuid.UUID) *DogProfileBreedCreate {
+	dpbc.mutation.SetID(u)
+	return dpbc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (dpbc *DogProfileBreedCreate) SetNillableID(u *uuid.UUID) *DogProfileBreedCreate {
+	if u != nil {
+		dpbc.SetID(*u)
+	}
+	return dpbc
 }
 
 // Mutation returns the DogProfileBreedMutation object of the builder.
@@ -29,6 +92,7 @@ func (dpbc *DogProfileBreedCreate) Save(ctx context.Context) (*DogProfileBreed, 
 		err  error
 		node *DogProfileBreed
 	)
+	dpbc.defaults()
 	if len(dpbc.hooks) == 0 {
 		if err = dpbc.check(); err != nil {
 			return nil, err
@@ -92,8 +156,44 @@ func (dpbc *DogProfileBreedCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (dpbc *DogProfileBreedCreate) defaults() {
+	if _, ok := dpbc.mutation.UpdatedAt(); !ok {
+		v := dogprofilebreed.DefaultUpdatedAt()
+		dpbc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := dpbc.mutation.CreatedAt(); !ok {
+		v := dogprofilebreed.DefaultCreatedAt()
+		dpbc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := dpbc.mutation.ID(); !ok {
+		v := dogprofilebreed.DefaultID()
+		dpbc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (dpbc *DogProfileBreedCreate) check() error {
+	if _, ok := dpbc.mutation.BreedID(); !ok {
+		return &ValidationError{Name: "breed_id", err: errors.New(`ent: missing required field "DogProfileBreed.breed_id"`)}
+	}
+	if _, ok := dpbc.mutation.DogID(); !ok {
+		return &ValidationError{Name: "dog_id", err: errors.New(`ent: missing required field "DogProfileBreed.dog_id"`)}
+	}
+	if _, ok := dpbc.mutation.Percentage(); !ok {
+		return &ValidationError{Name: "percentage", err: errors.New(`ent: missing required field "DogProfileBreed.percentage"`)}
+	}
+	if v, ok := dpbc.mutation.Percentage(); ok {
+		if err := dogprofilebreed.PercentageValidator(v); err != nil {
+			return &ValidationError{Name: "percentage", err: fmt.Errorf(`ent: validator failed for field "DogProfileBreed.percentage": %w`, err)}
+		}
+	}
+	if _, ok := dpbc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "DogProfileBreed.updated_at"`)}
+	}
+	if _, ok := dpbc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "DogProfileBreed.created_at"`)}
+	}
 	return nil
 }
 
@@ -105,8 +205,13 @@ func (dpbc *DogProfileBreedCreate) sqlSave(ctx context.Context) (*DogProfileBree
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	return _node, nil
 }
 
@@ -116,11 +221,55 @@ func (dpbc *DogProfileBreedCreate) createSpec() (*DogProfileBreed, *sqlgraph.Cre
 		_spec = &sqlgraph.CreateSpec{
 			Table: dogprofilebreed.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: dogprofilebreed.FieldID,
 			},
 		}
 	)
+	if id, ok := dpbc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
+	if value, ok := dpbc.mutation.BreedID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: dogprofilebreed.FieldBreedID,
+		})
+		_node.BreedID = value
+	}
+	if value, ok := dpbc.mutation.DogID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: dogprofilebreed.FieldDogID,
+		})
+		_node.DogID = value
+	}
+	if value, ok := dpbc.mutation.Percentage(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: dogprofilebreed.FieldPercentage,
+		})
+		_node.Percentage = value
+	}
+	if value, ok := dpbc.mutation.UpdatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dogprofilebreed.FieldUpdatedAt,
+		})
+		_node.UpdatedAt = value
+	}
+	if value, ok := dpbc.mutation.CreatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dogprofilebreed.FieldCreatedAt,
+		})
+		_node.CreatedAt = value
+	}
 	return _node, _spec
 }
 
@@ -138,6 +287,7 @@ func (dpbcb *DogProfileBreedCreateBulk) Save(ctx context.Context) ([]*DogProfile
 	for i := range dpbcb.builders {
 		func(i int, root context.Context) {
 			builder := dpbcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*DogProfileBreedMutation)
 				if !ok {
@@ -164,10 +314,6 @@ func (dpbcb *DogProfileBreedCreateBulk) Save(ctx context.Context) ([]*DogProfile
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

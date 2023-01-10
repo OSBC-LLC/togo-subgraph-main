@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // ImageQuery is the builder for querying Image entities.
@@ -85,8 +86,8 @@ func (iq *ImageQuery) FirstX(ctx context.Context) *Image {
 
 // FirstID returns the first Image ID from the query.
 // Returns a *NotFoundError when no Image ID was found.
-func (iq *ImageQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (iq *ImageQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = iq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -98,7 +99,7 @@ func (iq *ImageQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (iq *ImageQuery) FirstIDX(ctx context.Context) int {
+func (iq *ImageQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := iq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -136,8 +137,8 @@ func (iq *ImageQuery) OnlyX(ctx context.Context) *Image {
 // OnlyID is like Only, but returns the only Image ID in the query.
 // Returns a *NotSingularError when more than one Image ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (iq *ImageQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (iq *ImageQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = iq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -153,7 +154,7 @@ func (iq *ImageQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (iq *ImageQuery) OnlyIDX(ctx context.Context) int {
+func (iq *ImageQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := iq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -179,8 +180,8 @@ func (iq *ImageQuery) AllX(ctx context.Context) []*Image {
 }
 
 // IDs executes the query and returns a list of Image IDs.
-func (iq *ImageQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (iq *ImageQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := iq.Select(image.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -188,7 +189,7 @@ func (iq *ImageQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (iq *ImageQuery) IDsX(ctx context.Context) []int {
+func (iq *ImageQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := iq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -251,6 +252,18 @@ func (iq *ImageQuery) Clone() *ImageQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		URL string `json:"url,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Image.Query().
+//		GroupBy(image.FieldURL).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
 func (iq *ImageQuery) GroupBy(field string, fields ...string) *ImageGroupBy {
 	grbuild := &ImageGroupBy{config: iq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -267,6 +280,16 @@ func (iq *ImageQuery) GroupBy(field string, fields ...string) *ImageGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		URL string `json:"url,omitempty"`
+//	}
+//
+//	client.Image.Query().
+//		Select(image.FieldURL).
+//		Scan(ctx, &v)
 func (iq *ImageQuery) Select(fields ...string) *ImageSelect {
 	iq.fields = append(iq.fields, fields...)
 	selbuild := &ImageSelect{ImageQuery: iq}
@@ -350,7 +373,7 @@ func (iq *ImageQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   image.Table,
 			Columns: image.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: image.FieldID,
 			},
 		},
