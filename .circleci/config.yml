@@ -22,8 +22,20 @@ jobs:
           name: Dagger Pipeline
           command: go run dagger/lint/lint.go
 
+  dagger-sonar:
+    docker:
+      - image: cimg/go:1.19
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Dagger Pipeline
+          command: go run dagger/sonarqube/sonar.go
+
 workflows:
   dagger-workflow:
     jobs:
       - dagger-build
       - dagger-lint
+      - dagger-sonar

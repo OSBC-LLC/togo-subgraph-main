@@ -9,6 +9,7 @@ require (
 	github.com/99designs/gqlgen v0.17.20
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-multierror v1.1.1
+	github.com/joho/godotenv v1.4.0
 	github.com/lib/pq v1.10.5
 	github.com/newrelic/go-agent/v3 v3.15.2
 	github.com/sailsforce/gomicro-kit v0.4.2
@@ -34,7 +35,6 @@ require (
 	github.com/iancoleman/strcase v0.2.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.4 // indirect
-	github.com/joho/godotenv v1.4.0 // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
