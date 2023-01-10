@@ -9,9 +9,21 @@ jobs:
           docker_layer_caching: true
       - run:
           name: Dagger Pipeline
-          command: go run dagger/build.go
+          command: go run dagger/build/build.go
+
+  dagger-lint:
+    docker:
+      - image: cimg/go:1.19
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Dagger Pipeline
+          command: go run dagger/lint/lint.go
 
 workflows:
   dagger-workflow:
     jobs:
       - dagger-build
+      - dagger-lint
