@@ -2,6 +2,9 @@ directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | I
 directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
 type Breed implements Node {
   id: ID!
+  name: String!
+  updatedAt: Time!
+  createdAt: Time!
 }
 """
 BreedWhereInput is used for filtering Breed objects.
@@ -20,6 +23,38 @@ input BreedWhereInput {
   idGTE: ID
   idLT: ID
   idLTE: ID
+  """name field predicates"""
+  name: String
+  nameNEQ: String
+  nameIn: [String!]
+  nameNotIn: [String!]
+  nameGT: String
+  nameGTE: String
+  nameLT: String
+  nameLTE: String
+  nameContains: String
+  nameHasPrefix: String
+  nameHasSuffix: String
+  nameEqualFold: String
+  nameContainsFold: String
+  """updated_at field predicates"""
+  updatedAt: Time
+  updatedAtNEQ: Time
+  updatedAtIn: [Time!]
+  updatedAtNotIn: [Time!]
+  updatedAtGT: Time
+  updatedAtGTE: Time
+  updatedAtLT: Time
+  updatedAtLTE: Time
+  """created_at field predicates"""
+  createdAt: Time
+  createdAtNEQ: Time
+  createdAtIn: [Time!]
+  createdAtNotIn: [Time!]
+  createdAtGT: Time
+  createdAtGTE: Time
+  createdAtLT: Time
+  createdAtLTE: Time
 }
 """
 Define a Relay Cursor type:
@@ -28,9 +63,23 @@ https://relay.dev/graphql/connections.htm#sec-Cursor
 scalar Cursor
 type Dog implements Node {
   id: ID!
+  fullName: String!
+  age: Int!
+  weightLbs: Float!
+  weightKgs: Float!
+  size: String!
+  birthday: Time!
+  dogImgID: UUID!
+  updatedAt: Time!
+  createdAt: Time!
 }
 type DogProfileBreed implements Node {
   id: ID!
+  breedID: UUID!
+  dogID: UUID!
+  percentage: Float!
+  updatedAt: Time!
+  createdAt: Time!
 }
 """
 DogProfileBreedWhereInput is used for filtering DogProfileBreed objects.
@@ -49,9 +98,58 @@ input DogProfileBreedWhereInput {
   idGTE: ID
   idLT: ID
   idLTE: ID
+  """breed_id field predicates"""
+  breedID: UUID
+  breedIDNEQ: UUID
+  breedIDIn: [UUID!]
+  breedIDNotIn: [UUID!]
+  breedIDGT: UUID
+  breedIDGTE: UUID
+  breedIDLT: UUID
+  breedIDLTE: UUID
+  """dog_id field predicates"""
+  dogID: UUID
+  dogIDNEQ: UUID
+  dogIDIn: [UUID!]
+  dogIDNotIn: [UUID!]
+  dogIDGT: UUID
+  dogIDGTE: UUID
+  dogIDLT: UUID
+  dogIDLTE: UUID
+  """percentage field predicates"""
+  percentage: Float
+  percentageNEQ: Float
+  percentageIn: [Float!]
+  percentageNotIn: [Float!]
+  percentageGT: Float
+  percentageGTE: Float
+  percentageLT: Float
+  percentageLTE: Float
+  """updated_at field predicates"""
+  updatedAt: Time
+  updatedAtNEQ: Time
+  updatedAtIn: [Time!]
+  updatedAtNotIn: [Time!]
+  updatedAtGT: Time
+  updatedAtGTE: Time
+  updatedAtLT: Time
+  updatedAtLTE: Time
+  """created_at field predicates"""
+  createdAt: Time
+  createdAtNEQ: Time
+  createdAtIn: [Time!]
+  createdAtNotIn: [Time!]
+  createdAtGT: Time
+  createdAtGTE: Time
+  createdAtLT: Time
+  createdAtLTE: Time
 }
 type DogProfileOwner implements Node {
   id: ID!
+  ownerID: UUID!
+  dogID: UUID!
+  updatedAt: Time!
+  createdAt: Time!
 }
 """
 DogProfileOwnerWhereInput is used for filtering DogProfileOwner objects.
@@ -70,6 +168,42 @@ input DogProfileOwnerWhereInput {
   idGTE: ID
   idLT: ID
   idLTE: ID
+  """owner_id field predicates"""
+  ownerID: UUID
+  ownerIDNEQ: UUID
+  ownerIDIn: [UUID!]
+  ownerIDNotIn: [UUID!]
+  ownerIDGT: UUID
+  ownerIDGTE: UUID
+  ownerIDLT: UUID
+  ownerIDLTE: UUID
+  """dog_id field predicates"""
+  dogID: UUID
+  dogIDNEQ: UUID
+  dogIDIn: [UUID!]
+  dogIDNotIn: [UUID!]
+  dogIDGT: UUID
+  dogIDGTE: UUID
+  dogIDLT: UUID
+  dogIDLTE: UUID
+  """updated_at field predicates"""
+  updatedAt: Time
+  updatedAtNEQ: Time
+  updatedAtIn: [Time!]
+  updatedAtNotIn: [Time!]
+  updatedAtGT: Time
+  updatedAtGTE: Time
+  updatedAtLT: Time
+  updatedAtLTE: Time
+  """created_at field predicates"""
+  createdAt: Time
+  createdAtNEQ: Time
+  createdAtIn: [Time!]
+  createdAtNotIn: [Time!]
+  createdAtGT: Time
+  createdAtGTE: Time
+  createdAtLT: Time
+  createdAtLTE: Time
 }
 """
 DogWhereInput is used for filtering Dog objects.
@@ -88,9 +222,106 @@ input DogWhereInput {
   idGTE: ID
   idLT: ID
   idLTE: ID
+  """full_name field predicates"""
+  fullName: String
+  fullNameNEQ: String
+  fullNameIn: [String!]
+  fullNameNotIn: [String!]
+  fullNameGT: String
+  fullNameGTE: String
+  fullNameLT: String
+  fullNameLTE: String
+  fullNameContains: String
+  fullNameHasPrefix: String
+  fullNameHasSuffix: String
+  fullNameEqualFold: String
+  fullNameContainsFold: String
+  """age field predicates"""
+  age: Int
+  ageNEQ: Int
+  ageIn: [Int!]
+  ageNotIn: [Int!]
+  ageGT: Int
+  ageGTE: Int
+  ageLT: Int
+  ageLTE: Int
+  """weight_lbs field predicates"""
+  weightLbs: Float
+  weightLbsNEQ: Float
+  weightLbsIn: [Float!]
+  weightLbsNotIn: [Float!]
+  weightLbsGT: Float
+  weightLbsGTE: Float
+  weightLbsLT: Float
+  weightLbsLTE: Float
+  """weight_kgs field predicates"""
+  weightKgs: Float
+  weightKgsNEQ: Float
+  weightKgsIn: [Float!]
+  weightKgsNotIn: [Float!]
+  weightKgsGT: Float
+  weightKgsGTE: Float
+  weightKgsLT: Float
+  weightKgsLTE: Float
+  """size field predicates"""
+  size: String
+  sizeNEQ: String
+  sizeIn: [String!]
+  sizeNotIn: [String!]
+  sizeGT: String
+  sizeGTE: String
+  sizeLT: String
+  sizeLTE: String
+  sizeContains: String
+  sizeHasPrefix: String
+  sizeHasSuffix: String
+  sizeEqualFold: String
+  sizeContainsFold: String
+  """birthday field predicates"""
+  birthday: Time
+  birthdayNEQ: Time
+  birthdayIn: [Time!]
+  birthdayNotIn: [Time!]
+  birthdayGT: Time
+  birthdayGTE: Time
+  birthdayLT: Time
+  birthdayLTE: Time
+  """dog_img_id field predicates"""
+  dogImgID: UUID
+  dogImgIDNEQ: UUID
+  dogImgIDIn: [UUID!]
+  dogImgIDNotIn: [UUID!]
+  dogImgIDGT: UUID
+  dogImgIDGTE: UUID
+  dogImgIDLT: UUID
+  dogImgIDLTE: UUID
+  """updated_at field predicates"""
+  updatedAt: Time
+  updatedAtNEQ: Time
+  updatedAtIn: [Time!]
+  updatedAtNotIn: [Time!]
+  updatedAtGT: Time
+  updatedAtGTE: Time
+  updatedAtLT: Time
+  updatedAtLTE: Time
+  """created_at field predicates"""
+  createdAt: Time
+  createdAtNEQ: Time
+  createdAtIn: [Time!]
+  createdAtNotIn: [Time!]
+  createdAtGT: Time
+  createdAtGTE: Time
+  createdAtLT: Time
+  createdAtLTE: Time
 }
 type Image implements Node {
   id: ID!
+  url: String!
+  width: Int!
+  height: Int!
+  type: String!
+  updatedAt: Time!
+  createdAt: Time!
 }
 """
 ImageWhereInput is used for filtering Image objects.
@@ -109,6 +340,70 @@ input ImageWhereInput {
   idGTE: ID
   idLT: ID
   idLTE: ID
+  """url field predicates"""
+  url: String
+  urlNEQ: String
+  urlIn: [String!]
+  urlNotIn: [String!]
+  urlGT: String
+  urlGTE: String
+  urlLT: String
+  urlLTE: String
+  urlContains: String
+  urlHasPrefix: String
+  urlHasSuffix: String
+  urlEqualFold: String
+  urlContainsFold: String
+  """width field predicates"""
+  width: Int
+  widthNEQ: Int
+  widthIn: [Int!]
+  widthNotIn: [Int!]
+  widthGT: Int
+  widthGTE: Int
+  widthLT: Int
+  widthLTE: Int
+  """height field predicates"""
+  height: Int
+  heightNEQ: Int
+  heightIn: [Int!]
+  heightNotIn: [Int!]
+  heightGT: Int
+  heightGTE: Int
+  heightLT: Int
+  heightLTE: Int
+  """type field predicates"""
+  type: String
+  typeNEQ: String
+  typeIn: [String!]
+  typeNotIn: [String!]
+  typeGT: String
+  typeGTE: String
+  typeLT: String
+  typeLTE: String
+  typeContains: String
+  typeHasPrefix: String
+  typeHasSuffix: String
+  typeEqualFold: String
+  typeContainsFold: String
+  """updated_at field predicates"""
+  updatedAt: Time
+  updatedAtNEQ: Time
+  updatedAtIn: [Time!]
+  updatedAtNotIn: [Time!]
+  updatedAtGT: Time
+  updatedAtGTE: Time
+  updatedAtLT: Time
+  updatedAtLTE: Time
+  """created_at field predicates"""
+  createdAt: Time
+  createdAtNEQ: Time
+  createdAtIn: [Time!]
+  createdAtNotIn: [Time!]
+  createdAtGT: Time
+  createdAtGTE: Time
+  createdAtLT: Time
+  createdAtLTE: Time
 }
 """
 An object with an ID.
@@ -141,6 +436,10 @@ type PageInfo {
 }
 type Profile implements Node {
   id: ID!
+  name: String!
+  description: String!
+  updatedAt: Time!
+  createdAt: Time!
 }
 """
 ProfileWhereInput is used for filtering Profile objects.
@@ -159,6 +458,52 @@ input ProfileWhereInput {
   idGTE: ID
   idLT: ID
   idLTE: ID
+  """name field predicates"""
+  name: String
+  nameNEQ: String
+  nameIn: [String!]
+  nameNotIn: [String!]
+  nameGT: String
+  nameGTE: String
+  nameLT: String
+  nameLTE: String
+  nameContains: String
+  nameHasPrefix: String
+  nameHasSuffix: String
+  nameEqualFold: String
+  nameContainsFold: String
+  """description field predicates"""
+  description: String
+  descriptionNEQ: String
+  descriptionIn: [String!]
+  descriptionNotIn: [String!]
+  descriptionGT: String
+  descriptionGTE: String
+  descriptionLT: String
+  descriptionLTE: String
+  descriptionContains: String
+  descriptionHasPrefix: String
+  descriptionHasSuffix: String
+  descriptionEqualFold: String
+  descriptionContainsFold: String
+  """updated_at field predicates"""
+  updatedAt: Time
+  updatedAtNEQ: Time
+  updatedAtIn: [Time!]
+  updatedAtNotIn: [Time!]
+  updatedAtGT: Time
+  updatedAtGTE: Time
+  updatedAtLT: Time
+  updatedAtLTE: Time
+  """created_at field predicates"""
+  createdAt: Time
+  createdAtNEQ: Time
+  createdAtIn: [Time!]
+  createdAtNotIn: [Time!]
+  createdAtGT: Time
+  createdAtGTE: Time
+  createdAtLT: Time
+  createdAtLTE: Time
 }
 type Query {
   """Fetches an object given its ID."""
@@ -174,6 +519,12 @@ type Query {
 }
 type User implements Node {
   id: ID!
+  firstName: String!
+  lastName: String!
+  userImageID: UUID!
+  profileID: UUID!
+  updatedAt: Time!
+  createdAt: Time!
 }
 """
 UserWhereInput is used for filtering User objects.
@@ -192,4 +543,68 @@ input UserWhereInput {
   idGTE: ID
   idLT: ID
   idLTE: ID
+  """first_name field predicates"""
+  firstName: String
+  firstNameNEQ: String
+  firstNameIn: [String!]
+  firstNameNotIn: [String!]
+  firstNameGT: String
+  firstNameGTE: String
+  firstNameLT: String
+  firstNameLTE: String
+  firstNameContains: String
+  firstNameHasPrefix: String
+  firstNameHasSuffix: String
+  firstNameEqualFold: String
+  firstNameContainsFold: String
+  """last_name field predicates"""
+  lastName: String
+  lastNameNEQ: String
+  lastNameIn: [String!]
+  lastNameNotIn: [String!]
+  lastNameGT: String
+  lastNameGTE: String
+  lastNameLT: String
+  lastNameLTE: String
+  lastNameContains: String
+  lastNameHasPrefix: String
+  lastNameHasSuffix: String
+  lastNameEqualFold: String
+  lastNameContainsFold: String
+  """user_image_id field predicates"""
+  userImageID: UUID
+  userImageIDNEQ: UUID
+  userImageIDIn: [UUID!]
+  userImageIDNotIn: [UUID!]
+  userImageIDGT: UUID
+  userImageIDGTE: UUID
+  userImageIDLT: UUID
+  userImageIDLTE: UUID
+  """profile_id field predicates"""
+  profileID: UUID
+  profileIDNEQ: UUID
+  profileIDIn: [UUID!]
+  profileIDNotIn: [UUID!]
+  profileIDGT: UUID
+  profileIDGTE: UUID
+  profileIDLT: UUID
+  profileIDLTE: UUID
+  """updated_at field predicates"""
+  updatedAt: Time
+  updatedAtNEQ: Time
+  updatedAtIn: [Time!]
+  updatedAtNotIn: [Time!]
+  updatedAtGT: Time
+  updatedAtGTE: Time
+  updatedAtLT: Time
+  updatedAtLTE: Time
+  """created_at field predicates"""
+  createdAt: Time
+  createdAtNEQ: Time
+  createdAtIn: [Time!]
+  createdAtNotIn: [Time!]
+  createdAtGT: Time
+  createdAtGTE: Time
+  createdAtLT: Time
+  createdAtLTE: Time
 }

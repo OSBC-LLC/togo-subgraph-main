@@ -5,16 +5,36 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
+	"github.com/google/uuid"
 )
 
 // Dog is the model entity for the Dog schema.
 type Dog struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// FullName holds the value of the "full_name" field.
+	FullName string `json:"full_name,omitempty"`
+	// Age holds the value of the "age" field.
+	Age int `json:"age,omitempty"`
+	// WeightLbs holds the value of the "weight_lbs" field.
+	WeightLbs float64 `json:"weight_lbs,omitempty"`
+	// WeightKgs holds the value of the "weight_kgs" field.
+	WeightKgs float64 `json:"weight_kgs,omitempty"`
+	// Size holds the value of the "size" field.
+	Size string `json:"size,omitempty"`
+	// Birthday holds the value of the "birthday" field.
+	Birthday time.Time `json:"birthday,omitempty"`
+	// DogImgID holds the value of the "dog_img_id" field.
+	DogImgID uuid.UUID `json:"dog_img_id,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -22,8 +42,16 @@ func (*Dog) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case dog.FieldID:
+		case dog.FieldWeightLbs, dog.FieldWeightKgs:
+			values[i] = new(sql.NullFloat64)
+		case dog.FieldAge:
 			values[i] = new(sql.NullInt64)
+		case dog.FieldFullName, dog.FieldSize:
+			values[i] = new(sql.NullString)
+		case dog.FieldBirthday, dog.FieldUpdatedAt, dog.FieldCreatedAt:
+			values[i] = new(sql.NullTime)
+		case dog.FieldID, dog.FieldDogImgID:
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Dog", columns[i])
 		}
@@ -40,11 +68,65 @@ func (d *Dog) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case dog.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				d.ID = *value
 			}
-			d.ID = int(value.Int64)
+		case dog.FieldFullName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field full_name", values[i])
+			} else if value.Valid {
+				d.FullName = value.String
+			}
+		case dog.FieldAge:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field age", values[i])
+			} else if value.Valid {
+				d.Age = int(value.Int64)
+			}
+		case dog.FieldWeightLbs:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field weight_lbs", values[i])
+			} else if value.Valid {
+				d.WeightLbs = value.Float64
+			}
+		case dog.FieldWeightKgs:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field weight_kgs", values[i])
+			} else if value.Valid {
+				d.WeightKgs = value.Float64
+			}
+		case dog.FieldSize:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field size", values[i])
+			} else if value.Valid {
+				d.Size = value.String
+			}
+		case dog.FieldBirthday:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field birthday", values[i])
+			} else if value.Valid {
+				d.Birthday = value.Time
+			}
+		case dog.FieldDogImgID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field dog_img_id", values[i])
+			} else if value != nil {
+				d.DogImgID = *value
+			}
+		case dog.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				d.UpdatedAt = value.Time
+			}
+		case dog.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				d.CreatedAt = value.Time
+			}
 		}
 	}
 	return nil
@@ -72,7 +154,33 @@ func (d *Dog) Unwrap() *Dog {
 func (d *Dog) String() string {
 	var builder strings.Builder
 	builder.WriteString("Dog(")
-	builder.WriteString(fmt.Sprintf("id=%v", d.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", d.ID))
+	builder.WriteString("full_name=")
+	builder.WriteString(d.FullName)
+	builder.WriteString(", ")
+	builder.WriteString("age=")
+	builder.WriteString(fmt.Sprintf("%v", d.Age))
+	builder.WriteString(", ")
+	builder.WriteString("weight_lbs=")
+	builder.WriteString(fmt.Sprintf("%v", d.WeightLbs))
+	builder.WriteString(", ")
+	builder.WriteString("weight_kgs=")
+	builder.WriteString(fmt.Sprintf("%v", d.WeightKgs))
+	builder.WriteString(", ")
+	builder.WriteString("size=")
+	builder.WriteString(d.Size)
+	builder.WriteString(", ")
+	builder.WriteString("birthday=")
+	builder.WriteString(d.Birthday.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("dog_img_id=")
+	builder.WriteString(fmt.Sprintf("%v", d.DogImgID))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(d.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("created_at=")
+	builder.WriteString(d.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

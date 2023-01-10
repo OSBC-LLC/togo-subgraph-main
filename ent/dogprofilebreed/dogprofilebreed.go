@@ -2,11 +2,27 @@
 
 package dogprofilebreed
 
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
 const (
 	// Label holds the string label denoting the dogprofilebreed type in the database.
 	Label = "dog_profile_breed"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldBreedID holds the string denoting the breed_id field in the database.
+	FieldBreedID = "breed_id"
+	// FieldDogID holds the string denoting the dog_id field in the database.
+	FieldDogID = "dog_id"
+	// FieldPercentage holds the string denoting the percentage field in the database.
+	FieldPercentage = "percentage"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
 	// Table holds the table name of the dogprofilebreed in the database.
 	Table = "dog_profile_breeds"
 )
@@ -14,6 +30,11 @@ const (
 // Columns holds all SQL columns for dogprofilebreed fields.
 var Columns = []string{
 	FieldID,
+	FieldBreedID,
+	FieldDogID,
+	FieldPercentage,
+	FieldUpdatedAt,
+	FieldCreatedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -25,3 +46,14 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// PercentageValidator is a validator for the "percentage" field. It is called by the builders before save.
+	PercentageValidator func(float64) error
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
+)

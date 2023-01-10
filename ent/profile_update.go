@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -24,6 +25,46 @@ type ProfileUpdate struct {
 // Where appends a list predicates to the ProfileUpdate builder.
 func (pu *ProfileUpdate) Where(ps ...predicate.Profile) *ProfileUpdate {
 	pu.mutation.Where(ps...)
+	return pu
+}
+
+// SetName sets the "name" field.
+func (pu *ProfileUpdate) SetName(s string) *ProfileUpdate {
+	pu.mutation.SetName(s)
+	return pu
+}
+
+// SetDescription sets the "description" field.
+func (pu *ProfileUpdate) SetDescription(s string) *ProfileUpdate {
+	pu.mutation.SetDescription(s)
+	return pu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (pu *ProfileUpdate) SetUpdatedAt(t time.Time) *ProfileUpdate {
+	pu.mutation.SetUpdatedAt(t)
+	return pu
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (pu *ProfileUpdate) SetNillableUpdatedAt(t *time.Time) *ProfileUpdate {
+	if t != nil {
+		pu.SetUpdatedAt(*t)
+	}
+	return pu
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (pu *ProfileUpdate) SetCreatedAt(t time.Time) *ProfileUpdate {
+	pu.mutation.SetCreatedAt(t)
+	return pu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (pu *ProfileUpdate) SetNillableCreatedAt(t *time.Time) *ProfileUpdate {
+	if t != nil {
+		pu.SetCreatedAt(*t)
+	}
 	return pu
 }
 
@@ -92,7 +133,7 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   profile.Table,
 			Columns: profile.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: profile.FieldID,
 			},
 		},
@@ -103,6 +144,34 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := pu.mutation.Name(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: profile.FieldName,
+		})
+	}
+	if value, ok := pu.mutation.Description(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: profile.FieldDescription,
+		})
+	}
+	if value, ok := pu.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: profile.FieldUpdatedAt,
+		})
+	}
+	if value, ok := pu.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: profile.FieldCreatedAt,
+		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -121,6 +190,46 @@ type ProfileUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ProfileMutation
+}
+
+// SetName sets the "name" field.
+func (puo *ProfileUpdateOne) SetName(s string) *ProfileUpdateOne {
+	puo.mutation.SetName(s)
+	return puo
+}
+
+// SetDescription sets the "description" field.
+func (puo *ProfileUpdateOne) SetDescription(s string) *ProfileUpdateOne {
+	puo.mutation.SetDescription(s)
+	return puo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (puo *ProfileUpdateOne) SetUpdatedAt(t time.Time) *ProfileUpdateOne {
+	puo.mutation.SetUpdatedAt(t)
+	return puo
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (puo *ProfileUpdateOne) SetNillableUpdatedAt(t *time.Time) *ProfileUpdateOne {
+	if t != nil {
+		puo.SetUpdatedAt(*t)
+	}
+	return puo
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (puo *ProfileUpdateOne) SetCreatedAt(t time.Time) *ProfileUpdateOne {
+	puo.mutation.SetCreatedAt(t)
+	return puo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (puo *ProfileUpdateOne) SetNillableCreatedAt(t *time.Time) *ProfileUpdateOne {
+	if t != nil {
+		puo.SetCreatedAt(*t)
+	}
+	return puo
 }
 
 // Mutation returns the ProfileMutation object of the builder.
@@ -201,7 +310,7 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 			Table:   profile.Table,
 			Columns: profile.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: profile.FieldID,
 			},
 		},
@@ -229,6 +338,34 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := puo.mutation.Name(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: profile.FieldName,
+		})
+	}
+	if value, ok := puo.mutation.Description(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: profile.FieldDescription,
+		})
+	}
+	if value, ok := puo.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: profile.FieldUpdatedAt,
+		})
+	}
+	if value, ok := puo.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: profile.FieldCreatedAt,
+		})
 	}
 	_node = &Profile{config: puo.config}
 	_spec.Assign = _node.assignValues

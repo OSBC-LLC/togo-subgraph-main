@@ -4,14 +4,10 @@ package ent
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"sync"
-	"sync/atomic"
 
 	"entgo.io/contrib/entgql"
-	"entgo.io/ent/dialect"
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/schema"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/breed"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
@@ -20,8 +16,8 @@ import (
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/profile"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
+	"github.com/google/uuid"
 	"github.com/hashicorp/go-multierror"
-	"golang.org/x/sync/semaphore"
 )
 
 // Noder wraps the basic Node method.
@@ -31,10 +27,10 @@ type Noder interface {
 
 // Node in the graph.
 type Node struct {
-	ID     int      `json:"id,omitempty"`     // node id.
-	Type   string   `json:"type,omitempty"`   // node type.
-	Fields []*Field `json:"fields,omitempty"` // node fields.
-	Edges  []*Edge  `json:"edges,omitempty"`  // node edges.
+	ID     uuid.UUID `json:"id,omitempty"`     // node id.
+	Type   string    `json:"type,omitempty"`   // node type.
+	Fields []*Field  `json:"fields,omitempty"` // node fields.
+	Edges  []*Edge   `json:"edges,omitempty"`  // node edges.
 }
 
 // Field of a node.
@@ -46,17 +42,42 @@ type Field struct {
 
 // Edges between two nodes.
 type Edge struct {
-	Type string `json:"type,omitempty"` // edge type.
-	Name string `json:"name,omitempty"` // edge name.
-	IDs  []int  `json:"ids,omitempty"`  // node ids (where this edge point to).
+	Type string      `json:"type,omitempty"` // edge type.
+	Name string      `json:"name,omitempty"` // edge name.
+	IDs  []uuid.UUID `json:"ids,omitempty"`  // node ids (where this edge point to).
 }
 
 func (b *Breed) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     b.ID,
 		Type:   "Breed",
-		Fields: make([]*Field, 0),
+		Fields: make([]*Field, 3),
 		Edges:  make([]*Edge, 0),
+	}
+	var buf []byte
+	if buf, err = json.Marshal(b.Name); err != nil {
+		return nil, err
+	}
+	node.Fields[0] = &Field{
+		Type:  "string",
+		Name:  "name",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(b.UpdatedAt); err != nil {
+		return nil, err
+	}
+	node.Fields[1] = &Field{
+		Type:  "time.Time",
+		Name:  "updated_at",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(b.CreatedAt); err != nil {
+		return nil, err
+	}
+	node.Fields[2] = &Field{
+		Type:  "time.Time",
+		Name:  "created_at",
+		Value: string(buf),
 	}
 	return node, nil
 }
@@ -65,8 +86,81 @@ func (d *Dog) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     d.ID,
 		Type:   "Dog",
-		Fields: make([]*Field, 0),
+		Fields: make([]*Field, 9),
 		Edges:  make([]*Edge, 0),
+	}
+	var buf []byte
+	if buf, err = json.Marshal(d.FullName); err != nil {
+		return nil, err
+	}
+	node.Fields[0] = &Field{
+		Type:  "string",
+		Name:  "full_name",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(d.Age); err != nil {
+		return nil, err
+	}
+	node.Fields[1] = &Field{
+		Type:  "int",
+		Name:  "age",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(d.WeightLbs); err != nil {
+		return nil, err
+	}
+	node.Fields[2] = &Field{
+		Type:  "float64",
+		Name:  "weight_lbs",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(d.WeightKgs); err != nil {
+		return nil, err
+	}
+	node.Fields[3] = &Field{
+		Type:  "float64",
+		Name:  "weight_kgs",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(d.Size); err != nil {
+		return nil, err
+	}
+	node.Fields[4] = &Field{
+		Type:  "string",
+		Name:  "size",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(d.Birthday); err != nil {
+		return nil, err
+	}
+	node.Fields[5] = &Field{
+		Type:  "time.Time",
+		Name:  "birthday",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(d.DogImgID); err != nil {
+		return nil, err
+	}
+	node.Fields[6] = &Field{
+		Type:  "uuid.UUID",
+		Name:  "dog_img_id",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(d.UpdatedAt); err != nil {
+		return nil, err
+	}
+	node.Fields[7] = &Field{
+		Type:  "time.Time",
+		Name:  "updated_at",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(d.CreatedAt); err != nil {
+		return nil, err
+	}
+	node.Fields[8] = &Field{
+		Type:  "time.Time",
+		Name:  "created_at",
+		Value: string(buf),
 	}
 	return node, nil
 }
@@ -75,8 +169,49 @@ func (dpb *DogProfileBreed) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     dpb.ID,
 		Type:   "DogProfileBreed",
-		Fields: make([]*Field, 0),
+		Fields: make([]*Field, 5),
 		Edges:  make([]*Edge, 0),
+	}
+	var buf []byte
+	if buf, err = json.Marshal(dpb.BreedID); err != nil {
+		return nil, err
+	}
+	node.Fields[0] = &Field{
+		Type:  "uuid.UUID",
+		Name:  "breed_id",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(dpb.DogID); err != nil {
+		return nil, err
+	}
+	node.Fields[1] = &Field{
+		Type:  "uuid.UUID",
+		Name:  "dog_id",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(dpb.Percentage); err != nil {
+		return nil, err
+	}
+	node.Fields[2] = &Field{
+		Type:  "float64",
+		Name:  "percentage",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(dpb.UpdatedAt); err != nil {
+		return nil, err
+	}
+	node.Fields[3] = &Field{
+		Type:  "time.Time",
+		Name:  "updated_at",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(dpb.CreatedAt); err != nil {
+		return nil, err
+	}
+	node.Fields[4] = &Field{
+		Type:  "time.Time",
+		Name:  "created_at",
+		Value: string(buf),
 	}
 	return node, nil
 }
@@ -85,8 +220,41 @@ func (dpo *DogProfileOwner) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     dpo.ID,
 		Type:   "DogProfileOwner",
-		Fields: make([]*Field, 0),
+		Fields: make([]*Field, 4),
 		Edges:  make([]*Edge, 0),
+	}
+	var buf []byte
+	if buf, err = json.Marshal(dpo.OwnerID); err != nil {
+		return nil, err
+	}
+	node.Fields[0] = &Field{
+		Type:  "uuid.UUID",
+		Name:  "owner_id",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(dpo.DogID); err != nil {
+		return nil, err
+	}
+	node.Fields[1] = &Field{
+		Type:  "uuid.UUID",
+		Name:  "dog_id",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(dpo.UpdatedAt); err != nil {
+		return nil, err
+	}
+	node.Fields[2] = &Field{
+		Type:  "time.Time",
+		Name:  "updated_at",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(dpo.CreatedAt); err != nil {
+		return nil, err
+	}
+	node.Fields[3] = &Field{
+		Type:  "time.Time",
+		Name:  "created_at",
+		Value: string(buf),
 	}
 	return node, nil
 }
@@ -95,8 +263,57 @@ func (i *Image) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     i.ID,
 		Type:   "Image",
-		Fields: make([]*Field, 0),
+		Fields: make([]*Field, 6),
 		Edges:  make([]*Edge, 0),
+	}
+	var buf []byte
+	if buf, err = json.Marshal(i.URL); err != nil {
+		return nil, err
+	}
+	node.Fields[0] = &Field{
+		Type:  "string",
+		Name:  "url",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(i.Width); err != nil {
+		return nil, err
+	}
+	node.Fields[1] = &Field{
+		Type:  "int",
+		Name:  "width",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(i.Height); err != nil {
+		return nil, err
+	}
+	node.Fields[2] = &Field{
+		Type:  "int",
+		Name:  "height",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(i.Type); err != nil {
+		return nil, err
+	}
+	node.Fields[3] = &Field{
+		Type:  "string",
+		Name:  "type",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(i.UpdatedAt); err != nil {
+		return nil, err
+	}
+	node.Fields[4] = &Field{
+		Type:  "time.Time",
+		Name:  "updated_at",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(i.CreatedAt); err != nil {
+		return nil, err
+	}
+	node.Fields[5] = &Field{
+		Type:  "time.Time",
+		Name:  "created_at",
+		Value: string(buf),
 	}
 	return node, nil
 }
@@ -105,8 +322,41 @@ func (pr *Profile) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     pr.ID,
 		Type:   "Profile",
-		Fields: make([]*Field, 0),
+		Fields: make([]*Field, 4),
 		Edges:  make([]*Edge, 0),
+	}
+	var buf []byte
+	if buf, err = json.Marshal(pr.Name); err != nil {
+		return nil, err
+	}
+	node.Fields[0] = &Field{
+		Type:  "string",
+		Name:  "name",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(pr.Description); err != nil {
+		return nil, err
+	}
+	node.Fields[1] = &Field{
+		Type:  "string",
+		Name:  "description",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(pr.UpdatedAt); err != nil {
+		return nil, err
+	}
+	node.Fields[2] = &Field{
+		Type:  "time.Time",
+		Name:  "updated_at",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(pr.CreatedAt); err != nil {
+		return nil, err
+	}
+	node.Fields[3] = &Field{
+		Type:  "time.Time",
+		Name:  "created_at",
+		Value: string(buf),
 	}
 	return node, nil
 }
@@ -115,13 +365,62 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     u.ID,
 		Type:   "User",
-		Fields: make([]*Field, 0),
+		Fields: make([]*Field, 6),
 		Edges:  make([]*Edge, 0),
+	}
+	var buf []byte
+	if buf, err = json.Marshal(u.FirstName); err != nil {
+		return nil, err
+	}
+	node.Fields[0] = &Field{
+		Type:  "string",
+		Name:  "first_name",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(u.LastName); err != nil {
+		return nil, err
+	}
+	node.Fields[1] = &Field{
+		Type:  "string",
+		Name:  "last_name",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(u.UserImageID); err != nil {
+		return nil, err
+	}
+	node.Fields[2] = &Field{
+		Type:  "uuid.UUID",
+		Name:  "user_image_id",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(u.ProfileID); err != nil {
+		return nil, err
+	}
+	node.Fields[3] = &Field{
+		Type:  "uuid.UUID",
+		Name:  "profile_id",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(u.UpdatedAt); err != nil {
+		return nil, err
+	}
+	node.Fields[4] = &Field{
+		Type:  "time.Time",
+		Name:  "updated_at",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(u.CreatedAt); err != nil {
+		return nil, err
+	}
+	node.Fields[5] = &Field{
+		Type:  "time.Time",
+		Name:  "created_at",
+		Value: string(buf),
 	}
 	return node, nil
 }
 
-func (c *Client) Node(ctx context.Context, id int) (*Node, error) {
+func (c *Client) Node(ctx context.Context, id uuid.UUID) (*Node, error) {
 	n, err := c.Noder(ctx, id)
 	if err != nil {
 		return nil, err
@@ -137,7 +436,7 @@ type NodeOption func(*nodeOptions)
 // WithNodeType sets the node Type resolver function (i.e. the table to query).
 // If was not provided, the table will be derived from the universal-id
 // configuration as described in: https://entgo.io/docs/migrate/#universal-ids.
-func WithNodeType(f func(context.Context, int) (string, error)) NodeOption {
+func WithNodeType(f func(context.Context, uuid.UUID) (string, error)) NodeOption {
 	return func(o *nodeOptions) {
 		o.nodeType = f
 	}
@@ -145,13 +444,13 @@ func WithNodeType(f func(context.Context, int) (string, error)) NodeOption {
 
 // WithFixedNodeType sets the Type of the node to a fixed value.
 func WithFixedNodeType(t string) NodeOption {
-	return WithNodeType(func(context.Context, int) (string, error) {
+	return WithNodeType(func(context.Context, uuid.UUID) (string, error) {
 		return t, nil
 	})
 }
 
 type nodeOptions struct {
-	nodeType func(context.Context, int) (string, error)
+	nodeType func(context.Context, uuid.UUID) (string, error)
 }
 
 func (c *Client) newNodeOpts(opts []NodeOption) *nodeOptions {
@@ -160,8 +459,8 @@ func (c *Client) newNodeOpts(opts []NodeOption) *nodeOptions {
 		opt(nopts)
 	}
 	if nopts.nodeType == nil {
-		nopts.nodeType = func(ctx context.Context, id int) (string, error) {
-			return c.tables.nodeType(ctx, c.driver, id)
+		nopts.nodeType = func(ctx context.Context, id uuid.UUID) (string, error) {
+			return "", fmt.Errorf("cannot resolve noder (%v) without its type", id)
 		}
 	}
 	return nopts
@@ -170,10 +469,9 @@ func (c *Client) newNodeOpts(opts []NodeOption) *nodeOptions {
 // Noder returns a Node by its id. If the NodeType was not provided, it will
 // be derived from the id value according to the universal-id configuration.
 //
-//		c.Noder(ctx, id)
-//		c.Noder(ctx, id, ent.WithNodeType(typeResolver))
-//
-func (c *Client) Noder(ctx context.Context, id int, opts ...NodeOption) (_ Noder, err error) {
+//	c.Noder(ctx, id)
+//	c.Noder(ctx, id, ent.WithNodeType(typeResolver))
+func (c *Client) Noder(ctx context.Context, id uuid.UUID, opts ...NodeOption) (_ Noder, err error) {
 	defer func() {
 		if IsNotFound(err) {
 			err = multierror.Append(err, entgql.ErrNodeNotFound(id))
@@ -186,7 +484,7 @@ func (c *Client) Noder(ctx context.Context, id int, opts ...NodeOption) (_ Noder
 	return c.noder(ctx, table, id)
 }
 
-func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error) {
+func (c *Client) noder(ctx context.Context, table string, id uuid.UUID) (Noder, error) {
 	switch table {
 	case breed.Table:
 		query := c.Breed.Query().
@@ -277,7 +575,7 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 	}
 }
 
-func (c *Client) Noders(ctx context.Context, ids []int, opts ...NodeOption) ([]Noder, error) {
+func (c *Client) Noders(ctx context.Context, ids []uuid.UUID, opts ...NodeOption) ([]Noder, error) {
 	switch len(ids) {
 	case 1:
 		noder, err := c.Noder(ctx, ids[0], opts...)
@@ -291,8 +589,8 @@ func (c *Client) Noders(ctx context.Context, ids []int, opts ...NodeOption) ([]N
 
 	noders := make([]Noder, len(ids))
 	errors := make([]error, len(ids))
-	tables := make(map[string][]int)
-	id2idx := make(map[int][]int, len(ids))
+	tables := make(map[string][]uuid.UUID)
+	id2idx := make(map[uuid.UUID][]int, len(ids))
 	nopts := c.newNodeOpts(opts)
 	for i, id := range ids {
 		table, err := nopts.nodeType(ctx, id)
@@ -338,9 +636,9 @@ func (c *Client) Noders(ctx context.Context, ids []int, opts ...NodeOption) ([]N
 	return noders, nil
 }
 
-func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, error) {
+func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]Noder, error) {
 	noders := make([]Noder, len(ids))
-	idmap := make(map[int][]*Noder, len(ids))
+	idmap := make(map[uuid.UUID][]*Noder, len(ids))
 	for i, id := range ids {
 		idmap[id] = append(idmap[id], &noders[i])
 	}
@@ -461,56 +759,4 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 		return nil, fmt.Errorf("cannot resolve noders from table %q: %w", table, errNodeInvalidID)
 	}
 	return noders, nil
-}
-
-type tables struct {
-	once  sync.Once
-	sem   *semaphore.Weighted
-	value atomic.Value
-}
-
-func (t *tables) nodeType(ctx context.Context, drv dialect.Driver, id int) (string, error) {
-	tables, err := t.Load(ctx, drv)
-	if err != nil {
-		return "", err
-	}
-	idx := int(id / (1<<32 - 1))
-	if idx < 0 || idx >= len(tables) {
-		return "", fmt.Errorf("cannot resolve table from id %v: %w", id, errNodeInvalidID)
-	}
-	return tables[idx], nil
-}
-
-func (t *tables) Load(ctx context.Context, drv dialect.Driver) ([]string, error) {
-	if tables := t.value.Load(); tables != nil {
-		return tables.([]string), nil
-	}
-	t.once.Do(func() { t.sem = semaphore.NewWeighted(1) })
-	if err := t.sem.Acquire(ctx, 1); err != nil {
-		return nil, err
-	}
-	defer t.sem.Release(1)
-	if tables := t.value.Load(); tables != nil {
-		return tables.([]string), nil
-	}
-	tables, err := t.load(ctx, drv)
-	if err == nil {
-		t.value.Store(tables)
-	}
-	return tables, err
-}
-
-func (*tables) load(ctx context.Context, drv dialect.Driver) ([]string, error) {
-	rows := &sql.Rows{}
-	query, args := sql.Dialect(drv.Dialect()).
-		Select("type").
-		From(sql.Table(schema.TypeTable)).
-		OrderBy(sql.Asc("id")).
-		Query()
-	if err := drv.Query(ctx, query, args, rows); err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var tables []string
-	return tables, sql.ScanSlice(rows, &tables)
 }

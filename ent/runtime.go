@@ -2,8 +2,144 @@
 
 package ent
 
+import (
+	"time"
+
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/breed"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofilebreed"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/profile"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/schema"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
+	"github.com/google/uuid"
+)
+
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	breedFields := schema.Breed{}.Fields()
+	_ = breedFields
+	// breedDescUpdatedAt is the schema descriptor for updated_at field.
+	breedDescUpdatedAt := breedFields[2].Descriptor()
+	// breed.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	breed.DefaultUpdatedAt = breedDescUpdatedAt.Default.(func() time.Time)
+	// breedDescCreatedAt is the schema descriptor for created_at field.
+	breedDescCreatedAt := breedFields[3].Descriptor()
+	// breed.DefaultCreatedAt holds the default value on creation for the created_at field.
+	breed.DefaultCreatedAt = breedDescCreatedAt.Default.(func() time.Time)
+	// breedDescID is the schema descriptor for id field.
+	breedDescID := breedFields[0].Descriptor()
+	// breed.DefaultID holds the default value on creation for the id field.
+	breed.DefaultID = breedDescID.Default.(func() uuid.UUID)
+	dogFields := schema.Dog{}.Fields()
+	_ = dogFields
+	// dogDescAge is the schema descriptor for age field.
+	dogDescAge := dogFields[2].Descriptor()
+	// dog.AgeValidator is a validator for the "age" field. It is called by the builders before save.
+	dog.AgeValidator = dogDescAge.Validators[0].(func(int) error)
+	// dogDescWeightLbs is the schema descriptor for weight_lbs field.
+	dogDescWeightLbs := dogFields[3].Descriptor()
+	// dog.WeightLbsValidator is a validator for the "weight_lbs" field. It is called by the builders before save.
+	dog.WeightLbsValidator = dogDescWeightLbs.Validators[0].(func(float64) error)
+	// dogDescWeightKgs is the schema descriptor for weight_kgs field.
+	dogDescWeightKgs := dogFields[4].Descriptor()
+	// dog.WeightKgsValidator is a validator for the "weight_kgs" field. It is called by the builders before save.
+	dog.WeightKgsValidator = dogDescWeightKgs.Validators[0].(func(float64) error)
+	// dogDescUpdatedAt is the schema descriptor for updated_at field.
+	dogDescUpdatedAt := dogFields[8].Descriptor()
+	// dog.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	dog.DefaultUpdatedAt = dogDescUpdatedAt.Default.(func() time.Time)
+	// dogDescCreatedAt is the schema descriptor for created_at field.
+	dogDescCreatedAt := dogFields[9].Descriptor()
+	// dog.DefaultCreatedAt holds the default value on creation for the created_at field.
+	dog.DefaultCreatedAt = dogDescCreatedAt.Default.(func() time.Time)
+	// dogDescID is the schema descriptor for id field.
+	dogDescID := dogFields[0].Descriptor()
+	// dog.DefaultID holds the default value on creation for the id field.
+	dog.DefaultID = dogDescID.Default.(func() uuid.UUID)
+	dogprofilebreedFields := schema.DogProfileBreed{}.Fields()
+	_ = dogprofilebreedFields
+	// dogprofilebreedDescPercentage is the schema descriptor for percentage field.
+	dogprofilebreedDescPercentage := dogprofilebreedFields[3].Descriptor()
+	// dogprofilebreed.PercentageValidator is a validator for the "percentage" field. It is called by the builders before save.
+	dogprofilebreed.PercentageValidator = dogprofilebreedDescPercentage.Validators[0].(func(float64) error)
+	// dogprofilebreedDescUpdatedAt is the schema descriptor for updated_at field.
+	dogprofilebreedDescUpdatedAt := dogprofilebreedFields[4].Descriptor()
+	// dogprofilebreed.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	dogprofilebreed.DefaultUpdatedAt = dogprofilebreedDescUpdatedAt.Default.(func() time.Time)
+	// dogprofilebreedDescCreatedAt is the schema descriptor for created_at field.
+	dogprofilebreedDescCreatedAt := dogprofilebreedFields[5].Descriptor()
+	// dogprofilebreed.DefaultCreatedAt holds the default value on creation for the created_at field.
+	dogprofilebreed.DefaultCreatedAt = dogprofilebreedDescCreatedAt.Default.(func() time.Time)
+	// dogprofilebreedDescID is the schema descriptor for id field.
+	dogprofilebreedDescID := dogprofilebreedFields[0].Descriptor()
+	// dogprofilebreed.DefaultID holds the default value on creation for the id field.
+	dogprofilebreed.DefaultID = dogprofilebreedDescID.Default.(func() uuid.UUID)
+	dogprofileownerFields := schema.DogProfileOwner{}.Fields()
+	_ = dogprofileownerFields
+	// dogprofileownerDescUpdatedAt is the schema descriptor for updated_at field.
+	dogprofileownerDescUpdatedAt := dogprofileownerFields[3].Descriptor()
+	// dogprofileowner.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	dogprofileowner.DefaultUpdatedAt = dogprofileownerDescUpdatedAt.Default.(func() time.Time)
+	// dogprofileownerDescCreatedAt is the schema descriptor for created_at field.
+	dogprofileownerDescCreatedAt := dogprofileownerFields[4].Descriptor()
+	// dogprofileowner.DefaultCreatedAt holds the default value on creation for the created_at field.
+	dogprofileowner.DefaultCreatedAt = dogprofileownerDescCreatedAt.Default.(func() time.Time)
+	// dogprofileownerDescID is the schema descriptor for id field.
+	dogprofileownerDescID := dogprofileownerFields[0].Descriptor()
+	// dogprofileowner.DefaultID holds the default value on creation for the id field.
+	dogprofileowner.DefaultID = dogprofileownerDescID.Default.(func() uuid.UUID)
+	imageFields := schema.Image{}.Fields()
+	_ = imageFields
+	// imageDescWidth is the schema descriptor for width field.
+	imageDescWidth := imageFields[2].Descriptor()
+	// image.WidthValidator is a validator for the "width" field. It is called by the builders before save.
+	image.WidthValidator = imageDescWidth.Validators[0].(func(int) error)
+	// imageDescHeight is the schema descriptor for height field.
+	imageDescHeight := imageFields[3].Descriptor()
+	// image.HeightValidator is a validator for the "height" field. It is called by the builders before save.
+	image.HeightValidator = imageDescHeight.Validators[0].(func(int) error)
+	// imageDescUpdatedAt is the schema descriptor for updated_at field.
+	imageDescUpdatedAt := imageFields[5].Descriptor()
+	// image.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	image.DefaultUpdatedAt = imageDescUpdatedAt.Default.(func() time.Time)
+	// imageDescCreatedAt is the schema descriptor for created_at field.
+	imageDescCreatedAt := imageFields[6].Descriptor()
+	// image.DefaultCreatedAt holds the default value on creation for the created_at field.
+	image.DefaultCreatedAt = imageDescCreatedAt.Default.(func() time.Time)
+	// imageDescID is the schema descriptor for id field.
+	imageDescID := imageFields[0].Descriptor()
+	// image.DefaultID holds the default value on creation for the id field.
+	image.DefaultID = imageDescID.Default.(func() uuid.UUID)
+	profileFields := schema.Profile{}.Fields()
+	_ = profileFields
+	// profileDescUpdatedAt is the schema descriptor for updated_at field.
+	profileDescUpdatedAt := profileFields[3].Descriptor()
+	// profile.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	profile.DefaultUpdatedAt = profileDescUpdatedAt.Default.(func() time.Time)
+	// profileDescCreatedAt is the schema descriptor for created_at field.
+	profileDescCreatedAt := profileFields[4].Descriptor()
+	// profile.DefaultCreatedAt holds the default value on creation for the created_at field.
+	profile.DefaultCreatedAt = profileDescCreatedAt.Default.(func() time.Time)
+	// profileDescID is the schema descriptor for id field.
+	profileDescID := profileFields[0].Descriptor()
+	// profile.DefaultID holds the default value on creation for the id field.
+	profile.DefaultID = profileDescID.Default.(func() uuid.UUID)
+	userFields := schema.User{}.Fields()
+	_ = userFields
+	// userDescUpdatedAt is the schema descriptor for updated_at field.
+	userDescUpdatedAt := userFields[5].Descriptor()
+	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
+	// userDescCreatedAt is the schema descriptor for created_at field.
+	userDescCreatedAt := userFields[6].Descriptor()
+	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
+	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
+	// userDescID is the schema descriptor for id field.
+	userDescID := userFields[0].Descriptor()
+	// user.DefaultID holds the default value on creation for the id field.
+	user.DefaultID = userDescID.Default.(func() uuid.UUID)
 }

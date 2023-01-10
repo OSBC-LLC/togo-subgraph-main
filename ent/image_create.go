@@ -4,11 +4,14 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
+	"github.com/google/uuid"
 )
 
 // ImageCreate is the builder for creating a Image entity.
@@ -16,6 +19,72 @@ type ImageCreate struct {
 	config
 	mutation *ImageMutation
 	hooks    []Hook
+}
+
+// SetURL sets the "url" field.
+func (ic *ImageCreate) SetURL(s string) *ImageCreate {
+	ic.mutation.SetURL(s)
+	return ic
+}
+
+// SetWidth sets the "width" field.
+func (ic *ImageCreate) SetWidth(i int) *ImageCreate {
+	ic.mutation.SetWidth(i)
+	return ic
+}
+
+// SetHeight sets the "height" field.
+func (ic *ImageCreate) SetHeight(i int) *ImageCreate {
+	ic.mutation.SetHeight(i)
+	return ic
+}
+
+// SetType sets the "type" field.
+func (ic *ImageCreate) SetType(s string) *ImageCreate {
+	ic.mutation.SetType(s)
+	return ic
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (ic *ImageCreate) SetUpdatedAt(t time.Time) *ImageCreate {
+	ic.mutation.SetUpdatedAt(t)
+	return ic
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (ic *ImageCreate) SetNillableUpdatedAt(t *time.Time) *ImageCreate {
+	if t != nil {
+		ic.SetUpdatedAt(*t)
+	}
+	return ic
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (ic *ImageCreate) SetCreatedAt(t time.Time) *ImageCreate {
+	ic.mutation.SetCreatedAt(t)
+	return ic
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (ic *ImageCreate) SetNillableCreatedAt(t *time.Time) *ImageCreate {
+	if t != nil {
+		ic.SetCreatedAt(*t)
+	}
+	return ic
+}
+
+// SetID sets the "id" field.
+func (ic *ImageCreate) SetID(u uuid.UUID) *ImageCreate {
+	ic.mutation.SetID(u)
+	return ic
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (ic *ImageCreate) SetNillableID(u *uuid.UUID) *ImageCreate {
+	if u != nil {
+		ic.SetID(*u)
+	}
+	return ic
 }
 
 // Mutation returns the ImageMutation object of the builder.
@@ -29,6 +98,7 @@ func (ic *ImageCreate) Save(ctx context.Context) (*Image, error) {
 		err  error
 		node *Image
 	)
+	ic.defaults()
 	if len(ic.hooks) == 0 {
 		if err = ic.check(); err != nil {
 			return nil, err
@@ -92,8 +162,52 @@ func (ic *ImageCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (ic *ImageCreate) defaults() {
+	if _, ok := ic.mutation.UpdatedAt(); !ok {
+		v := image.DefaultUpdatedAt()
+		ic.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := ic.mutation.CreatedAt(); !ok {
+		v := image.DefaultCreatedAt()
+		ic.mutation.SetCreatedAt(v)
+	}
+	if _, ok := ic.mutation.ID(); !ok {
+		v := image.DefaultID()
+		ic.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (ic *ImageCreate) check() error {
+	if _, ok := ic.mutation.URL(); !ok {
+		return &ValidationError{Name: "url", err: errors.New(`ent: missing required field "Image.url"`)}
+	}
+	if _, ok := ic.mutation.Width(); !ok {
+		return &ValidationError{Name: "width", err: errors.New(`ent: missing required field "Image.width"`)}
+	}
+	if v, ok := ic.mutation.Width(); ok {
+		if err := image.WidthValidator(v); err != nil {
+			return &ValidationError{Name: "width", err: fmt.Errorf(`ent: validator failed for field "Image.width": %w`, err)}
+		}
+	}
+	if _, ok := ic.mutation.Height(); !ok {
+		return &ValidationError{Name: "height", err: errors.New(`ent: missing required field "Image.height"`)}
+	}
+	if v, ok := ic.mutation.Height(); ok {
+		if err := image.HeightValidator(v); err != nil {
+			return &ValidationError{Name: "height", err: fmt.Errorf(`ent: validator failed for field "Image.height": %w`, err)}
+		}
+	}
+	if _, ok := ic.mutation.GetType(); !ok {
+		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "Image.type"`)}
+	}
+	if _, ok := ic.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Image.updated_at"`)}
+	}
+	if _, ok := ic.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Image.created_at"`)}
+	}
 	return nil
 }
 
@@ -105,8 +219,13 @@ func (ic *ImageCreate) sqlSave(ctx context.Context) (*Image, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	return _node, nil
 }
 
@@ -116,11 +235,63 @@ func (ic *ImageCreate) createSpec() (*Image, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: image.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: image.FieldID,
 			},
 		}
 	)
+	if id, ok := ic.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
+	if value, ok := ic.mutation.URL(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: image.FieldURL,
+		})
+		_node.URL = value
+	}
+	if value, ok := ic.mutation.Width(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: image.FieldWidth,
+		})
+		_node.Width = value
+	}
+	if value, ok := ic.mutation.Height(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: image.FieldHeight,
+		})
+		_node.Height = value
+	}
+	if value, ok := ic.mutation.GetType(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: image.FieldType,
+		})
+		_node.Type = value
+	}
+	if value, ok := ic.mutation.UpdatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: image.FieldUpdatedAt,
+		})
+		_node.UpdatedAt = value
+	}
+	if value, ok := ic.mutation.CreatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: image.FieldCreatedAt,
+		})
+		_node.CreatedAt = value
+	}
 	return _node, _spec
 }
 
@@ -138,6 +309,7 @@ func (icb *ImageCreateBulk) Save(ctx context.Context) ([]*Image, error) {
 	for i := range icb.builders {
 		func(i int, root context.Context) {
 			builder := icb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ImageMutation)
 				if !ok {
@@ -164,10 +336,6 @@ func (icb *ImageCreateBulk) Save(ctx context.Context) ([]*Image, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

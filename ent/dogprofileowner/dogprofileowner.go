@@ -2,11 +2,25 @@
 
 package dogprofileowner
 
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
 const (
 	// Label holds the string label denoting the dogprofileowner type in the database.
 	Label = "dog_profile_owner"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldOwnerID holds the string denoting the owner_id field in the database.
+	FieldOwnerID = "owner_id"
+	// FieldDogID holds the string denoting the dog_id field in the database.
+	FieldDogID = "dog_id"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
 	// Table holds the table name of the dogprofileowner in the database.
 	Table = "dog_profile_owners"
 )
@@ -14,6 +28,10 @@ const (
 // Columns holds all SQL columns for dogprofileowner fields.
 var Columns = []string{
 	FieldID,
+	FieldOwnerID,
+	FieldDogID,
+	FieldUpdatedAt,
+	FieldCreatedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -25,3 +43,12 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
+)

@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -27,6 +28,72 @@ func (iu *ImageUpdate) Where(ps ...predicate.Image) *ImageUpdate {
 	return iu
 }
 
+// SetURL sets the "url" field.
+func (iu *ImageUpdate) SetURL(s string) *ImageUpdate {
+	iu.mutation.SetURL(s)
+	return iu
+}
+
+// SetWidth sets the "width" field.
+func (iu *ImageUpdate) SetWidth(i int) *ImageUpdate {
+	iu.mutation.ResetWidth()
+	iu.mutation.SetWidth(i)
+	return iu
+}
+
+// AddWidth adds i to the "width" field.
+func (iu *ImageUpdate) AddWidth(i int) *ImageUpdate {
+	iu.mutation.AddWidth(i)
+	return iu
+}
+
+// SetHeight sets the "height" field.
+func (iu *ImageUpdate) SetHeight(i int) *ImageUpdate {
+	iu.mutation.ResetHeight()
+	iu.mutation.SetHeight(i)
+	return iu
+}
+
+// AddHeight adds i to the "height" field.
+func (iu *ImageUpdate) AddHeight(i int) *ImageUpdate {
+	iu.mutation.AddHeight(i)
+	return iu
+}
+
+// SetType sets the "type" field.
+func (iu *ImageUpdate) SetType(s string) *ImageUpdate {
+	iu.mutation.SetType(s)
+	return iu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (iu *ImageUpdate) SetUpdatedAt(t time.Time) *ImageUpdate {
+	iu.mutation.SetUpdatedAt(t)
+	return iu
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (iu *ImageUpdate) SetNillableUpdatedAt(t *time.Time) *ImageUpdate {
+	if t != nil {
+		iu.SetUpdatedAt(*t)
+	}
+	return iu
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (iu *ImageUpdate) SetCreatedAt(t time.Time) *ImageUpdate {
+	iu.mutation.SetCreatedAt(t)
+	return iu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (iu *ImageUpdate) SetNillableCreatedAt(t *time.Time) *ImageUpdate {
+	if t != nil {
+		iu.SetCreatedAt(*t)
+	}
+	return iu
+}
+
 // Mutation returns the ImageMutation object of the builder.
 func (iu *ImageUpdate) Mutation() *ImageMutation {
 	return iu.mutation
@@ -39,12 +106,18 @@ func (iu *ImageUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(iu.hooks) == 0 {
+		if err = iu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = iu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ImageMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = iu.check(); err != nil {
+				return 0, err
 			}
 			iu.mutation = mutation
 			affected, err = iu.sqlSave(ctx)
@@ -86,13 +159,28 @@ func (iu *ImageUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (iu *ImageUpdate) check() error {
+	if v, ok := iu.mutation.Width(); ok {
+		if err := image.WidthValidator(v); err != nil {
+			return &ValidationError{Name: "width", err: fmt.Errorf(`ent: validator failed for field "Image.width": %w`, err)}
+		}
+	}
+	if v, ok := iu.mutation.Height(); ok {
+		if err := image.HeightValidator(v); err != nil {
+			return &ValidationError{Name: "height", err: fmt.Errorf(`ent: validator failed for field "Image.height": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (iu *ImageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   image.Table,
 			Columns: image.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: image.FieldID,
 			},
 		},
@@ -103,6 +191,62 @@ func (iu *ImageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := iu.mutation.URL(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: image.FieldURL,
+		})
+	}
+	if value, ok := iu.mutation.Width(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: image.FieldWidth,
+		})
+	}
+	if value, ok := iu.mutation.AddedWidth(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: image.FieldWidth,
+		})
+	}
+	if value, ok := iu.mutation.Height(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: image.FieldHeight,
+		})
+	}
+	if value, ok := iu.mutation.AddedHeight(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: image.FieldHeight,
+		})
+	}
+	if value, ok := iu.mutation.GetType(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: image.FieldType,
+		})
+	}
+	if value, ok := iu.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: image.FieldUpdatedAt,
+		})
+	}
+	if value, ok := iu.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: image.FieldCreatedAt,
+		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, iu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -121,6 +265,72 @@ type ImageUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ImageMutation
+}
+
+// SetURL sets the "url" field.
+func (iuo *ImageUpdateOne) SetURL(s string) *ImageUpdateOne {
+	iuo.mutation.SetURL(s)
+	return iuo
+}
+
+// SetWidth sets the "width" field.
+func (iuo *ImageUpdateOne) SetWidth(i int) *ImageUpdateOne {
+	iuo.mutation.ResetWidth()
+	iuo.mutation.SetWidth(i)
+	return iuo
+}
+
+// AddWidth adds i to the "width" field.
+func (iuo *ImageUpdateOne) AddWidth(i int) *ImageUpdateOne {
+	iuo.mutation.AddWidth(i)
+	return iuo
+}
+
+// SetHeight sets the "height" field.
+func (iuo *ImageUpdateOne) SetHeight(i int) *ImageUpdateOne {
+	iuo.mutation.ResetHeight()
+	iuo.mutation.SetHeight(i)
+	return iuo
+}
+
+// AddHeight adds i to the "height" field.
+func (iuo *ImageUpdateOne) AddHeight(i int) *ImageUpdateOne {
+	iuo.mutation.AddHeight(i)
+	return iuo
+}
+
+// SetType sets the "type" field.
+func (iuo *ImageUpdateOne) SetType(s string) *ImageUpdateOne {
+	iuo.mutation.SetType(s)
+	return iuo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (iuo *ImageUpdateOne) SetUpdatedAt(t time.Time) *ImageUpdateOne {
+	iuo.mutation.SetUpdatedAt(t)
+	return iuo
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (iuo *ImageUpdateOne) SetNillableUpdatedAt(t *time.Time) *ImageUpdateOne {
+	if t != nil {
+		iuo.SetUpdatedAt(*t)
+	}
+	return iuo
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (iuo *ImageUpdateOne) SetCreatedAt(t time.Time) *ImageUpdateOne {
+	iuo.mutation.SetCreatedAt(t)
+	return iuo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (iuo *ImageUpdateOne) SetNillableCreatedAt(t *time.Time) *ImageUpdateOne {
+	if t != nil {
+		iuo.SetCreatedAt(*t)
+	}
+	return iuo
 }
 
 // Mutation returns the ImageMutation object of the builder.
@@ -142,12 +352,18 @@ func (iuo *ImageUpdateOne) Save(ctx context.Context) (*Image, error) {
 		node *Image
 	)
 	if len(iuo.hooks) == 0 {
+		if err = iuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = iuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ImageMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = iuo.check(); err != nil {
+				return nil, err
 			}
 			iuo.mutation = mutation
 			node, err = iuo.sqlSave(ctx)
@@ -195,13 +411,28 @@ func (iuo *ImageUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (iuo *ImageUpdateOne) check() error {
+	if v, ok := iuo.mutation.Width(); ok {
+		if err := image.WidthValidator(v); err != nil {
+			return &ValidationError{Name: "width", err: fmt.Errorf(`ent: validator failed for field "Image.width": %w`, err)}
+		}
+	}
+	if v, ok := iuo.mutation.Height(); ok {
+		if err := image.HeightValidator(v); err != nil {
+			return &ValidationError{Name: "height", err: fmt.Errorf(`ent: validator failed for field "Image.height": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (iuo *ImageUpdateOne) sqlSave(ctx context.Context) (_node *Image, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   image.Table,
 			Columns: image.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: image.FieldID,
 			},
 		},
@@ -229,6 +460,62 @@ func (iuo *ImageUpdateOne) sqlSave(ctx context.Context) (_node *Image, err error
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := iuo.mutation.URL(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: image.FieldURL,
+		})
+	}
+	if value, ok := iuo.mutation.Width(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: image.FieldWidth,
+		})
+	}
+	if value, ok := iuo.mutation.AddedWidth(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: image.FieldWidth,
+		})
+	}
+	if value, ok := iuo.mutation.Height(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: image.FieldHeight,
+		})
+	}
+	if value, ok := iuo.mutation.AddedHeight(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: image.FieldHeight,
+		})
+	}
+	if value, ok := iuo.mutation.GetType(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: image.FieldType,
+		})
+	}
+	if value, ok := iuo.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: image.FieldUpdatedAt,
+		})
+	}
+	if value, ok := iuo.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: image.FieldCreatedAt,
+		})
 	}
 	_node = &Image{config: iuo.config}
 	_spec.Assign = _node.assignValues

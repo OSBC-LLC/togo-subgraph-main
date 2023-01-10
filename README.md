@@ -1,4 +1,4 @@
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/OSBC-LLC/togo-subgraph-main/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/OSBC-LLC/togo-subgraph-main/tree/main)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/OSBC-LLC/togo-subgraph-main/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/OSBC-LLC/togo-subgraph-main/tree/main)  [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=OSBC-LLC_togo-subgraph-main&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=OSBC-LLC_togo-subgraph-main)  [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=OSBC-LLC_togo-subgraph-main&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=OSBC-LLC_togo-subgraph-main)
 
 # apollo-subgraph-template
 Template to create a new Apollo subgraph service using Entgo, Gqlgen, and some CI

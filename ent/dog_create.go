@@ -4,11 +4,14 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
+	"github.com/google/uuid"
 )
 
 // DogCreate is the builder for creating a Dog entity.
@@ -16,6 +19,90 @@ type DogCreate struct {
 	config
 	mutation *DogMutation
 	hooks    []Hook
+}
+
+// SetFullName sets the "full_name" field.
+func (dc *DogCreate) SetFullName(s string) *DogCreate {
+	dc.mutation.SetFullName(s)
+	return dc
+}
+
+// SetAge sets the "age" field.
+func (dc *DogCreate) SetAge(i int) *DogCreate {
+	dc.mutation.SetAge(i)
+	return dc
+}
+
+// SetWeightLbs sets the "weight_lbs" field.
+func (dc *DogCreate) SetWeightLbs(f float64) *DogCreate {
+	dc.mutation.SetWeightLbs(f)
+	return dc
+}
+
+// SetWeightKgs sets the "weight_kgs" field.
+func (dc *DogCreate) SetWeightKgs(f float64) *DogCreate {
+	dc.mutation.SetWeightKgs(f)
+	return dc
+}
+
+// SetSize sets the "size" field.
+func (dc *DogCreate) SetSize(s string) *DogCreate {
+	dc.mutation.SetSize(s)
+	return dc
+}
+
+// SetBirthday sets the "birthday" field.
+func (dc *DogCreate) SetBirthday(t time.Time) *DogCreate {
+	dc.mutation.SetBirthday(t)
+	return dc
+}
+
+// SetDogImgID sets the "dog_img_id" field.
+func (dc *DogCreate) SetDogImgID(u uuid.UUID) *DogCreate {
+	dc.mutation.SetDogImgID(u)
+	return dc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (dc *DogCreate) SetUpdatedAt(t time.Time) *DogCreate {
+	dc.mutation.SetUpdatedAt(t)
+	return dc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (dc *DogCreate) SetNillableUpdatedAt(t *time.Time) *DogCreate {
+	if t != nil {
+		dc.SetUpdatedAt(*t)
+	}
+	return dc
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (dc *DogCreate) SetCreatedAt(t time.Time) *DogCreate {
+	dc.mutation.SetCreatedAt(t)
+	return dc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (dc *DogCreate) SetNillableCreatedAt(t *time.Time) *DogCreate {
+	if t != nil {
+		dc.SetCreatedAt(*t)
+	}
+	return dc
+}
+
+// SetID sets the "id" field.
+func (dc *DogCreate) SetID(u uuid.UUID) *DogCreate {
+	dc.mutation.SetID(u)
+	return dc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (dc *DogCreate) SetNillableID(u *uuid.UUID) *DogCreate {
+	if u != nil {
+		dc.SetID(*u)
+	}
+	return dc
 }
 
 // Mutation returns the DogMutation object of the builder.
@@ -29,6 +116,7 @@ func (dc *DogCreate) Save(ctx context.Context) (*Dog, error) {
 		err  error
 		node *Dog
 	)
+	dc.defaults()
 	if len(dc.hooks) == 0 {
 		if err = dc.check(); err != nil {
 			return nil, err
@@ -92,8 +180,66 @@ func (dc *DogCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (dc *DogCreate) defaults() {
+	if _, ok := dc.mutation.UpdatedAt(); !ok {
+		v := dog.DefaultUpdatedAt()
+		dc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := dc.mutation.CreatedAt(); !ok {
+		v := dog.DefaultCreatedAt()
+		dc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := dc.mutation.ID(); !ok {
+		v := dog.DefaultID()
+		dc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (dc *DogCreate) check() error {
+	if _, ok := dc.mutation.FullName(); !ok {
+		return &ValidationError{Name: "full_name", err: errors.New(`ent: missing required field "Dog.full_name"`)}
+	}
+	if _, ok := dc.mutation.Age(); !ok {
+		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "Dog.age"`)}
+	}
+	if v, ok := dc.mutation.Age(); ok {
+		if err := dog.AgeValidator(v); err != nil {
+			return &ValidationError{Name: "age", err: fmt.Errorf(`ent: validator failed for field "Dog.age": %w`, err)}
+		}
+	}
+	if _, ok := dc.mutation.WeightLbs(); !ok {
+		return &ValidationError{Name: "weight_lbs", err: errors.New(`ent: missing required field "Dog.weight_lbs"`)}
+	}
+	if v, ok := dc.mutation.WeightLbs(); ok {
+		if err := dog.WeightLbsValidator(v); err != nil {
+			return &ValidationError{Name: "weight_lbs", err: fmt.Errorf(`ent: validator failed for field "Dog.weight_lbs": %w`, err)}
+		}
+	}
+	if _, ok := dc.mutation.WeightKgs(); !ok {
+		return &ValidationError{Name: "weight_kgs", err: errors.New(`ent: missing required field "Dog.weight_kgs"`)}
+	}
+	if v, ok := dc.mutation.WeightKgs(); ok {
+		if err := dog.WeightKgsValidator(v); err != nil {
+			return &ValidationError{Name: "weight_kgs", err: fmt.Errorf(`ent: validator failed for field "Dog.weight_kgs": %w`, err)}
+		}
+	}
+	if _, ok := dc.mutation.Size(); !ok {
+		return &ValidationError{Name: "size", err: errors.New(`ent: missing required field "Dog.size"`)}
+	}
+	if _, ok := dc.mutation.Birthday(); !ok {
+		return &ValidationError{Name: "birthday", err: errors.New(`ent: missing required field "Dog.birthday"`)}
+	}
+	if _, ok := dc.mutation.DogImgID(); !ok {
+		return &ValidationError{Name: "dog_img_id", err: errors.New(`ent: missing required field "Dog.dog_img_id"`)}
+	}
+	if _, ok := dc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Dog.updated_at"`)}
+	}
+	if _, ok := dc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Dog.created_at"`)}
+	}
 	return nil
 }
 
@@ -105,8 +251,13 @@ func (dc *DogCreate) sqlSave(ctx context.Context) (*Dog, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	return _node, nil
 }
 
@@ -116,11 +267,87 @@ func (dc *DogCreate) createSpec() (*Dog, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: dog.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: dog.FieldID,
 			},
 		}
 	)
+	if id, ok := dc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
+	if value, ok := dc.mutation.FullName(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: dog.FieldFullName,
+		})
+		_node.FullName = value
+	}
+	if value, ok := dc.mutation.Age(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: dog.FieldAge,
+		})
+		_node.Age = value
+	}
+	if value, ok := dc.mutation.WeightLbs(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: dog.FieldWeightLbs,
+		})
+		_node.WeightLbs = value
+	}
+	if value, ok := dc.mutation.WeightKgs(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: dog.FieldWeightKgs,
+		})
+		_node.WeightKgs = value
+	}
+	if value, ok := dc.mutation.Size(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: dog.FieldSize,
+		})
+		_node.Size = value
+	}
+	if value, ok := dc.mutation.Birthday(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dog.FieldBirthday,
+		})
+		_node.Birthday = value
+	}
+	if value, ok := dc.mutation.DogImgID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: dog.FieldDogImgID,
+		})
+		_node.DogImgID = value
+	}
+	if value, ok := dc.mutation.UpdatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dog.FieldUpdatedAt,
+		})
+		_node.UpdatedAt = value
+	}
+	if value, ok := dc.mutation.CreatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dog.FieldCreatedAt,
+		})
+		_node.CreatedAt = value
+	}
 	return _node, _spec
 }
 
@@ -138,6 +365,7 @@ func (dcb *DogCreateBulk) Save(ctx context.Context) ([]*Dog, error) {
 	for i := range dcb.builders {
 		func(i int, root context.Context) {
 			builder := dcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*DogMutation)
 				if !ok {
@@ -164,10 +392,6 @@ func (dcb *DogCreateBulk) Save(ctx context.Context) ([]*Dog, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

@@ -4,11 +4,14 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
+	"github.com/google/uuid"
 )
 
 // DogProfileOwnerCreate is the builder for creating a DogProfileOwner entity.
@@ -16,6 +19,60 @@ type DogProfileOwnerCreate struct {
 	config
 	mutation *DogProfileOwnerMutation
 	hooks    []Hook
+}
+
+// SetOwnerID sets the "owner_id" field.
+func (dpoc *DogProfileOwnerCreate) SetOwnerID(u uuid.UUID) *DogProfileOwnerCreate {
+	dpoc.mutation.SetOwnerID(u)
+	return dpoc
+}
+
+// SetDogID sets the "dog_id" field.
+func (dpoc *DogProfileOwnerCreate) SetDogID(u uuid.UUID) *DogProfileOwnerCreate {
+	dpoc.mutation.SetDogID(u)
+	return dpoc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (dpoc *DogProfileOwnerCreate) SetUpdatedAt(t time.Time) *DogProfileOwnerCreate {
+	dpoc.mutation.SetUpdatedAt(t)
+	return dpoc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (dpoc *DogProfileOwnerCreate) SetNillableUpdatedAt(t *time.Time) *DogProfileOwnerCreate {
+	if t != nil {
+		dpoc.SetUpdatedAt(*t)
+	}
+	return dpoc
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (dpoc *DogProfileOwnerCreate) SetCreatedAt(t time.Time) *DogProfileOwnerCreate {
+	dpoc.mutation.SetCreatedAt(t)
+	return dpoc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (dpoc *DogProfileOwnerCreate) SetNillableCreatedAt(t *time.Time) *DogProfileOwnerCreate {
+	if t != nil {
+		dpoc.SetCreatedAt(*t)
+	}
+	return dpoc
+}
+
+// SetID sets the "id" field.
+func (dpoc *DogProfileOwnerCreate) SetID(u uuid.UUID) *DogProfileOwnerCreate {
+	dpoc.mutation.SetID(u)
+	return dpoc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (dpoc *DogProfileOwnerCreate) SetNillableID(u *uuid.UUID) *DogProfileOwnerCreate {
+	if u != nil {
+		dpoc.SetID(*u)
+	}
+	return dpoc
 }
 
 // Mutation returns the DogProfileOwnerMutation object of the builder.
@@ -29,6 +86,7 @@ func (dpoc *DogProfileOwnerCreate) Save(ctx context.Context) (*DogProfileOwner, 
 		err  error
 		node *DogProfileOwner
 	)
+	dpoc.defaults()
 	if len(dpoc.hooks) == 0 {
 		if err = dpoc.check(); err != nil {
 			return nil, err
@@ -92,8 +150,36 @@ func (dpoc *DogProfileOwnerCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (dpoc *DogProfileOwnerCreate) defaults() {
+	if _, ok := dpoc.mutation.UpdatedAt(); !ok {
+		v := dogprofileowner.DefaultUpdatedAt()
+		dpoc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := dpoc.mutation.CreatedAt(); !ok {
+		v := dogprofileowner.DefaultCreatedAt()
+		dpoc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := dpoc.mutation.ID(); !ok {
+		v := dogprofileowner.DefaultID()
+		dpoc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (dpoc *DogProfileOwnerCreate) check() error {
+	if _, ok := dpoc.mutation.OwnerID(); !ok {
+		return &ValidationError{Name: "owner_id", err: errors.New(`ent: missing required field "DogProfileOwner.owner_id"`)}
+	}
+	if _, ok := dpoc.mutation.DogID(); !ok {
+		return &ValidationError{Name: "dog_id", err: errors.New(`ent: missing required field "DogProfileOwner.dog_id"`)}
+	}
+	if _, ok := dpoc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "DogProfileOwner.updated_at"`)}
+	}
+	if _, ok := dpoc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "DogProfileOwner.created_at"`)}
+	}
 	return nil
 }
 
@@ -105,8 +191,13 @@ func (dpoc *DogProfileOwnerCreate) sqlSave(ctx context.Context) (*DogProfileOwne
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	return _node, nil
 }
 
@@ -116,11 +207,47 @@ func (dpoc *DogProfileOwnerCreate) createSpec() (*DogProfileOwner, *sqlgraph.Cre
 		_spec = &sqlgraph.CreateSpec{
 			Table: dogprofileowner.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: dogprofileowner.FieldID,
 			},
 		}
 	)
+	if id, ok := dpoc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
+	if value, ok := dpoc.mutation.OwnerID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: dogprofileowner.FieldOwnerID,
+		})
+		_node.OwnerID = value
+	}
+	if value, ok := dpoc.mutation.DogID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: dogprofileowner.FieldDogID,
+		})
+		_node.DogID = value
+	}
+	if value, ok := dpoc.mutation.UpdatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dogprofileowner.FieldUpdatedAt,
+		})
+		_node.UpdatedAt = value
+	}
+	if value, ok := dpoc.mutation.CreatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dogprofileowner.FieldCreatedAt,
+		})
+		_node.CreatedAt = value
+	}
 	return _node, _spec
 }
 
@@ -138,6 +265,7 @@ func (dpocb *DogProfileOwnerCreateBulk) Save(ctx context.Context) ([]*DogProfile
 	for i := range dpocb.builders {
 		func(i int, root context.Context) {
 			builder := dpocb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*DogProfileOwnerMutation)
 				if !ok {
@@ -164,10 +292,6 @@ func (dpocb *DogProfileOwnerCreateBulk) Save(ctx context.Context) ([]*DogProfile
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

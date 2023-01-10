@@ -6,12 +6,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofilebreed"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // DogProfileBreedUpdate is the builder for updating DogProfileBreed entities.
@@ -27,6 +29,59 @@ func (dpbu *DogProfileBreedUpdate) Where(ps ...predicate.DogProfileBreed) *DogPr
 	return dpbu
 }
 
+// SetBreedID sets the "breed_id" field.
+func (dpbu *DogProfileBreedUpdate) SetBreedID(u uuid.UUID) *DogProfileBreedUpdate {
+	dpbu.mutation.SetBreedID(u)
+	return dpbu
+}
+
+// SetDogID sets the "dog_id" field.
+func (dpbu *DogProfileBreedUpdate) SetDogID(u uuid.UUID) *DogProfileBreedUpdate {
+	dpbu.mutation.SetDogID(u)
+	return dpbu
+}
+
+// SetPercentage sets the "percentage" field.
+func (dpbu *DogProfileBreedUpdate) SetPercentage(f float64) *DogProfileBreedUpdate {
+	dpbu.mutation.ResetPercentage()
+	dpbu.mutation.SetPercentage(f)
+	return dpbu
+}
+
+// AddPercentage adds f to the "percentage" field.
+func (dpbu *DogProfileBreedUpdate) AddPercentage(f float64) *DogProfileBreedUpdate {
+	dpbu.mutation.AddPercentage(f)
+	return dpbu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (dpbu *DogProfileBreedUpdate) SetUpdatedAt(t time.Time) *DogProfileBreedUpdate {
+	dpbu.mutation.SetUpdatedAt(t)
+	return dpbu
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (dpbu *DogProfileBreedUpdate) SetNillableUpdatedAt(t *time.Time) *DogProfileBreedUpdate {
+	if t != nil {
+		dpbu.SetUpdatedAt(*t)
+	}
+	return dpbu
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (dpbu *DogProfileBreedUpdate) SetCreatedAt(t time.Time) *DogProfileBreedUpdate {
+	dpbu.mutation.SetCreatedAt(t)
+	return dpbu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (dpbu *DogProfileBreedUpdate) SetNillableCreatedAt(t *time.Time) *DogProfileBreedUpdate {
+	if t != nil {
+		dpbu.SetCreatedAt(*t)
+	}
+	return dpbu
+}
+
 // Mutation returns the DogProfileBreedMutation object of the builder.
 func (dpbu *DogProfileBreedUpdate) Mutation() *DogProfileBreedMutation {
 	return dpbu.mutation
@@ -39,12 +94,18 @@ func (dpbu *DogProfileBreedUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(dpbu.hooks) == 0 {
+		if err = dpbu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = dpbu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*DogProfileBreedMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = dpbu.check(); err != nil {
+				return 0, err
 			}
 			dpbu.mutation = mutation
 			affected, err = dpbu.sqlSave(ctx)
@@ -86,13 +147,23 @@ func (dpbu *DogProfileBreedUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (dpbu *DogProfileBreedUpdate) check() error {
+	if v, ok := dpbu.mutation.Percentage(); ok {
+		if err := dogprofilebreed.PercentageValidator(v); err != nil {
+			return &ValidationError{Name: "percentage", err: fmt.Errorf(`ent: validator failed for field "DogProfileBreed.percentage": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (dpbu *DogProfileBreedUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   dogprofilebreed.Table,
 			Columns: dogprofilebreed.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: dogprofilebreed.FieldID,
 			},
 		},
@@ -103,6 +174,48 @@ func (dpbu *DogProfileBreedUpdate) sqlSave(ctx context.Context) (n int, err erro
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := dpbu.mutation.BreedID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: dogprofilebreed.FieldBreedID,
+		})
+	}
+	if value, ok := dpbu.mutation.DogID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: dogprofilebreed.FieldDogID,
+		})
+	}
+	if value, ok := dpbu.mutation.Percentage(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: dogprofilebreed.FieldPercentage,
+		})
+	}
+	if value, ok := dpbu.mutation.AddedPercentage(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: dogprofilebreed.FieldPercentage,
+		})
+	}
+	if value, ok := dpbu.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dogprofilebreed.FieldUpdatedAt,
+		})
+	}
+	if value, ok := dpbu.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dogprofilebreed.FieldCreatedAt,
+		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, dpbu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -121,6 +234,59 @@ type DogProfileBreedUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *DogProfileBreedMutation
+}
+
+// SetBreedID sets the "breed_id" field.
+func (dpbuo *DogProfileBreedUpdateOne) SetBreedID(u uuid.UUID) *DogProfileBreedUpdateOne {
+	dpbuo.mutation.SetBreedID(u)
+	return dpbuo
+}
+
+// SetDogID sets the "dog_id" field.
+func (dpbuo *DogProfileBreedUpdateOne) SetDogID(u uuid.UUID) *DogProfileBreedUpdateOne {
+	dpbuo.mutation.SetDogID(u)
+	return dpbuo
+}
+
+// SetPercentage sets the "percentage" field.
+func (dpbuo *DogProfileBreedUpdateOne) SetPercentage(f float64) *DogProfileBreedUpdateOne {
+	dpbuo.mutation.ResetPercentage()
+	dpbuo.mutation.SetPercentage(f)
+	return dpbuo
+}
+
+// AddPercentage adds f to the "percentage" field.
+func (dpbuo *DogProfileBreedUpdateOne) AddPercentage(f float64) *DogProfileBreedUpdateOne {
+	dpbuo.mutation.AddPercentage(f)
+	return dpbuo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (dpbuo *DogProfileBreedUpdateOne) SetUpdatedAt(t time.Time) *DogProfileBreedUpdateOne {
+	dpbuo.mutation.SetUpdatedAt(t)
+	return dpbuo
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (dpbuo *DogProfileBreedUpdateOne) SetNillableUpdatedAt(t *time.Time) *DogProfileBreedUpdateOne {
+	if t != nil {
+		dpbuo.SetUpdatedAt(*t)
+	}
+	return dpbuo
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (dpbuo *DogProfileBreedUpdateOne) SetCreatedAt(t time.Time) *DogProfileBreedUpdateOne {
+	dpbuo.mutation.SetCreatedAt(t)
+	return dpbuo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (dpbuo *DogProfileBreedUpdateOne) SetNillableCreatedAt(t *time.Time) *DogProfileBreedUpdateOne {
+	if t != nil {
+		dpbuo.SetCreatedAt(*t)
+	}
+	return dpbuo
 }
 
 // Mutation returns the DogProfileBreedMutation object of the builder.
@@ -142,12 +308,18 @@ func (dpbuo *DogProfileBreedUpdateOne) Save(ctx context.Context) (*DogProfileBre
 		node *DogProfileBreed
 	)
 	if len(dpbuo.hooks) == 0 {
+		if err = dpbuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = dpbuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*DogProfileBreedMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = dpbuo.check(); err != nil {
+				return nil, err
 			}
 			dpbuo.mutation = mutation
 			node, err = dpbuo.sqlSave(ctx)
@@ -195,13 +367,23 @@ func (dpbuo *DogProfileBreedUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (dpbuo *DogProfileBreedUpdateOne) check() error {
+	if v, ok := dpbuo.mutation.Percentage(); ok {
+		if err := dogprofilebreed.PercentageValidator(v); err != nil {
+			return &ValidationError{Name: "percentage", err: fmt.Errorf(`ent: validator failed for field "DogProfileBreed.percentage": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (dpbuo *DogProfileBreedUpdateOne) sqlSave(ctx context.Context) (_node *DogProfileBreed, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   dogprofilebreed.Table,
 			Columns: dogprofilebreed.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: dogprofilebreed.FieldID,
 			},
 		},
@@ -229,6 +411,48 @@ func (dpbuo *DogProfileBreedUpdateOne) sqlSave(ctx context.Context) (_node *DogP
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := dpbuo.mutation.BreedID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: dogprofilebreed.FieldBreedID,
+		})
+	}
+	if value, ok := dpbuo.mutation.DogID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: dogprofilebreed.FieldDogID,
+		})
+	}
+	if value, ok := dpbuo.mutation.Percentage(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: dogprofilebreed.FieldPercentage,
+		})
+	}
+	if value, ok := dpbuo.mutation.AddedPercentage(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: dogprofilebreed.FieldPercentage,
+		})
+	}
+	if value, ok := dpbuo.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dogprofilebreed.FieldUpdatedAt,
+		})
+	}
+	if value, ok := dpbuo.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: dogprofilebreed.FieldCreatedAt,
+		})
 	}
 	_node = &DogProfileBreed{config: dpbuo.config}
 	_spec.Assign = _node.assignValues

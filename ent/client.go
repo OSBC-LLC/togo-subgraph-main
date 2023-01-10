@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/migrate"
+	"github.com/google/uuid"
 
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/breed"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
@@ -40,8 +41,6 @@ type Client struct {
 	Profile *ProfileClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
-	// additional fields for node api
-	tables tables
 }
 
 // NewClient creates a new client configured with the given options.
@@ -137,7 +136,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 //		Breed.
 //		Query().
 //		Count(ctx)
-//
 func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
@@ -206,7 +204,7 @@ func (c *BreedClient) UpdateOne(b *Breed) *BreedUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *BreedClient) UpdateOneID(id int) *BreedUpdateOne {
+func (c *BreedClient) UpdateOneID(id uuid.UUID) *BreedUpdateOne {
 	mutation := newBreedMutation(c.config, OpUpdateOne, withBreedID(id))
 	return &BreedUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -223,7 +221,7 @@ func (c *BreedClient) DeleteOne(b *Breed) *BreedDeleteOne {
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *BreedClient) DeleteOneID(id int) *BreedDeleteOne {
+func (c *BreedClient) DeleteOneID(id uuid.UUID) *BreedDeleteOne {
 	builder := c.Delete().Where(breed.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -238,12 +236,12 @@ func (c *BreedClient) Query() *BreedQuery {
 }
 
 // Get returns a Breed entity by its id.
-func (c *BreedClient) Get(ctx context.Context, id int) (*Breed, error) {
+func (c *BreedClient) Get(ctx context.Context, id uuid.UUID) (*Breed, error) {
 	return c.Query().Where(breed.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *BreedClient) GetX(ctx context.Context, id int) *Breed {
+func (c *BreedClient) GetX(ctx context.Context, id uuid.UUID) *Breed {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -296,7 +294,7 @@ func (c *DogClient) UpdateOne(d *Dog) *DogUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *DogClient) UpdateOneID(id int) *DogUpdateOne {
+func (c *DogClient) UpdateOneID(id uuid.UUID) *DogUpdateOne {
 	mutation := newDogMutation(c.config, OpUpdateOne, withDogID(id))
 	return &DogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -313,7 +311,7 @@ func (c *DogClient) DeleteOne(d *Dog) *DogDeleteOne {
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *DogClient) DeleteOneID(id int) *DogDeleteOne {
+func (c *DogClient) DeleteOneID(id uuid.UUID) *DogDeleteOne {
 	builder := c.Delete().Where(dog.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -328,12 +326,12 @@ func (c *DogClient) Query() *DogQuery {
 }
 
 // Get returns a Dog entity by its id.
-func (c *DogClient) Get(ctx context.Context, id int) (*Dog, error) {
+func (c *DogClient) Get(ctx context.Context, id uuid.UUID) (*Dog, error) {
 	return c.Query().Where(dog.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *DogClient) GetX(ctx context.Context, id int) *Dog {
+func (c *DogClient) GetX(ctx context.Context, id uuid.UUID) *Dog {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -386,7 +384,7 @@ func (c *DogProfileBreedClient) UpdateOne(dpb *DogProfileBreed) *DogProfileBreed
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *DogProfileBreedClient) UpdateOneID(id int) *DogProfileBreedUpdateOne {
+func (c *DogProfileBreedClient) UpdateOneID(id uuid.UUID) *DogProfileBreedUpdateOne {
 	mutation := newDogProfileBreedMutation(c.config, OpUpdateOne, withDogProfileBreedID(id))
 	return &DogProfileBreedUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -403,7 +401,7 @@ func (c *DogProfileBreedClient) DeleteOne(dpb *DogProfileBreed) *DogProfileBreed
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *DogProfileBreedClient) DeleteOneID(id int) *DogProfileBreedDeleteOne {
+func (c *DogProfileBreedClient) DeleteOneID(id uuid.UUID) *DogProfileBreedDeleteOne {
 	builder := c.Delete().Where(dogprofilebreed.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -418,12 +416,12 @@ func (c *DogProfileBreedClient) Query() *DogProfileBreedQuery {
 }
 
 // Get returns a DogProfileBreed entity by its id.
-func (c *DogProfileBreedClient) Get(ctx context.Context, id int) (*DogProfileBreed, error) {
+func (c *DogProfileBreedClient) Get(ctx context.Context, id uuid.UUID) (*DogProfileBreed, error) {
 	return c.Query().Where(dogprofilebreed.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *DogProfileBreedClient) GetX(ctx context.Context, id int) *DogProfileBreed {
+func (c *DogProfileBreedClient) GetX(ctx context.Context, id uuid.UUID) *DogProfileBreed {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -476,7 +474,7 @@ func (c *DogProfileOwnerClient) UpdateOne(dpo *DogProfileOwner) *DogProfileOwner
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *DogProfileOwnerClient) UpdateOneID(id int) *DogProfileOwnerUpdateOne {
+func (c *DogProfileOwnerClient) UpdateOneID(id uuid.UUID) *DogProfileOwnerUpdateOne {
 	mutation := newDogProfileOwnerMutation(c.config, OpUpdateOne, withDogProfileOwnerID(id))
 	return &DogProfileOwnerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -493,7 +491,7 @@ func (c *DogProfileOwnerClient) DeleteOne(dpo *DogProfileOwner) *DogProfileOwner
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *DogProfileOwnerClient) DeleteOneID(id int) *DogProfileOwnerDeleteOne {
+func (c *DogProfileOwnerClient) DeleteOneID(id uuid.UUID) *DogProfileOwnerDeleteOne {
 	builder := c.Delete().Where(dogprofileowner.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -508,12 +506,12 @@ func (c *DogProfileOwnerClient) Query() *DogProfileOwnerQuery {
 }
 
 // Get returns a DogProfileOwner entity by its id.
-func (c *DogProfileOwnerClient) Get(ctx context.Context, id int) (*DogProfileOwner, error) {
+func (c *DogProfileOwnerClient) Get(ctx context.Context, id uuid.UUID) (*DogProfileOwner, error) {
 	return c.Query().Where(dogprofileowner.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *DogProfileOwnerClient) GetX(ctx context.Context, id int) *DogProfileOwner {
+func (c *DogProfileOwnerClient) GetX(ctx context.Context, id uuid.UUID) *DogProfileOwner {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -566,7 +564,7 @@ func (c *ImageClient) UpdateOne(i *Image) *ImageUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *ImageClient) UpdateOneID(id int) *ImageUpdateOne {
+func (c *ImageClient) UpdateOneID(id uuid.UUID) *ImageUpdateOne {
 	mutation := newImageMutation(c.config, OpUpdateOne, withImageID(id))
 	return &ImageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -583,7 +581,7 @@ func (c *ImageClient) DeleteOne(i *Image) *ImageDeleteOne {
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *ImageClient) DeleteOneID(id int) *ImageDeleteOne {
+func (c *ImageClient) DeleteOneID(id uuid.UUID) *ImageDeleteOne {
 	builder := c.Delete().Where(image.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -598,12 +596,12 @@ func (c *ImageClient) Query() *ImageQuery {
 }
 
 // Get returns a Image entity by its id.
-func (c *ImageClient) Get(ctx context.Context, id int) (*Image, error) {
+func (c *ImageClient) Get(ctx context.Context, id uuid.UUID) (*Image, error) {
 	return c.Query().Where(image.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *ImageClient) GetX(ctx context.Context, id int) *Image {
+func (c *ImageClient) GetX(ctx context.Context, id uuid.UUID) *Image {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -656,7 +654,7 @@ func (c *ProfileClient) UpdateOne(pr *Profile) *ProfileUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *ProfileClient) UpdateOneID(id int) *ProfileUpdateOne {
+func (c *ProfileClient) UpdateOneID(id uuid.UUID) *ProfileUpdateOne {
 	mutation := newProfileMutation(c.config, OpUpdateOne, withProfileID(id))
 	return &ProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -673,7 +671,7 @@ func (c *ProfileClient) DeleteOne(pr *Profile) *ProfileDeleteOne {
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *ProfileClient) DeleteOneID(id int) *ProfileDeleteOne {
+func (c *ProfileClient) DeleteOneID(id uuid.UUID) *ProfileDeleteOne {
 	builder := c.Delete().Where(profile.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -688,12 +686,12 @@ func (c *ProfileClient) Query() *ProfileQuery {
 }
 
 // Get returns a Profile entity by its id.
-func (c *ProfileClient) Get(ctx context.Context, id int) (*Profile, error) {
+func (c *ProfileClient) Get(ctx context.Context, id uuid.UUID) (*Profile, error) {
 	return c.Query().Where(profile.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *ProfileClient) GetX(ctx context.Context, id int) *Profile {
+func (c *ProfileClient) GetX(ctx context.Context, id uuid.UUID) *Profile {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -746,7 +744,7 @@ func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *UserClient) UpdateOneID(id int) *UserUpdateOne {
+func (c *UserClient) UpdateOneID(id uuid.UUID) *UserUpdateOne {
 	mutation := newUserMutation(c.config, OpUpdateOne, withUserID(id))
 	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -763,7 +761,7 @@ func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
+func (c *UserClient) DeleteOneID(id uuid.UUID) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -778,12 +776,12 @@ func (c *UserClient) Query() *UserQuery {
 }
 
 // Get returns a User entity by its id.
-func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
+func (c *UserClient) Get(ctx context.Context, id uuid.UUID) (*User, error) {
 	return c.Query().Where(user.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *UserClient) GetX(ctx context.Context, id int) *User {
+func (c *UserClient) GetX(ctx context.Context, id uuid.UUID) *User {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)

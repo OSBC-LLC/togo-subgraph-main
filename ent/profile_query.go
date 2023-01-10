@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/profile"
+	"github.com/google/uuid"
 )
 
 // ProfileQuery is the builder for querying Profile entities.
@@ -85,8 +86,8 @@ func (pq *ProfileQuery) FirstX(ctx context.Context) *Profile {
 
 // FirstID returns the first Profile ID from the query.
 // Returns a *NotFoundError when no Profile ID was found.
-func (pq *ProfileQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (pq *ProfileQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = pq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -98,7 +99,7 @@ func (pq *ProfileQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (pq *ProfileQuery) FirstIDX(ctx context.Context) int {
+func (pq *ProfileQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := pq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -136,8 +137,8 @@ func (pq *ProfileQuery) OnlyX(ctx context.Context) *Profile {
 // OnlyID is like Only, but returns the only Profile ID in the query.
 // Returns a *NotSingularError when more than one Profile ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (pq *ProfileQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (pq *ProfileQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = pq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -153,7 +154,7 @@ func (pq *ProfileQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (pq *ProfileQuery) OnlyIDX(ctx context.Context) int {
+func (pq *ProfileQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := pq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -179,8 +180,8 @@ func (pq *ProfileQuery) AllX(ctx context.Context) []*Profile {
 }
 
 // IDs executes the query and returns a list of Profile IDs.
-func (pq *ProfileQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (pq *ProfileQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := pq.Select(profile.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -188,7 +189,7 @@ func (pq *ProfileQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (pq *ProfileQuery) IDsX(ctx context.Context) []int {
+func (pq *ProfileQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := pq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -251,6 +252,18 @@ func (pq *ProfileQuery) Clone() *ProfileQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		Name string `json:"name,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Profile.Query().
+//		GroupBy(profile.FieldName).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
 func (pq *ProfileQuery) GroupBy(field string, fields ...string) *ProfileGroupBy {
 	grbuild := &ProfileGroupBy{config: pq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -267,6 +280,16 @@ func (pq *ProfileQuery) GroupBy(field string, fields ...string) *ProfileGroupBy 
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		Name string `json:"name,omitempty"`
+//	}
+//
+//	client.Profile.Query().
+//		Select(profile.FieldName).
+//		Scan(ctx, &v)
 func (pq *ProfileQuery) Select(fields ...string) *ProfileSelect {
 	pq.fields = append(pq.fields, fields...)
 	selbuild := &ProfileSelect{ProfileQuery: pq}
@@ -350,7 +373,7 @@ func (pq *ProfileQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   profile.Table,
 			Columns: profile.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: profile.FieldID,
 			},
 		},

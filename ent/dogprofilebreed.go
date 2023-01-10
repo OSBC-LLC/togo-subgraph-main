@@ -5,16 +5,28 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofilebreed"
+	"github.com/google/uuid"
 )
 
 // DogProfileBreed is the model entity for the DogProfileBreed schema.
 type DogProfileBreed struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// BreedID holds the value of the "breed_id" field.
+	BreedID uuid.UUID `json:"breed_id,omitempty"`
+	// DogID holds the value of the "dog_id" field.
+	DogID uuid.UUID `json:"dog_id,omitempty"`
+	// Percentage holds the value of the "percentage" field.
+	Percentage float64 `json:"percentage,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -22,8 +34,12 @@ func (*DogProfileBreed) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case dogprofilebreed.FieldID:
-			values[i] = new(sql.NullInt64)
+		case dogprofilebreed.FieldPercentage:
+			values[i] = new(sql.NullFloat64)
+		case dogprofilebreed.FieldUpdatedAt, dogprofilebreed.FieldCreatedAt:
+			values[i] = new(sql.NullTime)
+		case dogprofilebreed.FieldID, dogprofilebreed.FieldBreedID, dogprofilebreed.FieldDogID:
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type DogProfileBreed", columns[i])
 		}
@@ -40,11 +56,41 @@ func (dpb *DogProfileBreed) assignValues(columns []string, values []interface{})
 	for i := range columns {
 		switch columns[i] {
 		case dogprofilebreed.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				dpb.ID = *value
 			}
-			dpb.ID = int(value.Int64)
+		case dogprofilebreed.FieldBreedID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field breed_id", values[i])
+			} else if value != nil {
+				dpb.BreedID = *value
+			}
+		case dogprofilebreed.FieldDogID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field dog_id", values[i])
+			} else if value != nil {
+				dpb.DogID = *value
+			}
+		case dogprofilebreed.FieldPercentage:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field percentage", values[i])
+			} else if value.Valid {
+				dpb.Percentage = value.Float64
+			}
+		case dogprofilebreed.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				dpb.UpdatedAt = value.Time
+			}
+		case dogprofilebreed.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				dpb.CreatedAt = value.Time
+			}
 		}
 	}
 	return nil
@@ -72,7 +118,21 @@ func (dpb *DogProfileBreed) Unwrap() *DogProfileBreed {
 func (dpb *DogProfileBreed) String() string {
 	var builder strings.Builder
 	builder.WriteString("DogProfileBreed(")
-	builder.WriteString(fmt.Sprintf("id=%v", dpb.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", dpb.ID))
+	builder.WriteString("breed_id=")
+	builder.WriteString(fmt.Sprintf("%v", dpb.BreedID))
+	builder.WriteString(", ")
+	builder.WriteString("dog_id=")
+	builder.WriteString(fmt.Sprintf("%v", dpb.DogID))
+	builder.WriteString(", ")
+	builder.WriteString("percentage=")
+	builder.WriteString(fmt.Sprintf("%v", dpb.Percentage))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(dpb.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("created_at=")
+	builder.WriteString(dpb.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -4,11 +4,14 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/breed"
+	"github.com/google/uuid"
 )
 
 // BreedCreate is the builder for creating a Breed entity.
@@ -16,6 +19,54 @@ type BreedCreate struct {
 	config
 	mutation *BreedMutation
 	hooks    []Hook
+}
+
+// SetName sets the "name" field.
+func (bc *BreedCreate) SetName(s string) *BreedCreate {
+	bc.mutation.SetName(s)
+	return bc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (bc *BreedCreate) SetUpdatedAt(t time.Time) *BreedCreate {
+	bc.mutation.SetUpdatedAt(t)
+	return bc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (bc *BreedCreate) SetNillableUpdatedAt(t *time.Time) *BreedCreate {
+	if t != nil {
+		bc.SetUpdatedAt(*t)
+	}
+	return bc
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (bc *BreedCreate) SetCreatedAt(t time.Time) *BreedCreate {
+	bc.mutation.SetCreatedAt(t)
+	return bc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (bc *BreedCreate) SetNillableCreatedAt(t *time.Time) *BreedCreate {
+	if t != nil {
+		bc.SetCreatedAt(*t)
+	}
+	return bc
+}
+
+// SetID sets the "id" field.
+func (bc *BreedCreate) SetID(u uuid.UUID) *BreedCreate {
+	bc.mutation.SetID(u)
+	return bc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (bc *BreedCreate) SetNillableID(u *uuid.UUID) *BreedCreate {
+	if u != nil {
+		bc.SetID(*u)
+	}
+	return bc
 }
 
 // Mutation returns the BreedMutation object of the builder.
@@ -29,6 +80,7 @@ func (bc *BreedCreate) Save(ctx context.Context) (*Breed, error) {
 		err  error
 		node *Breed
 	)
+	bc.defaults()
 	if len(bc.hooks) == 0 {
 		if err = bc.check(); err != nil {
 			return nil, err
@@ -92,8 +144,33 @@ func (bc *BreedCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (bc *BreedCreate) defaults() {
+	if _, ok := bc.mutation.UpdatedAt(); !ok {
+		v := breed.DefaultUpdatedAt()
+		bc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := bc.mutation.CreatedAt(); !ok {
+		v := breed.DefaultCreatedAt()
+		bc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := bc.mutation.ID(); !ok {
+		v := breed.DefaultID()
+		bc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (bc *BreedCreate) check() error {
+	if _, ok := bc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Breed.name"`)}
+	}
+	if _, ok := bc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Breed.updated_at"`)}
+	}
+	if _, ok := bc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Breed.created_at"`)}
+	}
 	return nil
 }
 
@@ -105,8 +182,13 @@ func (bc *BreedCreate) sqlSave(ctx context.Context) (*Breed, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	return _node, nil
 }
 
@@ -116,11 +198,39 @@ func (bc *BreedCreate) createSpec() (*Breed, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: breed.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: breed.FieldID,
 			},
 		}
 	)
+	if id, ok := bc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
+	if value, ok := bc.mutation.Name(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: breed.FieldName,
+		})
+		_node.Name = value
+	}
+	if value, ok := bc.mutation.UpdatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: breed.FieldUpdatedAt,
+		})
+		_node.UpdatedAt = value
+	}
+	if value, ok := bc.mutation.CreatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: breed.FieldCreatedAt,
+		})
+		_node.CreatedAt = value
+	}
 	return _node, _spec
 }
 
@@ -138,6 +248,7 @@ func (bcb *BreedCreateBulk) Save(ctx context.Context) ([]*Breed, error) {
 	for i := range bcb.builders {
 		func(i int, root context.Context) {
 			builder := bcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*BreedMutation)
 				if !ok {
@@ -164,10 +275,6 @@ func (bcb *BreedCreateBulk) Save(ctx context.Context) ([]*Breed, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
