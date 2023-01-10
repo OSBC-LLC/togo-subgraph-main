@@ -29,7 +29,7 @@ func main() {
 		WithWorkdir("/src").
 		WithEnvVariable("CGO_ENABLED", "0")
 
-	_, err = linter.WithExec([]string{"golangci-lint", "run", "-v", "--timeout", "1m"}).Stdout(ctx)
+	_, err = linter.WithExec([]string{"golangci-lint", "run", "-v", "--timeout", "2m"}).Stdout(ctx)
 	if err != nil {
 		log.Fatalf("Error performing golangci-lint: %s\n", err)
 	}
