@@ -11,6 +11,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/migrate"
 	"github.com/OSBC-LLC/togo-subgraph-main/graph"
 	"github.com/newrelic/go-agent/v3/newrelic"
 
@@ -42,7 +43,7 @@ func main() {
 
 	// Run the auto migration tool.
 	if os.Getenv("MIGRATE") == "true" {
-		if err := client.Schema.Create(context.Background()); err != nil {
+		if err := client.Schema.Create(context.Background(), migrate.WithGlobalUniqueID(true)); err != nil {
 			log.Fatalf("failed created schema resources: %v", err)
 		}
 	}
