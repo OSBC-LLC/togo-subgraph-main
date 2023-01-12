@@ -4,14 +4,17 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
 	"github.com/google/uuid"
 )
 
@@ -24,8 +27,11 @@ type ImageQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Image
-	modifiers  []func(*sql.Selector)
-	loadTotal  []func(context.Context, []*Image) error
+	// eager-loading edges.
+	withUsers *UserQuery
+	withDogs  *DogQuery
+	modifiers []func(*sql.Selector)
+	loadTotal []func(context.Context, []*Image) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -60,6 +66,50 @@ func (iq *ImageQuery) Unique(unique bool) *ImageQuery {
 func (iq *ImageQuery) Order(o ...OrderFunc) *ImageQuery {
 	iq.order = append(iq.order, o...)
 	return iq
+}
+
+// QueryUsers chains the current query on the "users" edge.
+func (iq *ImageQuery) QueryUsers() *UserQuery {
+	query := &UserQuery{config: iq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := iq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := iq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(image.Table, image.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, image.UsersTable, image.UsersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(iq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDogs chains the current query on the "dogs" edge.
+func (iq *ImageQuery) QueryDogs() *DogQuery {
+	query := &DogQuery{config: iq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := iq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := iq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(image.Table, image.FieldID, selector),
+			sqlgraph.To(dog.Table, dog.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, image.DogsTable, image.DogsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(iq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Image entity from the query.
@@ -243,11 +293,35 @@ func (iq *ImageQuery) Clone() *ImageQuery {
 		offset:     iq.offset,
 		order:      append([]OrderFunc{}, iq.order...),
 		predicates: append([]predicate.Image{}, iq.predicates...),
+		withUsers:  iq.withUsers.Clone(),
+		withDogs:   iq.withDogs.Clone(),
 		// clone intermediate query.
 		sql:    iq.sql.Clone(),
 		path:   iq.path,
 		unique: iq.unique,
 	}
+}
+
+// WithUsers tells the query-builder to eager-load the nodes that are connected to
+// the "users" edge. The optional arguments are used to configure the query builder of the edge.
+func (iq *ImageQuery) WithUsers(opts ...func(*UserQuery)) *ImageQuery {
+	query := &UserQuery{config: iq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	iq.withUsers = query
+	return iq
+}
+
+// WithDogs tells the query-builder to eager-load the nodes that are connected to
+// the "dogs" edge. The optional arguments are used to configure the query builder of the edge.
+func (iq *ImageQuery) WithDogs(opts ...func(*DogQuery)) *ImageQuery {
+	query := &DogQuery{config: iq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	iq.withDogs = query
+	return iq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -316,8 +390,12 @@ func (iq *ImageQuery) prepareQuery(ctx context.Context) error {
 
 func (iq *ImageQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Image, error) {
 	var (
-		nodes = []*Image{}
-		_spec = iq.querySpec()
+		nodes       = []*Image{}
+		_spec       = iq.querySpec()
+		loadedTypes = [2]bool{
+			iq.withUsers != nil,
+			iq.withDogs != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		return (*Image).scanValues(nil, columns)
@@ -325,6 +403,7 @@ func (iq *ImageQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Image,
 	_spec.Assign = func(columns []string, values []interface{}) error {
 		node := &Image{config: iq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if len(iq.modifiers) > 0 {
@@ -339,6 +418,57 @@ func (iq *ImageQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Image,
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := iq.withUsers; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*Image)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Users = []*User{}
+		}
+		query.Where(predicate.User(func(s *sql.Selector) {
+			s.Where(sql.InValues(image.UsersColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.UserImageID
+			node, ok := nodeids[fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_image_id" returned %v for node %v`, fk, n.ID)
+			}
+			node.Edges.Users = append(node.Edges.Users, n)
+		}
+	}
+
+	if query := iq.withDogs; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*Image)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Dogs = []*Dog{}
+		}
+		query.Where(predicate.Dog(func(s *sql.Selector) {
+			s.Where(sql.InValues(image.DogsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.DogImgID
+			node, ok := nodeids[fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "dog_img_id" returned %v for node %v`, fk, n.ID)
+			}
+			node.Edges.Dogs = append(node.Edges.Dogs, n)
+		}
+	}
+
 	for i := range iq.loadTotal {
 		if err := iq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err

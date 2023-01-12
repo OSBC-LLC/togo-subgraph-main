@@ -30,15 +30,23 @@ var (
 		{Name: "weight_kgs", Type: field.TypeFloat64},
 		{Name: "size", Type: field.TypeString},
 		{Name: "birthday", Type: field.TypeTime},
-		{Name: "dog_img_id", Type: field.TypeUUID},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "dog_img_id", Type: field.TypeUUID},
 	}
 	// DogsTable holds the schema information for the "dogs" table.
 	DogsTable = &schema.Table{
 		Name:       "dogs",
 		Columns:    DogsColumns,
 		PrimaryKey: []*schema.Column{DogsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "dogs_images_dogs",
+				Columns:    []*schema.Column{DogsColumns[9]},
+				RefColumns: []*schema.Column{ImagesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// DogProfileBreedsColumns holds the columns for the "dog_profile_breeds" table.
 	DogProfileBreedsColumns = []*schema.Column{
@@ -118,9 +126,9 @@ var (
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "first_name", Type: field.TypeString},
 		{Name: "last_name", Type: field.TypeString},
-		{Name: "user_image_id", Type: field.TypeUUID},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_image_id", Type: field.TypeUUID},
 		{Name: "profile_id", Type: field.TypeUUID},
 	}
 	// UsersTable holds the schema information for the "users" table.
@@ -129,6 +137,12 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "users_images_users",
+				Columns:    []*schema.Column{UsersColumns[5]},
+				RefColumns: []*schema.Column{ImagesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
 			{
 				Symbol:     "users_profiles_users",
 				Columns:    []*schema.Column{UsersColumns[6]},
@@ -150,7 +164,9 @@ var (
 )
 
 func init() {
+	DogsTable.ForeignKeys[0].RefTable = ImagesTable
 	DogProfileOwnersTable.ForeignKeys[0].RefTable = DogsTable
 	DogProfileOwnersTable.ForeignKeys[1].RefTable = UsersTable
-	UsersTable.ForeignKeys[0].RefTable = ProfilesTable
+	UsersTable.ForeignKeys[0].RefTable = ImagesTable
+	UsersTable.ForeignKeys[1].RefTable = ProfilesTable
 }

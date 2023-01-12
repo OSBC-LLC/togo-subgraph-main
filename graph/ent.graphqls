@@ -69,9 +69,10 @@ type Dog implements Node {
   weightKgs: Float!
   size: String!
   birthday: Time!
-  dogImgID: UUID!
+  dogImgID: ID!
   updatedAt: Time!
   createdAt: Time!
+  image: Image!
   ownerprofiles: [DogProfileOwner!]
 }
 type DogProfileBreed implements Node {
@@ -288,14 +289,10 @@ input DogWhereInput {
   birthdayLT: Time
   birthdayLTE: Time
   """dog_img_id field predicates"""
-  dogImgID: UUID
-  dogImgIDNEQ: UUID
-  dogImgIDIn: [UUID!]
-  dogImgIDNotIn: [UUID!]
-  dogImgIDGT: UUID
-  dogImgIDGTE: UUID
-  dogImgIDLT: UUID
-  dogImgIDLTE: UUID
+  dogImgID: ID
+  dogImgIDNEQ: ID
+  dogImgIDIn: [ID!]
+  dogImgIDNotIn: [ID!]
   """updated_at field predicates"""
   updatedAt: Time
   updatedAtNEQ: Time
@@ -314,6 +311,9 @@ input DogWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
+  """image edge predicates"""
+  hasImage: Boolean
+  hasImageWith: [ImageWhereInput!]
   """ownerProfiles edge predicates"""
   hasOwnerProfiles: Boolean
   hasOwnerProfilesWith: [DogProfileOwnerWhereInput!]
@@ -326,6 +326,8 @@ type Image implements Node {
   type: String!
   updatedAt: Time!
   createdAt: Time!
+  users: [User!]
+  dogs: [Dog!]
 }
 """
 ImageWhereInput is used for filtering Image objects.
@@ -408,6 +410,12 @@ input ImageWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
+  """users edge predicates"""
+  hasUsers: Boolean
+  hasUsersWith: [UserWhereInput!]
+  """dogs edge predicates"""
+  hasDogs: Boolean
+  hasDogsWith: [DogWhereInput!]
 }
 """
 An object with an ID.
@@ -529,11 +537,12 @@ type User implements Node {
   id: ID!
   firstName: String!
   lastName: String!
-  userImageID: UUID!
+  userImageID: ID!
   profileID: ID!
   updatedAt: Time!
   createdAt: Time!
   profile: Profile!
+  image: Image!
   dogprofiles: [DogProfileOwner!]
 }
 """
@@ -582,14 +591,10 @@ input UserWhereInput {
   lastNameEqualFold: String
   lastNameContainsFold: String
   """user_image_id field predicates"""
-  userImageID: UUID
-  userImageIDNEQ: UUID
-  userImageIDIn: [UUID!]
-  userImageIDNotIn: [UUID!]
-  userImageIDGT: UUID
-  userImageIDGTE: UUID
-  userImageIDLT: UUID
-  userImageIDLTE: UUID
+  userImageID: ID
+  userImageIDNEQ: ID
+  userImageIDIn: [ID!]
+  userImageIDNotIn: [ID!]
   """profile_id field predicates"""
   profileID: ID
   profileIDNEQ: ID
@@ -616,6 +621,9 @@ input UserWhereInput {
   """profile edge predicates"""
   hasProfile: Boolean
   hasProfileWith: [ProfileWhereInput!]
+  """image edge predicates"""
+  hasImage: Boolean
+  hasImageWith: [ImageWhereInput!]
   """dogProfiles edge predicates"""
   hasDogProfiles: Boolean
   hasDogProfilesWith: [DogProfileOwnerWhereInput!]

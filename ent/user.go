@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/profile"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
 	"github.com/google/uuid"
@@ -39,13 +40,15 @@ type User struct {
 type UserEdges struct {
 	// Profile holds the value of the profile edge.
 	Profile *Profile `json:"profile,omitempty"`
+	// Image holds the value of the image edge.
+	Image *Image `json:"image,omitempty"`
 	// DogProfiles holds the value of the dogProfiles edge.
 	DogProfiles []*DogProfileOwner `json:"dogProfiles,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 	// totalCount holds the count of the edges above.
-	totalCount [2]*int
+	totalCount [3]*int
 }
 
 // ProfileOrErr returns the Profile value or an error if the edge
@@ -62,10 +65,24 @@ func (e UserEdges) ProfileOrErr() (*Profile, error) {
 	return nil, &NotLoadedError{edge: "profile"}
 }
 
+// ImageOrErr returns the Image value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) ImageOrErr() (*Image, error) {
+	if e.loadedTypes[1] {
+		if e.Image == nil {
+			// The edge image was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: image.Label}
+		}
+		return e.Image, nil
+	}
+	return nil, &NotLoadedError{edge: "image"}
+}
+
 // DogProfilesOrErr returns the DogProfiles value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) DogProfilesOrErr() ([]*DogProfileOwner, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.DogProfiles, nil
 	}
 	return nil, &NotLoadedError{edge: "dogProfiles"}
@@ -147,6 +164,11 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 // QueryProfile queries the "profile" edge of the User entity.
 func (u *User) QueryProfile() *ProfileQuery {
 	return (&UserClient{config: u.config}).QueryProfile(u)
+}
+
+// QueryImage queries the "image" edge of the User entity.
+func (u *User) QueryImage() *ImageQuery {
+	return (&UserClient{config: u.config}).QueryImage(u)
 }
 
 // QueryDogProfiles queries the "dogProfiles" edge of the User entity.

@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/profile"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
@@ -88,6 +89,17 @@ func (uu *UserUpdate) SetProfile(p *Profile) *UserUpdate {
 	return uu.SetProfileID(p.ID)
 }
 
+// SetImageID sets the "image" edge to the Image entity by ID.
+func (uu *UserUpdate) SetImageID(id uuid.UUID) *UserUpdate {
+	uu.mutation.SetImageID(id)
+	return uu
+}
+
+// SetImage sets the "image" edge to the Image entity.
+func (uu *UserUpdate) SetImage(i *Image) *UserUpdate {
+	return uu.SetImageID(i.ID)
+}
+
 // AddDogProfileIDs adds the "dogProfiles" edge to the DogProfileOwner entity by IDs.
 func (uu *UserUpdate) AddDogProfileIDs(ids ...uuid.UUID) *UserUpdate {
 	uu.mutation.AddDogProfileIDs(ids...)
@@ -111,6 +123,12 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 // ClearProfile clears the "profile" edge to the Profile entity.
 func (uu *UserUpdate) ClearProfile() *UserUpdate {
 	uu.mutation.ClearProfile()
+	return uu
+}
+
+// ClearImage clears the "image" edge to the Image entity.
+func (uu *UserUpdate) ClearImage() *UserUpdate {
+	uu.mutation.ClearImage()
 	return uu
 }
 
@@ -200,6 +218,9 @@ func (uu *UserUpdate) check() error {
 	if _, ok := uu.mutation.ProfileID(); uu.mutation.ProfileCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "User.profile"`)
 	}
+	if _, ok := uu.mutation.ImageID(); uu.mutation.ImageCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "User.image"`)
+	}
 	return nil
 }
 
@@ -233,13 +254,6 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeString,
 			Value:  value,
 			Column: user.FieldLastName,
-		})
-	}
-	if value, ok := uu.mutation.UserImageID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: user.FieldUserImageID,
 		})
 	}
 	if value, ok := uu.mutation.UpdatedAt(); ok {
@@ -283,6 +297,41 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: profile.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.ImageCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.ImageTable,
+			Columns: []string{user.ImageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: image.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.ImageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.ImageTable,
+			Columns: []string{user.ImageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: image.FieldID,
 				},
 			},
 		}
@@ -421,6 +470,17 @@ func (uuo *UserUpdateOne) SetProfile(p *Profile) *UserUpdateOne {
 	return uuo.SetProfileID(p.ID)
 }
 
+// SetImageID sets the "image" edge to the Image entity by ID.
+func (uuo *UserUpdateOne) SetImageID(id uuid.UUID) *UserUpdateOne {
+	uuo.mutation.SetImageID(id)
+	return uuo
+}
+
+// SetImage sets the "image" edge to the Image entity.
+func (uuo *UserUpdateOne) SetImage(i *Image) *UserUpdateOne {
+	return uuo.SetImageID(i.ID)
+}
+
 // AddDogProfileIDs adds the "dogProfiles" edge to the DogProfileOwner entity by IDs.
 func (uuo *UserUpdateOne) AddDogProfileIDs(ids ...uuid.UUID) *UserUpdateOne {
 	uuo.mutation.AddDogProfileIDs(ids...)
@@ -444,6 +504,12 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 // ClearProfile clears the "profile" edge to the Profile entity.
 func (uuo *UserUpdateOne) ClearProfile() *UserUpdateOne {
 	uuo.mutation.ClearProfile()
+	return uuo
+}
+
+// ClearImage clears the "image" edge to the Image entity.
+func (uuo *UserUpdateOne) ClearImage() *UserUpdateOne {
+	uuo.mutation.ClearImage()
 	return uuo
 }
 
@@ -546,6 +612,9 @@ func (uuo *UserUpdateOne) check() error {
 	if _, ok := uuo.mutation.ProfileID(); uuo.mutation.ProfileCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "User.profile"`)
 	}
+	if _, ok := uuo.mutation.ImageID(); uuo.mutation.ImageCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "User.image"`)
+	}
 	return nil
 }
 
@@ -598,13 +667,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Column: user.FieldLastName,
 		})
 	}
-	if value, ok := uuo.mutation.UserImageID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: user.FieldUserImageID,
-		})
-	}
 	if value, ok := uuo.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -646,6 +708,41 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: profile.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.ImageCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.ImageTable,
+			Columns: []string{user.ImageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: image.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.ImageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.ImageTable,
+			Columns: []string{user.ImageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: image.FieldID,
 				},
 			},
 		}

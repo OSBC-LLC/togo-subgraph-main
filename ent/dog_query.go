@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
 	"github.com/google/uuid"
 )
@@ -27,6 +28,7 @@ type DogQuery struct {
 	fields     []string
 	predicates []predicate.Dog
 	// eager-loading edges.
+	withImage         *ImageQuery
 	withOwnerProfiles *DogProfileOwnerQuery
 	modifiers         []func(*sql.Selector)
 	loadTotal         []func(context.Context, []*Dog) error
@@ -64,6 +66,28 @@ func (dq *DogQuery) Unique(unique bool) *DogQuery {
 func (dq *DogQuery) Order(o ...OrderFunc) *DogQuery {
 	dq.order = append(dq.order, o...)
 	return dq
+}
+
+// QueryImage chains the current query on the "image" edge.
+func (dq *DogQuery) QueryImage() *ImageQuery {
+	query := &ImageQuery{config: dq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := dq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := dq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dog.Table, dog.FieldID, selector),
+			sqlgraph.To(image.Table, image.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dog.ImageTable, dog.ImageColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(dq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // QueryOwnerProfiles chains the current query on the "ownerProfiles" edge.
@@ -269,12 +293,24 @@ func (dq *DogQuery) Clone() *DogQuery {
 		offset:            dq.offset,
 		order:             append([]OrderFunc{}, dq.order...),
 		predicates:        append([]predicate.Dog{}, dq.predicates...),
+		withImage:         dq.withImage.Clone(),
 		withOwnerProfiles: dq.withOwnerProfiles.Clone(),
 		// clone intermediate query.
 		sql:    dq.sql.Clone(),
 		path:   dq.path,
 		unique: dq.unique,
 	}
+}
+
+// WithImage tells the query-builder to eager-load the nodes that are connected to
+// the "image" edge. The optional arguments are used to configure the query builder of the edge.
+func (dq *DogQuery) WithImage(opts ...func(*ImageQuery)) *DogQuery {
+	query := &ImageQuery{config: dq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	dq.withImage = query
+	return dq
 }
 
 // WithOwnerProfiles tells the query-builder to eager-load the nodes that are connected to
@@ -356,7 +392,8 @@ func (dq *DogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Dog, err
 	var (
 		nodes       = []*Dog{}
 		_spec       = dq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
+			dq.withImage != nil,
 			dq.withOwnerProfiles != nil,
 		}
 	)
@@ -380,6 +417,32 @@ func (dq *DogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Dog, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
+	}
+
+	if query := dq.withImage; query != nil {
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*Dog)
+		for i := range nodes {
+			fk := nodes[i].DogImgID
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(image.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "dog_img_id" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Image = n
+			}
+		}
 	}
 
 	if query := dq.withOwnerProfiles; query != nil {

@@ -31,10 +31,19 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
+	// EdgeImage holds the string denoting the image edge name in mutations.
+	EdgeImage = "image"
 	// EdgeOwnerProfiles holds the string denoting the ownerprofiles edge name in mutations.
 	EdgeOwnerProfiles = "ownerProfiles"
 	// Table holds the table name of the dog in the database.
 	Table = "dogs"
+	// ImageTable is the table that holds the image relation/edge.
+	ImageTable = "dogs"
+	// ImageInverseTable is the table name for the Image entity.
+	// It exists in this package in order to avoid circular dependency with the "image" package.
+	ImageInverseTable = "images"
+	// ImageColumn is the table column denoting the image relation/edge.
+	ImageColumn = "dog_img_id"
 	// OwnerProfilesTable is the table that holds the ownerProfiles relation/edge.
 	OwnerProfilesTable = "dog_profile_owners"
 	// OwnerProfilesInverseTable is the table name for the DogProfileOwner entity.

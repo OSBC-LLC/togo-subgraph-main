@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
 	"github.com/google/uuid"
 )
 
@@ -42,19 +43,35 @@ type Dog struct {
 
 // DogEdges holds the relations/edges for other nodes in the graph.
 type DogEdges struct {
+	// Image holds the value of the image edge.
+	Image *Image `json:"image,omitempty"`
 	// OwnerProfiles holds the value of the ownerProfiles edge.
 	OwnerProfiles []*DogProfileOwner `json:"ownerProfiles,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 	// totalCount holds the count of the edges above.
-	totalCount [1]*int
+	totalCount [2]*int
+}
+
+// ImageOrErr returns the Image value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e DogEdges) ImageOrErr() (*Image, error) {
+	if e.loadedTypes[0] {
+		if e.Image == nil {
+			// The edge image was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: image.Label}
+		}
+		return e.Image, nil
+	}
+	return nil, &NotLoadedError{edge: "image"}
 }
 
 // OwnerProfilesOrErr returns the OwnerProfiles value or an error if the edge
 // was not loaded in eager-loading.
 func (e DogEdges) OwnerProfilesOrErr() ([]*DogProfileOwner, error) {
-	if e.loadedTypes[0] {
+	if e.loadedTypes[1] {
 		return e.OwnerProfiles, nil
 	}
 	return nil, &NotLoadedError{edge: "ownerProfiles"}
@@ -153,6 +170,11 @@ func (d *Dog) assignValues(columns []string, values []interface{}) error {
 		}
 	}
 	return nil
+}
+
+// QueryImage queries the "image" edge of the Dog entity.
+func (d *Dog) QueryImage() *ImageQuery {
+	return (&DogClient{config: d.config}).QueryImage(d)
 }
 
 // QueryOwnerProfiles queries the "ownerProfiles" edge of the Dog entity.

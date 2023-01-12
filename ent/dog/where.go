@@ -719,34 +719,6 @@ func DogImgIDNotIn(vs ...uuid.UUID) predicate.Dog {
 	})
 }
 
-// DogImgIDGT applies the GT predicate on the "dog_img_id" field.
-func DogImgIDGT(v uuid.UUID) predicate.Dog {
-	return predicate.Dog(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldDogImgID), v))
-	})
-}
-
-// DogImgIDGTE applies the GTE predicate on the "dog_img_id" field.
-func DogImgIDGTE(v uuid.UUID) predicate.Dog {
-	return predicate.Dog(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldDogImgID), v))
-	})
-}
-
-// DogImgIDLT applies the LT predicate on the "dog_img_id" field.
-func DogImgIDLT(v uuid.UUID) predicate.Dog {
-	return predicate.Dog(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldDogImgID), v))
-	})
-}
-
-// DogImgIDLTE applies the LTE predicate on the "dog_img_id" field.
-func DogImgIDLTE(v uuid.UUID) predicate.Dog {
-	return predicate.Dog(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldDogImgID), v))
-	})
-}
-
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
 func UpdatedAtEQ(v time.Time) predicate.Dog {
 	return predicate.Dog(func(s *sql.Selector) {
@@ -896,6 +868,34 @@ func CreatedAtLT(v time.Time) predicate.Dog {
 func CreatedAtLTE(v time.Time) predicate.Dog {
 	return predicate.Dog(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
+	})
+}
+
+// HasImage applies the HasEdge predicate on the "image" edge.
+func HasImage() predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ImageTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ImageTable, ImageColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasImageWith applies the HasEdge predicate on the "image" edge with a given conditions (other predicates).
+func HasImageWith(preds ...predicate.Image) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ImageInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ImageTable, ImageColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 

@@ -4,6 +4,14 @@ package ent
 
 import "context"
 
+func (d *Dog) Image(ctx context.Context) (*Image, error) {
+	result, err := d.Edges.ImageOrErr()
+	if IsNotLoaded(err) {
+		result, err = d.QueryImage().Only(ctx)
+	}
+	return result, err
+}
+
 func (d *Dog) OwnerProfiles(ctx context.Context) ([]*DogProfileOwner, error) {
 	result, err := d.Edges.OwnerProfilesOrErr()
 	if IsNotLoaded(err) {
@@ -28,6 +36,22 @@ func (dpo *DogProfileOwner) Dog(ctx context.Context) (*Dog, error) {
 	return result, err
 }
 
+func (i *Image) Users(ctx context.Context) ([]*User, error) {
+	result, err := i.Edges.UsersOrErr()
+	if IsNotLoaded(err) {
+		result, err = i.QueryUsers().All(ctx)
+	}
+	return result, err
+}
+
+func (i *Image) Dogs(ctx context.Context) ([]*Dog, error) {
+	result, err := i.Edges.DogsOrErr()
+	if IsNotLoaded(err) {
+		result, err = i.QueryDogs().All(ctx)
+	}
+	return result, err
+}
+
 func (pr *Profile) Users(ctx context.Context) ([]*User, error) {
 	result, err := pr.Edges.UsersOrErr()
 	if IsNotLoaded(err) {
@@ -40,6 +64,14 @@ func (u *User) Profile(ctx context.Context) (*Profile, error) {
 	result, err := u.Edges.ProfileOrErr()
 	if IsNotLoaded(err) {
 		result, err = u.QueryProfile().Only(ctx)
+	}
+	return result, err
+}
+
+func (u *User) Image(ctx context.Context) (*Image, error) {
+	result, err := u.Edges.ImageOrErr()
+	if IsNotLoaded(err) {
+		result, err = u.QueryImage().Only(ctx)
 	}
 	return result, err
 }

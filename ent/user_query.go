@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/profile"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
@@ -29,6 +30,7 @@ type UserQuery struct {
 	predicates []predicate.User
 	// eager-loading edges.
 	withProfile     *ProfileQuery
+	withImage       *ImageQuery
 	withDogProfiles *DogProfileOwnerQuery
 	modifiers       []func(*sql.Selector)
 	loadTotal       []func(context.Context, []*User) error
@@ -83,6 +85,28 @@ func (uq *UserQuery) QueryProfile() *ProfileQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(profile.Table, profile.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, user.ProfileTable, user.ProfileColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryImage chains the current query on the "image" edge.
+func (uq *UserQuery) QueryImage() *ImageQuery {
+	query := &ImageQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(image.Table, image.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, user.ImageTable, user.ImageColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -294,6 +318,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		order:           append([]OrderFunc{}, uq.order...),
 		predicates:      append([]predicate.User{}, uq.predicates...),
 		withProfile:     uq.withProfile.Clone(),
+		withImage:       uq.withImage.Clone(),
 		withDogProfiles: uq.withDogProfiles.Clone(),
 		// clone intermediate query.
 		sql:    uq.sql.Clone(),
@@ -310,6 +335,17 @@ func (uq *UserQuery) WithProfile(opts ...func(*ProfileQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withProfile = query
+	return uq
+}
+
+// WithImage tells the query-builder to eager-load the nodes that are connected to
+// the "image" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithImage(opts ...func(*ImageQuery)) *UserQuery {
+	query := &ImageQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withImage = query
 	return uq
 }
 
@@ -392,8 +428,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			uq.withProfile != nil,
+			uq.withImage != nil,
 			uq.withDogProfiles != nil,
 		}
 	)
@@ -441,6 +478,32 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			}
 			for i := range nodes {
 				nodes[i].Edges.Profile = n
+			}
+		}
+	}
+
+	if query := uq.withImage; query != nil {
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*User)
+		for i := range nodes {
+			fk := nodes[i].UserImageID
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(image.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_image_id" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Image = n
 			}
 		}
 	}

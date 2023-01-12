@@ -29,6 +29,40 @@ type Image struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the ImageQuery when eager-loading is set.
+	Edges ImageEdges `json:"edges"`
+}
+
+// ImageEdges holds the relations/edges for other nodes in the graph.
+type ImageEdges struct {
+	// Users holds the value of the users edge.
+	Users []*User `json:"users,omitempty"`
+	// Dogs holds the value of the dogs edge.
+	Dogs []*Dog `json:"dogs,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+	// totalCount holds the count of the edges above.
+	totalCount [2]*int
+}
+
+// UsersOrErr returns the Users value or an error if the edge
+// was not loaded in eager-loading.
+func (e ImageEdges) UsersOrErr() ([]*User, error) {
+	if e.loadedTypes[0] {
+		return e.Users, nil
+	}
+	return nil, &NotLoadedError{edge: "users"}
+}
+
+// DogsOrErr returns the Dogs value or an error if the edge
+// was not loaded in eager-loading.
+func (e ImageEdges) DogsOrErr() ([]*Dog, error) {
+	if e.loadedTypes[1] {
+		return e.Dogs, nil
+	}
+	return nil, &NotLoadedError{edge: "dogs"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -104,6 +138,16 @@ func (i *Image) assignValues(columns []string, values []interface{}) error {
 		}
 	}
 	return nil
+}
+
+// QueryUsers queries the "users" edge of the Image entity.
+func (i *Image) QueryUsers() *UserQuery {
+	return (&ImageClient{config: i.config}).QueryUsers(i)
+}
+
+// QueryDogs queries the "dogs" edge of the Image entity.
+func (i *Image) QueryDogs() *DogQuery {
+	return (&ImageClient{config: i.config}).QueryDogs(i)
 }
 
 // Update returns a builder for updating this Image.

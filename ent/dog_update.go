@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
 	"github.com/google/uuid"
 )
@@ -121,6 +122,17 @@ func (du *DogUpdate) SetNillableCreatedAt(t *time.Time) *DogUpdate {
 	return du
 }
 
+// SetImageID sets the "image" edge to the Image entity by ID.
+func (du *DogUpdate) SetImageID(id uuid.UUID) *DogUpdate {
+	du.mutation.SetImageID(id)
+	return du
+}
+
+// SetImage sets the "image" edge to the Image entity.
+func (du *DogUpdate) SetImage(i *Image) *DogUpdate {
+	return du.SetImageID(i.ID)
+}
+
 // AddOwnerProfileIDs adds the "ownerProfiles" edge to the DogProfileOwner entity by IDs.
 func (du *DogUpdate) AddOwnerProfileIDs(ids ...uuid.UUID) *DogUpdate {
 	du.mutation.AddOwnerProfileIDs(ids...)
@@ -139,6 +151,12 @@ func (du *DogUpdate) AddOwnerProfiles(d ...*DogProfileOwner) *DogUpdate {
 // Mutation returns the DogMutation object of the builder.
 func (du *DogUpdate) Mutation() *DogMutation {
 	return du.mutation
+}
+
+// ClearImage clears the "image" edge to the Image entity.
+func (du *DogUpdate) ClearImage() *DogUpdate {
+	du.mutation.ClearImage()
+	return du
 }
 
 // ClearOwnerProfiles clears all "ownerProfiles" edges to the DogProfileOwner entity.
@@ -239,6 +257,9 @@ func (du *DogUpdate) check() error {
 			return &ValidationError{Name: "weight_kgs", err: fmt.Errorf(`ent: validator failed for field "Dog.weight_kgs": %w`, err)}
 		}
 	}
+	if _, ok := du.mutation.ImageID(); du.mutation.ImageCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Dog.image"`)
+	}
 	return nil
 }
 
@@ -323,13 +344,6 @@ func (du *DogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: dog.FieldBirthday,
 		})
 	}
-	if value, ok := du.mutation.DogImgID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: dog.FieldDogImgID,
-		})
-	}
 	if value, ok := du.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -343,6 +357,41 @@ func (du *DogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Value:  value,
 			Column: dog.FieldCreatedAt,
 		})
+	}
+	if du.mutation.ImageCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   dog.ImageTable,
+			Columns: []string{dog.ImageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: image.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := du.mutation.ImageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   dog.ImageTable,
+			Columns: []string{dog.ImageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: image.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if du.mutation.OwnerProfilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -508,6 +557,17 @@ func (duo *DogUpdateOne) SetNillableCreatedAt(t *time.Time) *DogUpdateOne {
 	return duo
 }
 
+// SetImageID sets the "image" edge to the Image entity by ID.
+func (duo *DogUpdateOne) SetImageID(id uuid.UUID) *DogUpdateOne {
+	duo.mutation.SetImageID(id)
+	return duo
+}
+
+// SetImage sets the "image" edge to the Image entity.
+func (duo *DogUpdateOne) SetImage(i *Image) *DogUpdateOne {
+	return duo.SetImageID(i.ID)
+}
+
 // AddOwnerProfileIDs adds the "ownerProfiles" edge to the DogProfileOwner entity by IDs.
 func (duo *DogUpdateOne) AddOwnerProfileIDs(ids ...uuid.UUID) *DogUpdateOne {
 	duo.mutation.AddOwnerProfileIDs(ids...)
@@ -526,6 +586,12 @@ func (duo *DogUpdateOne) AddOwnerProfiles(d ...*DogProfileOwner) *DogUpdateOne {
 // Mutation returns the DogMutation object of the builder.
 func (duo *DogUpdateOne) Mutation() *DogMutation {
 	return duo.mutation
+}
+
+// ClearImage clears the "image" edge to the Image entity.
+func (duo *DogUpdateOne) ClearImage() *DogUpdateOne {
+	duo.mutation.ClearImage()
+	return duo
 }
 
 // ClearOwnerProfiles clears all "ownerProfiles" edges to the DogProfileOwner entity.
@@ -639,6 +705,9 @@ func (duo *DogUpdateOne) check() error {
 			return &ValidationError{Name: "weight_kgs", err: fmt.Errorf(`ent: validator failed for field "Dog.weight_kgs": %w`, err)}
 		}
 	}
+	if _, ok := duo.mutation.ImageID(); duo.mutation.ImageCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Dog.image"`)
+	}
 	return nil
 }
 
@@ -740,13 +809,6 @@ func (duo *DogUpdateOne) sqlSave(ctx context.Context) (_node *Dog, err error) {
 			Column: dog.FieldBirthday,
 		})
 	}
-	if value, ok := duo.mutation.DogImgID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: dog.FieldDogImgID,
-		})
-	}
 	if value, ok := duo.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -760,6 +822,41 @@ func (duo *DogUpdateOne) sqlSave(ctx context.Context) (_node *Dog, err error) {
 			Value:  value,
 			Column: dog.FieldCreatedAt,
 		})
+	}
+	if duo.mutation.ImageCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   dog.ImageTable,
+			Columns: []string{dog.ImageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: image.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := duo.mutation.ImageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   dog.ImageTable,
+			Columns: []string{dog.ImageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: image.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if duo.mutation.OwnerProfilesCleared() {
 		edge := &sqlgraph.EdgeSpec{

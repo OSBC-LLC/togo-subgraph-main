@@ -59,6 +59,12 @@ func (Dog) Fields() []ent.Field {
 // Edges of the Dog.
 func (Dog) Edges() []ent.Edge {
 	return []ent.Edge{
+		edge.From("image", Image.Type).
+			Ref("dogs").
+			Field("dog_img_id").
+			Required().
+			Unique(),
+
 		edge.To("ownerProfiles", DogProfileOwner.Type),
 	}
 }

@@ -394,34 +394,6 @@ func UserImageIDNotIn(vs ...uuid.UUID) predicate.User {
 	})
 }
 
-// UserImageIDGT applies the GT predicate on the "user_image_id" field.
-func UserImageIDGT(v uuid.UUID) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUserImageID), v))
-	})
-}
-
-// UserImageIDGTE applies the GTE predicate on the "user_image_id" field.
-func UserImageIDGTE(v uuid.UUID) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUserImageID), v))
-	})
-}
-
-// UserImageIDLT applies the LT predicate on the "user_image_id" field.
-func UserImageIDLT(v uuid.UUID) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUserImageID), v))
-	})
-}
-
-// UserImageIDLTE applies the LTE predicate on the "user_image_id" field.
-func UserImageIDLTE(v uuid.UUID) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUserImageID), v))
-	})
-}
-
 // ProfileIDEQ applies the EQ predicate on the "profile_id" field.
 func ProfileIDEQ(v uuid.UUID) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -641,6 +613,34 @@ func HasProfileWith(preds ...predicate.Profile) predicate.User {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(ProfileInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, ProfileTable, ProfileColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasImage applies the HasEdge predicate on the "image" edge.
+func HasImage() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ImageTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ImageTable, ImageColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasImageWith applies the HasEdge predicate on the "image" edge with a given conditions (other predicates).
+func HasImageWith(preds ...predicate.Image) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ImageInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ImageTable, ImageColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

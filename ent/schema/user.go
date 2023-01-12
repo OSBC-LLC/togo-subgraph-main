@@ -36,6 +36,12 @@ func (User) Edges() []ent.Edge {
 			Required().
 			Unique(),
 
+		edge.From("image", Image.Type).
+			Ref("users").
+			Field("user_image_id").
+			Required().
+			Unique(),
+
 		edge.To("dogProfiles", DogProfileOwner.Type),
 	}
 }

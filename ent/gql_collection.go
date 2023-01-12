@@ -71,6 +71,15 @@ func (d *DogQuery) collectField(ctx context.Context, op *graphql.OperationContex
 	path = append([]string(nil), path...)
 	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
 		switch field.Name {
+		case "image":
+			var (
+				path  = append(path, field.Name)
+				query = &ImageQuery{config: d.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			d.withImage = query
 		case "ownerprofiles", "ownerProfiles":
 			var (
 				path  = append(path, field.Name)
@@ -242,6 +251,28 @@ func (i *ImageQuery) CollectFields(ctx context.Context, satisfies ...string) (*I
 
 func (i *ImageQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
+	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+		switch field.Name {
+		case "users":
+			var (
+				path  = append(path, field.Name)
+				query = &UserQuery{config: i.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			i.withUsers = query
+		case "dogs":
+			var (
+				path  = append(path, field.Name)
+				query = &DogQuery{config: i.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			i.withDogs = query
+		}
+	}
 	return nil
 }
 
@@ -358,6 +389,15 @@ func (u *UserQuery) collectField(ctx context.Context, op *graphql.OperationConte
 				return err
 			}
 			u.withProfile = query
+		case "image":
+			var (
+				path  = append(path, field.Name)
+				query = &ImageQuery{config: u.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			u.withImage = query
 		case "dogprofiles", "dogProfiles":
 			var (
 				path  = append(path, field.Name)

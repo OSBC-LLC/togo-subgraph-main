@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/profile"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
 	"github.com/google/uuid"
@@ -92,6 +93,17 @@ func (uc *UserCreate) SetNillableID(u *uuid.UUID) *UserCreate {
 // SetProfile sets the "profile" edge to the Profile entity.
 func (uc *UserCreate) SetProfile(p *Profile) *UserCreate {
 	return uc.SetProfileID(p.ID)
+}
+
+// SetImageID sets the "image" edge to the Image entity by ID.
+func (uc *UserCreate) SetImageID(id uuid.UUID) *UserCreate {
+	uc.mutation.SetImageID(id)
+	return uc
+}
+
+// SetImage sets the "image" edge to the Image entity.
+func (uc *UserCreate) SetImage(i *Image) *UserCreate {
+	return uc.SetImageID(i.ID)
 }
 
 // AddDogProfileIDs adds the "dogProfiles" edge to the DogProfileOwner entity by IDs.
@@ -223,6 +235,9 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.ProfileID(); !ok {
 		return &ValidationError{Name: "profile", err: errors.New(`ent: missing required edge "User.profile"`)}
 	}
+	if _, ok := uc.mutation.ImageID(); !ok {
+		return &ValidationError{Name: "image", err: errors.New(`ent: missing required edge "User.image"`)}
+	}
 	return nil
 }
 
@@ -275,14 +290,6 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		})
 		_node.LastName = value
 	}
-	if value, ok := uc.mutation.UserImageID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: user.FieldUserImageID,
-		})
-		_node.UserImageID = value
-	}
 	if value, ok := uc.mutation.UpdatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -317,6 +324,26 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.ProfileID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.ImageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.ImageTable,
+			Columns: []string{user.ImageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: image.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.UserImageID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.mutation.DogProfilesIDs(); len(nodes) > 0 {

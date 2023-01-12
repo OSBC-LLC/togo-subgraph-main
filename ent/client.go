@@ -340,6 +340,22 @@ func (c *DogClient) GetX(ctx context.Context, id uuid.UUID) *Dog {
 	return obj
 }
 
+// QueryImage queries the image edge of a Dog.
+func (c *DogClient) QueryImage(d *Dog) *ImageQuery {
+	query := &ImageQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := d.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dog.Table, dog.FieldID, id),
+			sqlgraph.To(image.Table, image.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dog.ImageTable, dog.ImageColumn),
+		)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryOwnerProfiles queries the ownerProfiles edge of a Dog.
 func (c *DogClient) QueryOwnerProfiles(d *Dog) *DogProfileOwnerQuery {
 	query := &DogProfileOwnerQuery{config: c.config}
@@ -658,6 +674,38 @@ func (c *ImageClient) GetX(ctx context.Context, id uuid.UUID) *Image {
 	return obj
 }
 
+// QueryUsers queries the users edge of a Image.
+func (c *ImageClient) QueryUsers(i *Image) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := i.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(image.Table, image.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, image.UsersTable, image.UsersColumn),
+		)
+		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDogs queries the dogs edge of a Image.
+func (c *ImageClient) QueryDogs(i *Image) *DogQuery {
+	query := &DogQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := i.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(image.Table, image.FieldID, id),
+			sqlgraph.To(dog.Table, dog.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, image.DogsTable, image.DogsColumn),
+		)
+		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ImageClient) Hooks() []Hook {
 	return c.hooks.Image
@@ -863,6 +911,22 @@ func (c *UserClient) QueryProfile(u *User) *ProfileQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(profile.Table, profile.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, user.ProfileTable, user.ProfileColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryImage queries the image edge of a User.
+func (c *UserClient) QueryImage(u *User) *ImageQuery {
+	query := &ImageQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(image.Table, image.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, user.ImageTable, user.ImageColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

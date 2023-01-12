@@ -356,10 +356,6 @@ type DogWhereInput struct {
 	DogImgIDNEQ   *uuid.UUID  `json:"dogImgIDNEQ,omitempty"`
 	DogImgIDIn    []uuid.UUID `json:"dogImgIDIn,omitempty"`
 	DogImgIDNotIn []uuid.UUID `json:"dogImgIDNotIn,omitempty"`
-	DogImgIDGT    *uuid.UUID  `json:"dogImgIDGT,omitempty"`
-	DogImgIDGTE   *uuid.UUID  `json:"dogImgIDGTE,omitempty"`
-	DogImgIDLT    *uuid.UUID  `json:"dogImgIDLT,omitempty"`
-	DogImgIDLTE   *uuid.UUID  `json:"dogImgIDLTE,omitempty"`
 
 	// "updated_at" field predicates.
 	UpdatedAt      *time.Time  `json:"updatedAt,omitempty"`
@@ -380,6 +376,10 @@ type DogWhereInput struct {
 	CreatedAtGTE   *time.Time  `json:"createdAtGTE,omitempty"`
 	CreatedAtLT    *time.Time  `json:"createdAtLT,omitempty"`
 	CreatedAtLTE   *time.Time  `json:"createdAtLTE,omitempty"`
+
+	// "image" edge predicates.
+	HasImage     *bool              `json:"hasImage,omitempty"`
+	HasImageWith []*ImageWhereInput `json:"hasImageWith,omitempty"`
 
 	// "ownerProfiles" edge predicates.
 	HasOwnerProfiles     *bool                        `json:"hasOwnerProfiles,omitempty"`
@@ -667,18 +667,6 @@ func (i *DogWhereInput) P() (predicate.Dog, error) {
 	if len(i.DogImgIDNotIn) > 0 {
 		predicates = append(predicates, dog.DogImgIDNotIn(i.DogImgIDNotIn...))
 	}
-	if i.DogImgIDGT != nil {
-		predicates = append(predicates, dog.DogImgIDGT(*i.DogImgIDGT))
-	}
-	if i.DogImgIDGTE != nil {
-		predicates = append(predicates, dog.DogImgIDGTE(*i.DogImgIDGTE))
-	}
-	if i.DogImgIDLT != nil {
-		predicates = append(predicates, dog.DogImgIDLT(*i.DogImgIDLT))
-	}
-	if i.DogImgIDLTE != nil {
-		predicates = append(predicates, dog.DogImgIDLTE(*i.DogImgIDLTE))
-	}
 	if i.UpdatedAt != nil {
 		predicates = append(predicates, dog.UpdatedAtEQ(*i.UpdatedAt))
 	}
@@ -728,6 +716,24 @@ func (i *DogWhereInput) P() (predicate.Dog, error) {
 		predicates = append(predicates, dog.CreatedAtLTE(*i.CreatedAtLTE))
 	}
 
+	if i.HasImage != nil {
+		p := dog.HasImage()
+		if !*i.HasImage {
+			p = dog.Not(p)
+		}
+		predicates = append(predicates, p)
+	}
+	if len(i.HasImageWith) > 0 {
+		with := make([]predicate.Image, 0, len(i.HasImageWith))
+		for _, w := range i.HasImageWith {
+			p, err := w.P()
+			if err != nil {
+				return nil, fmt.Errorf("%w: field 'HasImageWith'", err)
+			}
+			with = append(with, p)
+		}
+		predicates = append(predicates, dog.HasImageWith(with...))
+	}
 	if i.HasOwnerProfiles != nil {
 		p := dog.HasOwnerProfiles()
 		if !*i.HasOwnerProfiles {
@@ -1408,6 +1414,14 @@ type ImageWhereInput struct {
 	CreatedAtGTE   *time.Time  `json:"createdAtGTE,omitempty"`
 	CreatedAtLT    *time.Time  `json:"createdAtLT,omitempty"`
 	CreatedAtLTE   *time.Time  `json:"createdAtLTE,omitempty"`
+
+	// "users" edge predicates.
+	HasUsers     *bool             `json:"hasUsers,omitempty"`
+	HasUsersWith []*UserWhereInput `json:"hasUsersWith,omitempty"`
+
+	// "dogs" edge predicates.
+	HasDogs     *bool            `json:"hasDogs,omitempty"`
+	HasDogsWith []*DogWhereInput `json:"hasDogsWith,omitempty"`
 }
 
 // AddPredicates adds custom predicates to the where input to be used during the filtering phase.
@@ -1680,6 +1694,42 @@ func (i *ImageWhereInput) P() (predicate.Image, error) {
 		predicates = append(predicates, image.CreatedAtLTE(*i.CreatedAtLTE))
 	}
 
+	if i.HasUsers != nil {
+		p := image.HasUsers()
+		if !*i.HasUsers {
+			p = image.Not(p)
+		}
+		predicates = append(predicates, p)
+	}
+	if len(i.HasUsersWith) > 0 {
+		with := make([]predicate.User, 0, len(i.HasUsersWith))
+		for _, w := range i.HasUsersWith {
+			p, err := w.P()
+			if err != nil {
+				return nil, fmt.Errorf("%w: field 'HasUsersWith'", err)
+			}
+			with = append(with, p)
+		}
+		predicates = append(predicates, image.HasUsersWith(with...))
+	}
+	if i.HasDogs != nil {
+		p := image.HasDogs()
+		if !*i.HasDogs {
+			p = image.Not(p)
+		}
+		predicates = append(predicates, p)
+	}
+	if len(i.HasDogsWith) > 0 {
+		with := make([]predicate.Dog, 0, len(i.HasDogsWith))
+		for _, w := range i.HasDogsWith {
+			p, err := w.P()
+			if err != nil {
+				return nil, fmt.Errorf("%w: field 'HasDogsWith'", err)
+			}
+			with = append(with, p)
+		}
+		predicates = append(predicates, image.HasDogsWith(with...))
+	}
 	switch len(predicates) {
 	case 0:
 		return nil, ErrEmptyImageWhereInput
@@ -2064,10 +2114,6 @@ type UserWhereInput struct {
 	UserImageIDNEQ   *uuid.UUID  `json:"userImageIDNEQ,omitempty"`
 	UserImageIDIn    []uuid.UUID `json:"userImageIDIn,omitempty"`
 	UserImageIDNotIn []uuid.UUID `json:"userImageIDNotIn,omitempty"`
-	UserImageIDGT    *uuid.UUID  `json:"userImageIDGT,omitempty"`
-	UserImageIDGTE   *uuid.UUID  `json:"userImageIDGTE,omitempty"`
-	UserImageIDLT    *uuid.UUID  `json:"userImageIDLT,omitempty"`
-	UserImageIDLTE   *uuid.UUID  `json:"userImageIDLTE,omitempty"`
 
 	// "profile_id" field predicates.
 	ProfileID      *uuid.UUID  `json:"profileID,omitempty"`
@@ -2098,6 +2144,10 @@ type UserWhereInput struct {
 	// "profile" edge predicates.
 	HasProfile     *bool                `json:"hasProfile,omitempty"`
 	HasProfileWith []*ProfileWhereInput `json:"hasProfileWith,omitempty"`
+
+	// "image" edge predicates.
+	HasImage     *bool              `json:"hasImage,omitempty"`
+	HasImageWith []*ImageWhereInput `json:"hasImageWith,omitempty"`
 
 	// "dogProfiles" edge predicates.
 	HasDogProfiles     *bool                        `json:"hasDogProfiles,omitempty"`
@@ -2289,18 +2339,6 @@ func (i *UserWhereInput) P() (predicate.User, error) {
 	if len(i.UserImageIDNotIn) > 0 {
 		predicates = append(predicates, user.UserImageIDNotIn(i.UserImageIDNotIn...))
 	}
-	if i.UserImageIDGT != nil {
-		predicates = append(predicates, user.UserImageIDGT(*i.UserImageIDGT))
-	}
-	if i.UserImageIDGTE != nil {
-		predicates = append(predicates, user.UserImageIDGTE(*i.UserImageIDGTE))
-	}
-	if i.UserImageIDLT != nil {
-		predicates = append(predicates, user.UserImageIDLT(*i.UserImageIDLT))
-	}
-	if i.UserImageIDLTE != nil {
-		predicates = append(predicates, user.UserImageIDLTE(*i.UserImageIDLTE))
-	}
 	if i.ProfileID != nil {
 		predicates = append(predicates, user.ProfileIDEQ(*i.ProfileID))
 	}
@@ -2379,6 +2417,24 @@ func (i *UserWhereInput) P() (predicate.User, error) {
 			with = append(with, p)
 		}
 		predicates = append(predicates, user.HasProfileWith(with...))
+	}
+	if i.HasImage != nil {
+		p := user.HasImage()
+		if !*i.HasImage {
+			p = user.Not(p)
+		}
+		predicates = append(predicates, p)
+	}
+	if len(i.HasImageWith) > 0 {
+		with := make([]predicate.Image, 0, len(i.HasImageWith))
+		for _, w := range i.HasImageWith {
+			p, err := w.P()
+			if err != nil {
+				return nil, fmt.Errorf("%w: field 'HasImageWith'", err)
+			}
+			with = append(with, p)
+		}
+		predicates = append(predicates, user.HasImageWith(with...))
 	}
 	if i.HasDogProfiles != nil {
 		p := user.HasDogProfiles()
