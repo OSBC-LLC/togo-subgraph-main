@@ -105,15 +105,23 @@ var (
 		{Name: "first_name", Type: field.TypeString},
 		{Name: "last_name", Type: field.TypeString},
 		{Name: "user_image_id", Type: field.TypeUUID},
-		{Name: "profile_id", Type: field.TypeUUID},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "profile_id", Type: field.TypeUUID},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "users_profiles_users",
+				Columns:    []*schema.Column{UsersColumns[6]},
+				RefColumns: []*schema.Column{ProfilesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
@@ -128,4 +136,5 @@ var (
 )
 
 func init() {
+	UsersTable.ForeignKeys[0].RefTable = ProfilesTable
 }

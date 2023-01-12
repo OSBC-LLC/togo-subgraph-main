@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/profile"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
 	"github.com/google/uuid"
 )
@@ -29,6 +30,34 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserQuery when eager-loading is set.
+	Edges UserEdges `json:"edges"`
+}
+
+// UserEdges holds the relations/edges for other nodes in the graph.
+type UserEdges struct {
+	// Profile holds the value of the profile edge.
+	Profile *Profile `json:"profile,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+	// totalCount holds the count of the edges above.
+	totalCount [1]*int
+}
+
+// ProfileOrErr returns the Profile value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) ProfileOrErr() (*Profile, error) {
+	if e.loadedTypes[0] {
+		if e.Profile == nil {
+			// The edge profile was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: profile.Label}
+		}
+		return e.Profile, nil
+	}
+	return nil, &NotLoadedError{edge: "profile"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -102,6 +131,11 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 		}
 	}
 	return nil
+}
+
+// QueryProfile queries the "profile" edge of the User entity.
+func (u *User) QueryProfile() *ProfileQuery {
+	return (&UserClient{config: u.config}).QueryProfile(u)
 }
 
 // Update returns a builder for updating this User.

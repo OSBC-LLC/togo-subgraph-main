@@ -1722,6 +1722,10 @@ type ProfileWhereInput struct {
 	CreatedAtGTE   *time.Time  `json:"createdAtGTE,omitempty"`
 	CreatedAtLT    *time.Time  `json:"createdAtLT,omitempty"`
 	CreatedAtLTE   *time.Time  `json:"createdAtLTE,omitempty"`
+
+	// "users" edge predicates.
+	HasUsers     *bool             `json:"hasUsers,omitempty"`
+	HasUsersWith []*UserWhereInput `json:"hasUsersWith,omitempty"`
 }
 
 // AddPredicates adds custom predicates to the where input to be used during the filtering phase.
@@ -1946,6 +1950,24 @@ func (i *ProfileWhereInput) P() (predicate.Profile, error) {
 		predicates = append(predicates, profile.CreatedAtLTE(*i.CreatedAtLTE))
 	}
 
+	if i.HasUsers != nil {
+		p := profile.HasUsers()
+		if !*i.HasUsers {
+			p = profile.Not(p)
+		}
+		predicates = append(predicates, p)
+	}
+	if len(i.HasUsersWith) > 0 {
+		with := make([]predicate.User, 0, len(i.HasUsersWith))
+		for _, w := range i.HasUsersWith {
+			p, err := w.P()
+			if err != nil {
+				return nil, fmt.Errorf("%w: field 'HasUsersWith'", err)
+			}
+			with = append(with, p)
+		}
+		predicates = append(predicates, profile.HasUsersWith(with...))
+	}
 	switch len(predicates) {
 	case 0:
 		return nil, ErrEmptyProfileWhereInput
@@ -2018,10 +2040,6 @@ type UserWhereInput struct {
 	ProfileIDNEQ   *uuid.UUID  `json:"profileIDNEQ,omitempty"`
 	ProfileIDIn    []uuid.UUID `json:"profileIDIn,omitempty"`
 	ProfileIDNotIn []uuid.UUID `json:"profileIDNotIn,omitempty"`
-	ProfileIDGT    *uuid.UUID  `json:"profileIDGT,omitempty"`
-	ProfileIDGTE   *uuid.UUID  `json:"profileIDGTE,omitempty"`
-	ProfileIDLT    *uuid.UUID  `json:"profileIDLT,omitempty"`
-	ProfileIDLTE   *uuid.UUID  `json:"profileIDLTE,omitempty"`
 
 	// "updated_at" field predicates.
 	UpdatedAt      *time.Time  `json:"updatedAt,omitempty"`
@@ -2042,6 +2060,10 @@ type UserWhereInput struct {
 	CreatedAtGTE   *time.Time  `json:"createdAtGTE,omitempty"`
 	CreatedAtLT    *time.Time  `json:"createdAtLT,omitempty"`
 	CreatedAtLTE   *time.Time  `json:"createdAtLTE,omitempty"`
+
+	// "profile" edge predicates.
+	HasProfile     *bool                `json:"hasProfile,omitempty"`
+	HasProfileWith []*ProfileWhereInput `json:"hasProfileWith,omitempty"`
 }
 
 // AddPredicates adds custom predicates to the where input to be used during the filtering phase.
@@ -2253,18 +2275,6 @@ func (i *UserWhereInput) P() (predicate.User, error) {
 	if len(i.ProfileIDNotIn) > 0 {
 		predicates = append(predicates, user.ProfileIDNotIn(i.ProfileIDNotIn...))
 	}
-	if i.ProfileIDGT != nil {
-		predicates = append(predicates, user.ProfileIDGT(*i.ProfileIDGT))
-	}
-	if i.ProfileIDGTE != nil {
-		predicates = append(predicates, user.ProfileIDGTE(*i.ProfileIDGTE))
-	}
-	if i.ProfileIDLT != nil {
-		predicates = append(predicates, user.ProfileIDLT(*i.ProfileIDLT))
-	}
-	if i.ProfileIDLTE != nil {
-		predicates = append(predicates, user.ProfileIDLTE(*i.ProfileIDLTE))
-	}
 	if i.UpdatedAt != nil {
 		predicates = append(predicates, user.UpdatedAtEQ(*i.UpdatedAt))
 	}
@@ -2314,6 +2324,24 @@ func (i *UserWhereInput) P() (predicate.User, error) {
 		predicates = append(predicates, user.CreatedAtLTE(*i.CreatedAtLTE))
 	}
 
+	if i.HasProfile != nil {
+		p := user.HasProfile()
+		if !*i.HasProfile {
+			p = user.Not(p)
+		}
+		predicates = append(predicates, p)
+	}
+	if len(i.HasProfileWith) > 0 {
+		with := make([]predicate.Profile, 0, len(i.HasProfileWith))
+		for _, w := range i.HasProfileWith {
+			p, err := w.P()
+			if err != nil {
+				return nil, fmt.Errorf("%w: field 'HasProfileWith'", err)
+			}
+			with = append(with, p)
+		}
+		predicates = append(predicates, user.HasProfileWith(with...))
+	}
 	switch len(predicates) {
 	case 0:
 		return nil, ErrEmptyUserWhereInput

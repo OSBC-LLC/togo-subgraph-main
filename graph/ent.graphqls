@@ -440,6 +440,7 @@ type Profile implements Node {
   description: String!
   updatedAt: Time!
   createdAt: Time!
+  users: [User!]
 }
 """
 ProfileWhereInput is used for filtering Profile objects.
@@ -504,6 +505,9 @@ input ProfileWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
+  """users edge predicates"""
+  hasUsers: Boolean
+  hasUsersWith: [UserWhereInput!]
 }
 type Query {
   """Fetches an object given its ID."""
@@ -522,9 +526,10 @@ type User implements Node {
   firstName: String!
   lastName: String!
   userImageID: UUID!
-  profileID: UUID!
+  profileID: ID!
   updatedAt: Time!
   createdAt: Time!
+  profile: Profile!
 }
 """
 UserWhereInput is used for filtering User objects.
@@ -581,14 +586,10 @@ input UserWhereInput {
   userImageIDLT: UUID
   userImageIDLTE: UUID
   """profile_id field predicates"""
-  profileID: UUID
-  profileIDNEQ: UUID
-  profileIDIn: [UUID!]
-  profileIDNotIn: [UUID!]
-  profileIDGT: UUID
-  profileIDGTE: UUID
-  profileIDLT: UUID
-  profileIDLTE: UUID
+  profileID: ID
+  profileIDNEQ: ID
+  profileIDIn: [ID!]
+  profileIDNotIn: [ID!]
   """updated_at field predicates"""
   updatedAt: Time
   updatedAtNEQ: Time
@@ -607,4 +608,7 @@ input UserWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
+  """profile edge predicates"""
+  hasProfile: Boolean
+  hasProfileWith: [ProfileWhereInput!]
 }

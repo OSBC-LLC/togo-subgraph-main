@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
 	"github.com/google/uuid"
 )
@@ -469,34 +470,6 @@ func ProfileIDNotIn(vs ...uuid.UUID) predicate.User {
 	})
 }
 
-// ProfileIDGT applies the GT predicate on the "profile_id" field.
-func ProfileIDGT(v uuid.UUID) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldProfileID), v))
-	})
-}
-
-// ProfileIDGTE applies the GTE predicate on the "profile_id" field.
-func ProfileIDGTE(v uuid.UUID) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldProfileID), v))
-	})
-}
-
-// ProfileIDLT applies the LT predicate on the "profile_id" field.
-func ProfileIDLT(v uuid.UUID) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldProfileID), v))
-	})
-}
-
-// ProfileIDLTE applies the LTE predicate on the "profile_id" field.
-func ProfileIDLTE(v uuid.UUID) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldProfileID), v))
-	})
-}
-
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
 func UpdatedAtEQ(v time.Time) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -646,6 +619,34 @@ func CreatedAtLT(v time.Time) predicate.User {
 func CreatedAtLTE(v time.Time) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
+	})
+}
+
+// HasProfile applies the HasEdge predicate on the "profile" edge.
+func HasProfile() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ProfileTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ProfileTable, ProfileColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasProfileWith applies the HasEdge predicate on the "profile" edge with a given conditions (other predicates).
+func HasProfileWith(preds ...predicate.Profile) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ProfileInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ProfileTable, ProfileColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 
