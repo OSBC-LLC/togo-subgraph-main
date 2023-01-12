@@ -69,6 +69,19 @@ func (d *DogQuery) CollectFields(ctx context.Context, satisfies ...string) (*Dog
 
 func (d *DogQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
+	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+		switch field.Name {
+		case "ownerprofiles", "ownerProfiles":
+			var (
+				path  = append(path, field.Name)
+				query = &DogProfileOwnerQuery{config: d.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			d.withOwnerProfiles = query
+		}
+	}
 	return nil
 }
 
@@ -161,6 +174,28 @@ func (dpo *DogProfileOwnerQuery) CollectFields(ctx context.Context, satisfies ..
 
 func (dpo *DogProfileOwnerQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
+	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+		switch field.Name {
+		case "owner":
+			var (
+				path  = append(path, field.Name)
+				query = &UserQuery{config: dpo.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			dpo.withOwner = query
+		case "dog":
+			var (
+				path  = append(path, field.Name)
+				query = &DogQuery{config: dpo.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			dpo.withDog = query
+		}
+	}
 	return nil
 }
 
@@ -323,6 +358,15 @@ func (u *UserQuery) collectField(ctx context.Context, op *graphql.OperationConte
 				return err
 			}
 			u.withProfile = query
+		case "dogprofiles", "dogProfiles":
+			var (
+				path  = append(path, field.Name)
+				query = &DogProfileOwnerQuery{config: u.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			u.withDogProfiles = query
 		}
 	}
 	return nil

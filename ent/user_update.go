@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/profile"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
@@ -87,6 +88,21 @@ func (uu *UserUpdate) SetProfile(p *Profile) *UserUpdate {
 	return uu.SetProfileID(p.ID)
 }
 
+// AddDogProfileIDs adds the "dogProfiles" edge to the DogProfileOwner entity by IDs.
+func (uu *UserUpdate) AddDogProfileIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddDogProfileIDs(ids...)
+	return uu
+}
+
+// AddDogProfiles adds the "dogProfiles" edges to the DogProfileOwner entity.
+func (uu *UserUpdate) AddDogProfiles(d ...*DogProfileOwner) *UserUpdate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uu.AddDogProfileIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -96,6 +112,27 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 func (uu *UserUpdate) ClearProfile() *UserUpdate {
 	uu.mutation.ClearProfile()
 	return uu
+}
+
+// ClearDogProfiles clears all "dogProfiles" edges to the DogProfileOwner entity.
+func (uu *UserUpdate) ClearDogProfiles() *UserUpdate {
+	uu.mutation.ClearDogProfiles()
+	return uu
+}
+
+// RemoveDogProfileIDs removes the "dogProfiles" edge to DogProfileOwner entities by IDs.
+func (uu *UserUpdate) RemoveDogProfileIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveDogProfileIDs(ids...)
+	return uu
+}
+
+// RemoveDogProfiles removes "dogProfiles" edges to DogProfileOwner entities.
+func (uu *UserUpdate) RemoveDogProfiles(d ...*DogProfileOwner) *UserUpdate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uu.RemoveDogProfileIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -254,6 +291,60 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.DogProfilesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DogProfilesTable,
+			Columns: []string{user.DogProfilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dogprofileowner.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedDogProfilesIDs(); len(nodes) > 0 && !uu.mutation.DogProfilesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DogProfilesTable,
+			Columns: []string{user.DogProfilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dogprofileowner.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.DogProfilesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DogProfilesTable,
+			Columns: []string{user.DogProfilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dogprofileowner.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -330,6 +421,21 @@ func (uuo *UserUpdateOne) SetProfile(p *Profile) *UserUpdateOne {
 	return uuo.SetProfileID(p.ID)
 }
 
+// AddDogProfileIDs adds the "dogProfiles" edge to the DogProfileOwner entity by IDs.
+func (uuo *UserUpdateOne) AddDogProfileIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddDogProfileIDs(ids...)
+	return uuo
+}
+
+// AddDogProfiles adds the "dogProfiles" edges to the DogProfileOwner entity.
+func (uuo *UserUpdateOne) AddDogProfiles(d ...*DogProfileOwner) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uuo.AddDogProfileIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -339,6 +445,27 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 func (uuo *UserUpdateOne) ClearProfile() *UserUpdateOne {
 	uuo.mutation.ClearProfile()
 	return uuo
+}
+
+// ClearDogProfiles clears all "dogProfiles" edges to the DogProfileOwner entity.
+func (uuo *UserUpdateOne) ClearDogProfiles() *UserUpdateOne {
+	uuo.mutation.ClearDogProfiles()
+	return uuo
+}
+
+// RemoveDogProfileIDs removes the "dogProfiles" edge to DogProfileOwner entities by IDs.
+func (uuo *UserUpdateOne) RemoveDogProfileIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveDogProfileIDs(ids...)
+	return uuo
+}
+
+// RemoveDogProfiles removes "dogProfiles" edges to DogProfileOwner entities.
+func (uuo *UserUpdateOne) RemoveDogProfiles(d ...*DogProfileOwner) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uuo.RemoveDogProfileIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -519,6 +646,60 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: profile.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.DogProfilesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DogProfilesTable,
+			Columns: []string{user.DogProfilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dogprofileowner.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedDogProfilesIDs(); len(nodes) > 0 && !uuo.mutation.DogProfilesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DogProfilesTable,
+			Columns: []string{user.DogProfilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dogprofileowner.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.DogProfilesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DogProfilesTable,
+			Columns: []string{user.DogProfilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dogprofileowner.FieldID,
 				},
 			},
 		}

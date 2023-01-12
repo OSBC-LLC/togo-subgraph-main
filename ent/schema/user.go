@@ -35,5 +35,7 @@ func (User) Edges() []ent.Edge {
 			Field("profile_id").
 			Required().
 			Unique(),
+
+		edge.To("dogProfiles", DogProfileOwner.Type),
 	}
 }

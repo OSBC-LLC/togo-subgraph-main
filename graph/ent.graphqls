@@ -72,6 +72,7 @@ type Dog implements Node {
   dogImgID: UUID!
   updatedAt: Time!
   createdAt: Time!
+  ownerprofiles: [DogProfileOwner!]
 }
 type DogProfileBreed implements Node {
   id: ID!
@@ -146,10 +147,12 @@ input DogProfileBreedWhereInput {
 }
 type DogProfileOwner implements Node {
   id: ID!
-  ownerID: UUID!
-  dogID: UUID!
+  ownerID: ID!
+  dogID: ID!
   updatedAt: Time!
   createdAt: Time!
+  owner: User!
+  dog: Dog!
 }
 """
 DogProfileOwnerWhereInput is used for filtering DogProfileOwner objects.
@@ -169,23 +172,15 @@ input DogProfileOwnerWhereInput {
   idLT: ID
   idLTE: ID
   """owner_id field predicates"""
-  ownerID: UUID
-  ownerIDNEQ: UUID
-  ownerIDIn: [UUID!]
-  ownerIDNotIn: [UUID!]
-  ownerIDGT: UUID
-  ownerIDGTE: UUID
-  ownerIDLT: UUID
-  ownerIDLTE: UUID
+  ownerID: ID
+  ownerIDNEQ: ID
+  ownerIDIn: [ID!]
+  ownerIDNotIn: [ID!]
   """dog_id field predicates"""
-  dogID: UUID
-  dogIDNEQ: UUID
-  dogIDIn: [UUID!]
-  dogIDNotIn: [UUID!]
-  dogIDGT: UUID
-  dogIDGTE: UUID
-  dogIDLT: UUID
-  dogIDLTE: UUID
+  dogID: ID
+  dogIDNEQ: ID
+  dogIDIn: [ID!]
+  dogIDNotIn: [ID!]
   """updated_at field predicates"""
   updatedAt: Time
   updatedAtNEQ: Time
@@ -204,6 +199,12 @@ input DogProfileOwnerWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
+  """owner edge predicates"""
+  hasOwner: Boolean
+  hasOwnerWith: [UserWhereInput!]
+  """dog edge predicates"""
+  hasDog: Boolean
+  hasDogWith: [DogWhereInput!]
 }
 """
 DogWhereInput is used for filtering Dog objects.
@@ -313,6 +314,9 @@ input DogWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
+  """ownerProfiles edge predicates"""
+  hasOwnerProfiles: Boolean
+  hasOwnerProfilesWith: [DogProfileOwnerWhereInput!]
 }
 type Image implements Node {
   id: ID!
@@ -530,6 +534,7 @@ type User implements Node {
   updatedAt: Time!
   createdAt: Time!
   profile: Profile!
+  dogprofiles: [DogProfileOwner!]
 }
 """
 UserWhereInput is used for filtering User objects.
@@ -611,4 +616,7 @@ input UserWhereInput {
   """profile edge predicates"""
   hasProfile: Boolean
   hasProfileWith: [ProfileWhereInput!]
+  """dogProfiles edge predicates"""
+  hasDogProfiles: Boolean
+  hasDogProfilesWith: [DogProfileOwnerWhereInput!]
 }

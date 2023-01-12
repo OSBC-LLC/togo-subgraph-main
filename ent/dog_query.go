@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -11,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
 	"github.com/google/uuid"
 )
@@ -24,8 +26,10 @@ type DogQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Dog
-	modifiers  []func(*sql.Selector)
-	loadTotal  []func(context.Context, []*Dog) error
+	// eager-loading edges.
+	withOwnerProfiles *DogProfileOwnerQuery
+	modifiers         []func(*sql.Selector)
+	loadTotal         []func(context.Context, []*Dog) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -60,6 +64,28 @@ func (dq *DogQuery) Unique(unique bool) *DogQuery {
 func (dq *DogQuery) Order(o ...OrderFunc) *DogQuery {
 	dq.order = append(dq.order, o...)
 	return dq
+}
+
+// QueryOwnerProfiles chains the current query on the "ownerProfiles" edge.
+func (dq *DogQuery) QueryOwnerProfiles() *DogProfileOwnerQuery {
+	query := &DogProfileOwnerQuery{config: dq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := dq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := dq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dog.Table, dog.FieldID, selector),
+			sqlgraph.To(dogprofileowner.Table, dogprofileowner.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, dog.OwnerProfilesTable, dog.OwnerProfilesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(dq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Dog entity from the query.
@@ -238,16 +264,28 @@ func (dq *DogQuery) Clone() *DogQuery {
 		return nil
 	}
 	return &DogQuery{
-		config:     dq.config,
-		limit:      dq.limit,
-		offset:     dq.offset,
-		order:      append([]OrderFunc{}, dq.order...),
-		predicates: append([]predicate.Dog{}, dq.predicates...),
+		config:            dq.config,
+		limit:             dq.limit,
+		offset:            dq.offset,
+		order:             append([]OrderFunc{}, dq.order...),
+		predicates:        append([]predicate.Dog{}, dq.predicates...),
+		withOwnerProfiles: dq.withOwnerProfiles.Clone(),
 		// clone intermediate query.
 		sql:    dq.sql.Clone(),
 		path:   dq.path,
 		unique: dq.unique,
 	}
+}
+
+// WithOwnerProfiles tells the query-builder to eager-load the nodes that are connected to
+// the "ownerProfiles" edge. The optional arguments are used to configure the query builder of the edge.
+func (dq *DogQuery) WithOwnerProfiles(opts ...func(*DogProfileOwnerQuery)) *DogQuery {
+	query := &DogProfileOwnerQuery{config: dq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	dq.withOwnerProfiles = query
+	return dq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -316,8 +354,11 @@ func (dq *DogQuery) prepareQuery(ctx context.Context) error {
 
 func (dq *DogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Dog, error) {
 	var (
-		nodes = []*Dog{}
-		_spec = dq.querySpec()
+		nodes       = []*Dog{}
+		_spec       = dq.querySpec()
+		loadedTypes = [1]bool{
+			dq.withOwnerProfiles != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		return (*Dog).scanValues(nil, columns)
@@ -325,6 +366,7 @@ func (dq *DogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Dog, err
 	_spec.Assign = func(columns []string, values []interface{}) error {
 		node := &Dog{config: dq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if len(dq.modifiers) > 0 {
@@ -339,6 +381,32 @@ func (dq *DogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Dog, err
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := dq.withOwnerProfiles; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*Dog)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.OwnerProfiles = []*DogProfileOwner{}
+		}
+		query.Where(predicate.DogProfileOwner(func(s *sql.Selector) {
+			s.Where(sql.InValues(dog.OwnerProfilesColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.DogID
+			node, ok := nodeids[fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "dog_id" returned %v for node %v`, fk, n.ID)
+			}
+			node.Edges.OwnerProfiles = append(node.Edges.OwnerProfiles, n)
+		}
+	}
+
 	for i := range dq.loadTotal {
 		if err := dq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err

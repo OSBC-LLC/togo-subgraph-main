@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
 	"github.com/google/uuid"
 )
@@ -157,34 +158,6 @@ func OwnerIDNotIn(vs ...uuid.UUID) predicate.DogProfileOwner {
 	})
 }
 
-// OwnerIDGT applies the GT predicate on the "owner_id" field.
-func OwnerIDGT(v uuid.UUID) predicate.DogProfileOwner {
-	return predicate.DogProfileOwner(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldOwnerID), v))
-	})
-}
-
-// OwnerIDGTE applies the GTE predicate on the "owner_id" field.
-func OwnerIDGTE(v uuid.UUID) predicate.DogProfileOwner {
-	return predicate.DogProfileOwner(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldOwnerID), v))
-	})
-}
-
-// OwnerIDLT applies the LT predicate on the "owner_id" field.
-func OwnerIDLT(v uuid.UUID) predicate.DogProfileOwner {
-	return predicate.DogProfileOwner(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldOwnerID), v))
-	})
-}
-
-// OwnerIDLTE applies the LTE predicate on the "owner_id" field.
-func OwnerIDLTE(v uuid.UUID) predicate.DogProfileOwner {
-	return predicate.DogProfileOwner(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldOwnerID), v))
-	})
-}
-
 // DogIDEQ applies the EQ predicate on the "dog_id" field.
 func DogIDEQ(v uuid.UUID) predicate.DogProfileOwner {
 	return predicate.DogProfileOwner(func(s *sql.Selector) {
@@ -230,34 +203,6 @@ func DogIDNotIn(vs ...uuid.UUID) predicate.DogProfileOwner {
 			return
 		}
 		s.Where(sql.NotIn(s.C(FieldDogID), v...))
-	})
-}
-
-// DogIDGT applies the GT predicate on the "dog_id" field.
-func DogIDGT(v uuid.UUID) predicate.DogProfileOwner {
-	return predicate.DogProfileOwner(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldDogID), v))
-	})
-}
-
-// DogIDGTE applies the GTE predicate on the "dog_id" field.
-func DogIDGTE(v uuid.UUID) predicate.DogProfileOwner {
-	return predicate.DogProfileOwner(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldDogID), v))
-	})
-}
-
-// DogIDLT applies the LT predicate on the "dog_id" field.
-func DogIDLT(v uuid.UUID) predicate.DogProfileOwner {
-	return predicate.DogProfileOwner(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldDogID), v))
-	})
-}
-
-// DogIDLTE applies the LTE predicate on the "dog_id" field.
-func DogIDLTE(v uuid.UUID) predicate.DogProfileOwner {
-	return predicate.DogProfileOwner(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldDogID), v))
 	})
 }
 
@@ -410,6 +355,62 @@ func CreatedAtLT(v time.Time) predicate.DogProfileOwner {
 func CreatedAtLTE(v time.Time) predicate.DogProfileOwner {
 	return predicate.DogProfileOwner(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
+	})
+}
+
+// HasOwner applies the HasEdge predicate on the "owner" edge.
+func HasOwner() predicate.DogProfileOwner {
+	return predicate.DogProfileOwner(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(OwnerTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, OwnerTable, OwnerColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
+func HasOwnerWith(preds ...predicate.User) predicate.DogProfileOwner {
+	return predicate.DogProfileOwner(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(OwnerInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, OwnerTable, OwnerColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasDog applies the HasEdge predicate on the "dog" edge.
+func HasDog() predicate.DogProfileOwner {
+	return predicate.DogProfileOwner(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(DogTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, DogTable, DogColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDogWith applies the HasEdge predicate on the "dog" edge with a given conditions (other predicates).
+func HasDogWith(preds ...predicate.Dog) predicate.DogProfileOwner {
+	return predicate.DogProfileOwner(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(DogInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, DogTable, DogColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 

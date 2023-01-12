@@ -31,8 +31,17 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
+	// EdgeOwnerProfiles holds the string denoting the ownerprofiles edge name in mutations.
+	EdgeOwnerProfiles = "ownerProfiles"
 	// Table holds the table name of the dog in the database.
 	Table = "dogs"
+	// OwnerProfilesTable is the table that holds the ownerProfiles relation/edge.
+	OwnerProfilesTable = "dog_profile_owners"
+	// OwnerProfilesInverseTable is the table name for the DogProfileOwner entity.
+	// It exists in this package in order to avoid circular dependency with the "dogprofileowner" package.
+	OwnerProfilesInverseTable = "dog_profile_owners"
+	// OwnerProfilesColumn is the table column denoting the ownerProfiles relation/edge.
+	OwnerProfilesColumn = "dog_id"
 )
 
 // Columns holds all SQL columns for dog fields.

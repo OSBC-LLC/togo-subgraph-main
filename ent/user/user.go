@@ -27,6 +27,8 @@ const (
 	FieldCreatedAt = "created_at"
 	// EdgeProfile holds the string denoting the profile edge name in mutations.
 	EdgeProfile = "profile"
+	// EdgeDogProfiles holds the string denoting the dogprofiles edge name in mutations.
+	EdgeDogProfiles = "dogProfiles"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// ProfileTable is the table that holds the profile relation/edge.
@@ -36,6 +38,13 @@ const (
 	ProfileInverseTable = "profiles"
 	// ProfileColumn is the table column denoting the profile relation/edge.
 	ProfileColumn = "profile_id"
+	// DogProfilesTable is the table that holds the dogProfiles relation/edge.
+	DogProfilesTable = "dog_profile_owners"
+	// DogProfilesInverseTable is the table name for the DogProfileOwner entity.
+	// It exists in this package in order to avoid circular dependency with the "dogprofileowner" package.
+	DogProfilesInverseTable = "dog_profile_owners"
+	// DogProfilesColumn is the table column denoting the dogProfiles relation/edge.
+	DogProfilesColumn = "owner_id"
 )
 
 // Columns holds all SQL columns for user fields.

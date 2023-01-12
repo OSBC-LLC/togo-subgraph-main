@@ -87,7 +87,7 @@ func (d *Dog) Node(ctx context.Context) (node *Node, err error) {
 		ID:     d.ID,
 		Type:   "Dog",
 		Fields: make([]*Field, 9),
-		Edges:  make([]*Edge, 0),
+		Edges:  make([]*Edge, 1),
 	}
 	var buf []byte
 	if buf, err = json.Marshal(d.FullName); err != nil {
@@ -162,6 +162,16 @@ func (d *Dog) Node(ctx context.Context) (node *Node, err error) {
 		Name:  "created_at",
 		Value: string(buf),
 	}
+	node.Edges[0] = &Edge{
+		Type: "DogProfileOwner",
+		Name: "ownerProfiles",
+	}
+	err = d.QueryOwnerProfiles().
+		Select(dogprofileowner.FieldID).
+		Scan(ctx, &node.Edges[0].IDs)
+	if err != nil {
+		return nil, err
+	}
 	return node, nil
 }
 
@@ -221,7 +231,7 @@ func (dpo *DogProfileOwner) Node(ctx context.Context) (node *Node, err error) {
 		ID:     dpo.ID,
 		Type:   "DogProfileOwner",
 		Fields: make([]*Field, 4),
-		Edges:  make([]*Edge, 0),
+		Edges:  make([]*Edge, 2),
 	}
 	var buf []byte
 	if buf, err = json.Marshal(dpo.OwnerID); err != nil {
@@ -255,6 +265,26 @@ func (dpo *DogProfileOwner) Node(ctx context.Context) (node *Node, err error) {
 		Type:  "time.Time",
 		Name:  "created_at",
 		Value: string(buf),
+	}
+	node.Edges[0] = &Edge{
+		Type: "User",
+		Name: "owner",
+	}
+	err = dpo.QueryOwner().
+		Select(user.FieldID).
+		Scan(ctx, &node.Edges[0].IDs)
+	if err != nil {
+		return nil, err
+	}
+	node.Edges[1] = &Edge{
+		Type: "Dog",
+		Name: "dog",
+	}
+	err = dpo.QueryDog().
+		Select(dog.FieldID).
+		Scan(ctx, &node.Edges[1].IDs)
+	if err != nil {
+		return nil, err
 	}
 	return node, nil
 }
@@ -376,7 +406,7 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 		ID:     u.ID,
 		Type:   "User",
 		Fields: make([]*Field, 6),
-		Edges:  make([]*Edge, 1),
+		Edges:  make([]*Edge, 2),
 	}
 	var buf []byte
 	if buf, err = json.Marshal(u.FirstName); err != nil {
@@ -434,6 +464,16 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	err = u.QueryProfile().
 		Select(profile.FieldID).
 		Scan(ctx, &node.Edges[0].IDs)
+	if err != nil {
+		return nil, err
+	}
+	node.Edges[1] = &Edge{
+		Type: "DogProfileOwner",
+		Name: "dogProfiles",
+	}
+	err = u.QueryDogProfiles().
+		Select(dogprofileowner.FieldID).
+		Scan(ctx, &node.Edges[1].IDs)
 	if err != nil {
 		return nil, err
 	}

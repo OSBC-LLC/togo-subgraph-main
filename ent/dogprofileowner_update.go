@@ -11,8 +11,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
 	"github.com/google/uuid"
 )
 
@@ -69,9 +71,31 @@ func (dpou *DogProfileOwnerUpdate) SetNillableCreatedAt(t *time.Time) *DogProfil
 	return dpou
 }
 
+// SetOwner sets the "owner" edge to the User entity.
+func (dpou *DogProfileOwnerUpdate) SetOwner(u *User) *DogProfileOwnerUpdate {
+	return dpou.SetOwnerID(u.ID)
+}
+
+// SetDog sets the "dog" edge to the Dog entity.
+func (dpou *DogProfileOwnerUpdate) SetDog(d *Dog) *DogProfileOwnerUpdate {
+	return dpou.SetDogID(d.ID)
+}
+
 // Mutation returns the DogProfileOwnerMutation object of the builder.
 func (dpou *DogProfileOwnerUpdate) Mutation() *DogProfileOwnerMutation {
 	return dpou.mutation
+}
+
+// ClearOwner clears the "owner" edge to the User entity.
+func (dpou *DogProfileOwnerUpdate) ClearOwner() *DogProfileOwnerUpdate {
+	dpou.mutation.ClearOwner()
+	return dpou
+}
+
+// ClearDog clears the "dog" edge to the Dog entity.
+func (dpou *DogProfileOwnerUpdate) ClearDog() *DogProfileOwnerUpdate {
+	dpou.mutation.ClearDog()
+	return dpou
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -81,12 +105,18 @@ func (dpou *DogProfileOwnerUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(dpou.hooks) == 0 {
+		if err = dpou.check(); err != nil {
+			return 0, err
+		}
 		affected, err = dpou.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*DogProfileOwnerMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = dpou.check(); err != nil {
+				return 0, err
 			}
 			dpou.mutation = mutation
 			affected, err = dpou.sqlSave(ctx)
@@ -128,6 +158,17 @@ func (dpou *DogProfileOwnerUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (dpou *DogProfileOwnerUpdate) check() error {
+	if _, ok := dpou.mutation.OwnerID(); dpou.mutation.OwnerCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "DogProfileOwner.owner"`)
+	}
+	if _, ok := dpou.mutation.DogID(); dpou.mutation.DogCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "DogProfileOwner.dog"`)
+	}
+	return nil
+}
+
 func (dpou *DogProfileOwnerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -146,20 +187,6 @@ func (dpou *DogProfileOwnerUpdate) sqlSave(ctx context.Context) (n int, err erro
 			}
 		}
 	}
-	if value, ok := dpou.mutation.OwnerID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: dogprofileowner.FieldOwnerID,
-		})
-	}
-	if value, ok := dpou.mutation.DogID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: dogprofileowner.FieldDogID,
-		})
-	}
 	if value, ok := dpou.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -173,6 +200,76 @@ func (dpou *DogProfileOwnerUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Value:  value,
 			Column: dogprofileowner.FieldCreatedAt,
 		})
+	}
+	if dpou.mutation.OwnerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   dogprofileowner.OwnerTable,
+			Columns: []string{dogprofileowner.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := dpou.mutation.OwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   dogprofileowner.OwnerTable,
+			Columns: []string{dogprofileowner.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if dpou.mutation.DogCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   dogprofileowner.DogTable,
+			Columns: []string{dogprofileowner.DogColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dog.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := dpou.mutation.DogIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   dogprofileowner.DogTable,
+			Columns: []string{dogprofileowner.DogColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dog.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, dpou.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -233,9 +330,31 @@ func (dpouo *DogProfileOwnerUpdateOne) SetNillableCreatedAt(t *time.Time) *DogPr
 	return dpouo
 }
 
+// SetOwner sets the "owner" edge to the User entity.
+func (dpouo *DogProfileOwnerUpdateOne) SetOwner(u *User) *DogProfileOwnerUpdateOne {
+	return dpouo.SetOwnerID(u.ID)
+}
+
+// SetDog sets the "dog" edge to the Dog entity.
+func (dpouo *DogProfileOwnerUpdateOne) SetDog(d *Dog) *DogProfileOwnerUpdateOne {
+	return dpouo.SetDogID(d.ID)
+}
+
 // Mutation returns the DogProfileOwnerMutation object of the builder.
 func (dpouo *DogProfileOwnerUpdateOne) Mutation() *DogProfileOwnerMutation {
 	return dpouo.mutation
+}
+
+// ClearOwner clears the "owner" edge to the User entity.
+func (dpouo *DogProfileOwnerUpdateOne) ClearOwner() *DogProfileOwnerUpdateOne {
+	dpouo.mutation.ClearOwner()
+	return dpouo
+}
+
+// ClearDog clears the "dog" edge to the Dog entity.
+func (dpouo *DogProfileOwnerUpdateOne) ClearDog() *DogProfileOwnerUpdateOne {
+	dpouo.mutation.ClearDog()
+	return dpouo
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -252,12 +371,18 @@ func (dpouo *DogProfileOwnerUpdateOne) Save(ctx context.Context) (*DogProfileOwn
 		node *DogProfileOwner
 	)
 	if len(dpouo.hooks) == 0 {
+		if err = dpouo.check(); err != nil {
+			return nil, err
+		}
 		node, err = dpouo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*DogProfileOwnerMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = dpouo.check(); err != nil {
+				return nil, err
 			}
 			dpouo.mutation = mutation
 			node, err = dpouo.sqlSave(ctx)
@@ -305,6 +430,17 @@ func (dpouo *DogProfileOwnerUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (dpouo *DogProfileOwnerUpdateOne) check() error {
+	if _, ok := dpouo.mutation.OwnerID(); dpouo.mutation.OwnerCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "DogProfileOwner.owner"`)
+	}
+	if _, ok := dpouo.mutation.DogID(); dpouo.mutation.DogCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "DogProfileOwner.dog"`)
+	}
+	return nil
+}
+
 func (dpouo *DogProfileOwnerUpdateOne) sqlSave(ctx context.Context) (_node *DogProfileOwner, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -340,20 +476,6 @@ func (dpouo *DogProfileOwnerUpdateOne) sqlSave(ctx context.Context) (_node *DogP
 			}
 		}
 	}
-	if value, ok := dpouo.mutation.OwnerID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: dogprofileowner.FieldOwnerID,
-		})
-	}
-	if value, ok := dpouo.mutation.DogID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: dogprofileowner.FieldDogID,
-		})
-	}
 	if value, ok := dpouo.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -367,6 +489,76 @@ func (dpouo *DogProfileOwnerUpdateOne) sqlSave(ctx context.Context) (_node *DogP
 			Value:  value,
 			Column: dogprofileowner.FieldCreatedAt,
 		})
+	}
+	if dpouo.mutation.OwnerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   dogprofileowner.OwnerTable,
+			Columns: []string{dogprofileowner.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := dpouo.mutation.OwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   dogprofileowner.OwnerTable,
+			Columns: []string{dogprofileowner.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if dpouo.mutation.DogCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   dogprofileowner.DogTable,
+			Columns: []string{dogprofileowner.DogColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dog.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := dpouo.mutation.DogIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   dogprofileowner.DogTable,
+			Columns: []string{dogprofileowner.DogColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dog.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &DogProfileOwner{config: dpouo.config}
 	_spec.Assign = _node.assignValues

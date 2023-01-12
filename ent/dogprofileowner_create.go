@@ -10,7 +10,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
 	"github.com/google/uuid"
 )
 
@@ -73,6 +75,16 @@ func (dpoc *DogProfileOwnerCreate) SetNillableID(u *uuid.UUID) *DogProfileOwnerC
 		dpoc.SetID(*u)
 	}
 	return dpoc
+}
+
+// SetOwner sets the "owner" edge to the User entity.
+func (dpoc *DogProfileOwnerCreate) SetOwner(u *User) *DogProfileOwnerCreate {
+	return dpoc.SetOwnerID(u.ID)
+}
+
+// SetDog sets the "dog" edge to the Dog entity.
+func (dpoc *DogProfileOwnerCreate) SetDog(d *Dog) *DogProfileOwnerCreate {
+	return dpoc.SetDogID(d.ID)
 }
 
 // Mutation returns the DogProfileOwnerMutation object of the builder.
@@ -180,6 +192,12 @@ func (dpoc *DogProfileOwnerCreate) check() error {
 	if _, ok := dpoc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "DogProfileOwner.created_at"`)}
 	}
+	if _, ok := dpoc.mutation.OwnerID(); !ok {
+		return &ValidationError{Name: "owner", err: errors.New(`ent: missing required edge "DogProfileOwner.owner"`)}
+	}
+	if _, ok := dpoc.mutation.DogID(); !ok {
+		return &ValidationError{Name: "dog", err: errors.New(`ent: missing required edge "DogProfileOwner.dog"`)}
+	}
 	return nil
 }
 
@@ -216,22 +234,6 @@ func (dpoc *DogProfileOwnerCreate) createSpec() (*DogProfileOwner, *sqlgraph.Cre
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := dpoc.mutation.OwnerID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: dogprofileowner.FieldOwnerID,
-		})
-		_node.OwnerID = value
-	}
-	if value, ok := dpoc.mutation.DogID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: dogprofileowner.FieldDogID,
-		})
-		_node.DogID = value
-	}
 	if value, ok := dpoc.mutation.UpdatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -247,6 +249,46 @@ func (dpoc *DogProfileOwnerCreate) createSpec() (*DogProfileOwner, *sqlgraph.Cre
 			Column: dogprofileowner.FieldCreatedAt,
 		})
 		_node.CreatedAt = value
+	}
+	if nodes := dpoc.mutation.OwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   dogprofileowner.OwnerTable,
+			Columns: []string{dogprofileowner.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.OwnerID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := dpoc.mutation.DogIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   dogprofileowner.DogTable,
+			Columns: []string{dogprofileowner.DogColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dog.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.DogID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

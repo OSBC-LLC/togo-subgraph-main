@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
 	"github.com/google/uuid"
 )
@@ -895,6 +896,34 @@ func CreatedAtLT(v time.Time) predicate.Dog {
 func CreatedAtLTE(v time.Time) predicate.Dog {
 	return predicate.Dog(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
+	})
+}
+
+// HasOwnerProfiles applies the HasEdge predicate on the "ownerProfiles" edge.
+func HasOwnerProfiles() predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(OwnerProfilesTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, OwnerProfilesTable, OwnerProfilesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasOwnerProfilesWith applies the HasEdge predicate on the "ownerProfiles" edge with a given conditions (other predicates).
+func HasOwnerProfilesWith(preds ...predicate.DogProfileOwner) predicate.Dog {
+	return predicate.Dog(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(OwnerProfilesInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, OwnerProfilesTable, OwnerProfilesColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 

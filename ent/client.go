@@ -340,6 +340,22 @@ func (c *DogClient) GetX(ctx context.Context, id uuid.UUID) *Dog {
 	return obj
 }
 
+// QueryOwnerProfiles queries the ownerProfiles edge of a Dog.
+func (c *DogClient) QueryOwnerProfiles(d *Dog) *DogProfileOwnerQuery {
+	query := &DogProfileOwnerQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := d.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dog.Table, dog.FieldID, id),
+			sqlgraph.To(dogprofileowner.Table, dogprofileowner.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, dog.OwnerProfilesTable, dog.OwnerProfilesColumn),
+		)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *DogClient) Hooks() []Hook {
 	return c.hooks.Dog
@@ -518,6 +534,38 @@ func (c *DogProfileOwnerClient) GetX(ctx context.Context, id uuid.UUID) *DogProf
 		panic(err)
 	}
 	return obj
+}
+
+// QueryOwner queries the owner edge of a DogProfileOwner.
+func (c *DogProfileOwnerClient) QueryOwner(dpo *DogProfileOwner) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := dpo.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dogprofileowner.Table, dogprofileowner.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dogprofileowner.OwnerTable, dogprofileowner.OwnerColumn),
+		)
+		fromV = sqlgraph.Neighbors(dpo.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDog queries the dog edge of a DogProfileOwner.
+func (c *DogProfileOwnerClient) QueryDog(dpo *DogProfileOwner) *DogQuery {
+	query := &DogQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := dpo.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dogprofileowner.Table, dogprofileowner.FieldID, id),
+			sqlgraph.To(dog.Table, dog.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dogprofileowner.DogTable, dogprofileowner.DogColumn),
+		)
+		fromV = sqlgraph.Neighbors(dpo.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.
@@ -815,6 +863,22 @@ func (c *UserClient) QueryProfile(u *User) *ProfileQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(profile.Table, profile.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, user.ProfileTable, user.ProfileColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDogProfiles queries the dogProfiles edge of a User.
+func (c *UserClient) QueryDogProfiles(u *User) *DogProfileOwnerQuery {
+	query := &DogProfileOwnerQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(dogprofileowner.Table, dogprofileowner.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.DogProfilesTable, user.DogProfilesColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

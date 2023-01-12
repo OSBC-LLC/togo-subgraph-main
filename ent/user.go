@@ -39,11 +39,13 @@ type User struct {
 type UserEdges struct {
 	// Profile holds the value of the profile edge.
 	Profile *Profile `json:"profile,omitempty"`
+	// DogProfiles holds the value of the dogProfiles edge.
+	DogProfiles []*DogProfileOwner `json:"dogProfiles,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 	// totalCount holds the count of the edges above.
-	totalCount [1]*int
+	totalCount [2]*int
 }
 
 // ProfileOrErr returns the Profile value or an error if the edge
@@ -58,6 +60,15 @@ func (e UserEdges) ProfileOrErr() (*Profile, error) {
 		return e.Profile, nil
 	}
 	return nil, &NotLoadedError{edge: "profile"}
+}
+
+// DogProfilesOrErr returns the DogProfiles value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) DogProfilesOrErr() ([]*DogProfileOwner, error) {
+	if e.loadedTypes[1] {
+		return e.DogProfiles, nil
+	}
+	return nil, &NotLoadedError{edge: "dogProfiles"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -136,6 +147,11 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 // QueryProfile queries the "profile" edge of the User entity.
 func (u *User) QueryProfile() *ProfileQuery {
 	return (&UserClient{config: u.config}).QueryProfile(u)
+}
+
+// QueryDogProfiles queries the "dogProfiles" edge of the User entity.
+func (u *User) QueryDogProfiles() *DogProfileOwnerQuery {
+	return (&UserClient{config: u.config}).QueryDogProfiles(u)
 }
 
 // Update returns a builder for updating this User.

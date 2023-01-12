@@ -4,12 +4,14 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/profile"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
@@ -26,9 +28,10 @@ type UserQuery struct {
 	fields     []string
 	predicates []predicate.User
 	// eager-loading edges.
-	withProfile *ProfileQuery
-	modifiers   []func(*sql.Selector)
-	loadTotal   []func(context.Context, []*User) error
+	withProfile     *ProfileQuery
+	withDogProfiles *DogProfileOwnerQuery
+	modifiers       []func(*sql.Selector)
+	loadTotal       []func(context.Context, []*User) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -80,6 +83,28 @@ func (uq *UserQuery) QueryProfile() *ProfileQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(profile.Table, profile.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, user.ProfileTable, user.ProfileColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDogProfiles chains the current query on the "dogProfiles" edge.
+func (uq *UserQuery) QueryDogProfiles() *DogProfileOwnerQuery {
+	query := &DogProfileOwnerQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(dogprofileowner.Table, dogprofileowner.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.DogProfilesTable, user.DogProfilesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -263,12 +288,13 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:      uq.config,
-		limit:       uq.limit,
-		offset:      uq.offset,
-		order:       append([]OrderFunc{}, uq.order...),
-		predicates:  append([]predicate.User{}, uq.predicates...),
-		withProfile: uq.withProfile.Clone(),
+		config:          uq.config,
+		limit:           uq.limit,
+		offset:          uq.offset,
+		order:           append([]OrderFunc{}, uq.order...),
+		predicates:      append([]predicate.User{}, uq.predicates...),
+		withProfile:     uq.withProfile.Clone(),
+		withDogProfiles: uq.withDogProfiles.Clone(),
 		// clone intermediate query.
 		sql:    uq.sql.Clone(),
 		path:   uq.path,
@@ -284,6 +310,17 @@ func (uq *UserQuery) WithProfile(opts ...func(*ProfileQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withProfile = query
+	return uq
+}
+
+// WithDogProfiles tells the query-builder to eager-load the nodes that are connected to
+// the "dogProfiles" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithDogProfiles(opts ...func(*DogProfileOwnerQuery)) *UserQuery {
+	query := &DogProfileOwnerQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withDogProfiles = query
 	return uq
 }
 
@@ -355,8 +392,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			uq.withProfile != nil,
+			uq.withDogProfiles != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -404,6 +442,31 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			for i := range nodes {
 				nodes[i].Edges.Profile = n
 			}
+		}
+	}
+
+	if query := uq.withDogProfiles; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.DogProfiles = []*DogProfileOwner{}
+		}
+		query.Where(predicate.DogProfileOwner(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.DogProfilesColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.OwnerID
+			node, ok := nodeids[fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v for node %v`, fk, n.ID)
+			}
+			node.Edges.DogProfiles = append(node.Edges.DogProfiles, n)
 		}
 	}
 
