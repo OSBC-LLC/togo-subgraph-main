@@ -14,6 +14,11 @@ type NewProfile struct {
 	Description string `json:"description"`
 }
 
+type NewUser struct {
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+}
+
 type Session struct {
 	Jwt string `json:"jwt"`
 }

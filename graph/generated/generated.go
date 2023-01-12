@@ -107,8 +107,9 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateImage   func(childComplexity int, session model.Session, details model.NewImage) int
-		CreateProfile func(childComplexity int, session model.Session, details model.NewProfile) int
+		CreateDefaultUser func(childComplexity int, session model.Session, details model.NewUser) int
+		CreateImage       func(childComplexity int, session model.Session, details model.NewImage) int
+		CreateProfile     func(childComplexity int, session model.Session, details model.NewProfile) int
 	}
 
 	PageInfo struct {
@@ -155,6 +156,7 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	CreateProfile(ctx context.Context, session model.Session, details model.NewProfile) (*ent.Profile, error)
 	CreateImage(ctx context.Context, session model.Session, details model.NewImage) (*ent.Image, error)
+	CreateDefaultUser(ctx context.Context, session model.Session, details model.NewUser) (*ent.User, error)
 }
 type QueryResolver interface {
 	Node(ctx context.Context, id uuid.UUID) (ent.Noder, error)
@@ -471,6 +473,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Image.Width(childComplexity), true
 
+	case "Mutation.createDefaultUser":
+		if e.complexity.Mutation.CreateDefaultUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createDefaultUser_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateDefaultUser(childComplexity, args["session"].(model.Session), args["details"].(model.NewUser)), true
+
 	case "Mutation.createImage":
 		if e.complexity.Mutation.CreateImage == nil {
 			break
@@ -700,6 +714,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputImageWhereInput,
 		ec.unmarshalInputNewImage,
 		ec.unmarshalInputNewProfile,
+		ec.unmarshalInputNewUser,
 		ec.unmarshalInputProfileWhereInput,
 		ec.unmarshalInputSession,
 		ec.unmarshalInputUserWhereInput,
@@ -1426,6 +1441,11 @@ input NewImage {
 	type: String!
 }
 
+input NewUser {
+	firstName: String!
+	lastName: String!
+}
+
 extend type Query {
 	getAppData(session: Session!): User
 }
@@ -1433,6 +1453,7 @@ extend type Query {
 type Mutation {
 	createProfile(session: Session!, details: NewProfile!): Profile
 	createImage(session: Session!, details: NewImage!): Image
+	createDefaultUser(session: Session!, details: NewUser!): User
 }
 `, BuiltIn: false},
 	{Name: "../../federation/directives.graphql", Input: `
@@ -1466,6 +1487,30 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_createDefaultUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.Session
+	if tmp, ok := rawArgs["session"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("session"))
+		arg0, err = ec.unmarshalNSession2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋgraphᚋmodelᚐSession(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["session"] = arg0
+	var arg1 model.NewUser
+	if tmp, ok := rawArgs["details"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("details"))
+		arg1, err = ec.unmarshalNNewUser2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋgraphᚋmodelᚐNewUser(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["details"] = arg1
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createImage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -3790,6 +3835,80 @@ func (ec *executionContext) fieldContext_Mutation_createImage(ctx context.Contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_createImage_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createDefaultUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createDefaultUser(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateDefaultUser(rctx, fc.Args["session"].(model.Session), fc.Args["details"].(model.NewUser))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ent.User)
+	fc.Result = res
+	return ec.marshalOUser2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createDefaultUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "userImageID":
+				return ec.fieldContext_User_userImageID(ctx, field)
+			case "profileID":
+				return ec.fieldContext_User_profileID(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_User_updatedAt(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "profile":
+				return ec.fieldContext_User_profile(ctx, field)
+			case "image":
+				return ec.fieldContext_User_image(ctx, field)
+			case "dogprofiles":
+				return ec.fieldContext_User_dogprofiles(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createDefaultUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -9464,6 +9583,42 @@ func (ec *executionContext) unmarshalInputNewProfile(ctx context.Context, obj in
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj interface{}) (model.NewUser, error) {
+	var it model.NewUser
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"firstName", "lastName"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "firstName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("firstName"))
+			it.FirstName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("lastName"))
+			it.LastName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputProfileWhereInput(ctx context.Context, obj interface{}) (ent.ProfileWhereInput, error) {
 	var it ent.ProfileWhereInput
 	asMap := map[string]interface{}{}
@@ -11105,6 +11260,12 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 				return ec._Mutation_createImage(ctx, field)
 			})
 
+		case "createDefaultUser":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createDefaultUser(ctx, field)
+			})
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -12004,6 +12165,11 @@ func (ec *executionContext) unmarshalNNewImage2githubᚗcomᚋOSBCᚑLLCᚋtogo�
 
 func (ec *executionContext) unmarshalNNewProfile2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋgraphᚋmodelᚐNewProfile(ctx context.Context, v interface{}) (model.NewProfile, error) {
 	res, err := ec.unmarshalInputNewProfile(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNNewUser2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋgraphᚋmodelᚐNewUser(ctx context.Context, v interface{}) (model.NewUser, error) {
+	res, err := ec.unmarshalInputNewUser(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

@@ -22,6 +22,11 @@ input NewImage {
 	type: String!
 }
 
+input NewUser {
+	firstName: String!
+	lastName: String!
+}
+
 extend type Query {
 	getAppData(session: Session!): User
 }
@@ -29,4 +34,5 @@ extend type Query {
 type Mutation {
 	createProfile(session: Session!, details: NewProfile!): Profile
 	createImage(session: Session!, details: NewImage!): Image
+	createDefaultUser(session: Session!, details: NewUser!): User
 }

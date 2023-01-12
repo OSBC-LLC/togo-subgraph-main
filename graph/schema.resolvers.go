@@ -5,10 +5,12 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/OSBC-LLC/togo-subgraph-main/ent"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/profile"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
 	"github.com/OSBC-LLC/togo-subgraph-main/graph/generated"
 	"github.com/OSBC-LLC/togo-subgraph-main/graph/model"
 	"github.com/google/uuid"
@@ -40,9 +42,33 @@ func (r *mutationResolver) CreateImage(ctx context.Context, session model.Sessio
 		Save(ctx)
 }
 
+// CreateDefaultUser is the resolver for the createDefaultUser field.
+func (r *mutationResolver) CreateDefaultUser(ctx context.Context, session model.Session, details model.NewUser) (*ent.User, error) {
+	t := time.Now()
+	defaultImage, err := r.client.Image.Query().Where(image.URL("default")).Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defaultProfile, err := r.client.Profile.Query().Where(profile.Name("standard")).Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.client.User.Create().
+		SetID(uuid.New()).
+		SetFirstName(details.FirstName).
+		SetLastName(details.LastName).
+		SetCreatedAt(t).
+		SetUpdatedAt(t).
+		SetImage(defaultImage).
+		SetProfile(defaultProfile).
+		Save(ctx)
+}
+
 // GetAppData is the resolver for the getAppData field.
 func (r *queryResolver) GetAppData(ctx context.Context, session model.Session) (*ent.User, error) {
-	panic(fmt.Errorf("not implemented: GetAppData - getAppData"))
+	return r.client.User.Query().
+		Where(user.FirstName("Will")).
+		Only(ctx)
 }
 
 // Mutation returns generated.MutationResolver implementation.

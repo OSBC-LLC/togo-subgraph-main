@@ -9,6 +9,7 @@ import (
 	_ "github.com/lib/pq"
 
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/migrate"
@@ -58,6 +59,7 @@ func main() {
 	}
 
 	srv := handler.NewDefaultServer(graph.NewSchema(client))
+	srv.Use(extension.FixedComplexityLimit(10))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle(newrelic.WrapHandle(newRelicApp, "/query", srv))
