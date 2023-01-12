@@ -28,7 +28,16 @@ func (r *mutationResolver) CreateProfile(ctx context.Context, session model.Sess
 
 // CreateImage is the resolver for the createImage field.
 func (r *mutationResolver) CreateImage(ctx context.Context, session model.Session, details model.NewImage) (*ent.Image, error) {
-	panic(fmt.Errorf("not implemented: CreateImage - createImage"))
+	t := time.Now()
+	return r.client.Image.Create().
+		SetID(uuid.New()).
+		SetURL(details.URL).
+		SetWidth(details.Width).
+		SetHeight(details.Height).
+		SetType(details.Type).
+		SetCreatedAt(t).
+		SetUpdatedAt(t).
+		Save(ctx)
 }
 
 // GetAppData is the resolver for the getAppData field.
