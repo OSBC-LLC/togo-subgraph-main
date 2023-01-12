@@ -8,7 +8,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
 	"github.com/google/uuid"
 )
 
@@ -25,6 +27,50 @@ type DogProfileOwner struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the DogProfileOwnerQuery when eager-loading is set.
+	Edges DogProfileOwnerEdges `json:"edges"`
+}
+
+// DogProfileOwnerEdges holds the relations/edges for other nodes in the graph.
+type DogProfileOwnerEdges struct {
+	// Owner holds the value of the owner edge.
+	Owner *User `json:"owner,omitempty"`
+	// Dog holds the value of the dog edge.
+	Dog *Dog `json:"dog,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+	// totalCount holds the count of the edges above.
+	totalCount [2]*int
+}
+
+// OwnerOrErr returns the Owner value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e DogProfileOwnerEdges) OwnerOrErr() (*User, error) {
+	if e.loadedTypes[0] {
+		if e.Owner == nil {
+			// The edge owner was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.Owner, nil
+	}
+	return nil, &NotLoadedError{edge: "owner"}
+}
+
+// DogOrErr returns the Dog value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e DogProfileOwnerEdges) DogOrErr() (*Dog, error) {
+	if e.loadedTypes[1] {
+		if e.Dog == nil {
+			// The edge dog was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: dog.Label}
+		}
+		return e.Dog, nil
+	}
+	return nil, &NotLoadedError{edge: "dog"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -84,6 +130,16 @@ func (dpo *DogProfileOwner) assignValues(columns []string, values []interface{})
 		}
 	}
 	return nil
+}
+
+// QueryOwner queries the "owner" edge of the DogProfileOwner entity.
+func (dpo *DogProfileOwner) QueryOwner() *UserQuery {
+	return (&DogProfileOwnerClient{config: dpo.config}).QueryOwner(dpo)
+}
+
+// QueryDog queries the "dog" edge of the DogProfileOwner entity.
+func (dpo *DogProfileOwner) QueryDog() *DogQuery {
+	return (&DogProfileOwnerClient{config: dpo.config}).QueryDog(dpo)
 }
 
 // Update returns a builder for updating this DogProfileOwner.

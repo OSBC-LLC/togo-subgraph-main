@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -12,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/profile"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
 	"github.com/google/uuid"
 )
 
@@ -24,8 +26,10 @@ type ProfileQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Profile
-	modifiers  []func(*sql.Selector)
-	loadTotal  []func(context.Context, []*Profile) error
+	// eager-loading edges.
+	withUsers *UserQuery
+	modifiers []func(*sql.Selector)
+	loadTotal []func(context.Context, []*Profile) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -60,6 +64,28 @@ func (pq *ProfileQuery) Unique(unique bool) *ProfileQuery {
 func (pq *ProfileQuery) Order(o ...OrderFunc) *ProfileQuery {
 	pq.order = append(pq.order, o...)
 	return pq
+}
+
+// QueryUsers chains the current query on the "users" edge.
+func (pq *ProfileQuery) QueryUsers() *UserQuery {
+	query := &UserQuery{config: pq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(profile.Table, profile.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, profile.UsersTable, profile.UsersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Profile entity from the query.
@@ -243,11 +269,23 @@ func (pq *ProfileQuery) Clone() *ProfileQuery {
 		offset:     pq.offset,
 		order:      append([]OrderFunc{}, pq.order...),
 		predicates: append([]predicate.Profile{}, pq.predicates...),
+		withUsers:  pq.withUsers.Clone(),
 		// clone intermediate query.
 		sql:    pq.sql.Clone(),
 		path:   pq.path,
 		unique: pq.unique,
 	}
+}
+
+// WithUsers tells the query-builder to eager-load the nodes that are connected to
+// the "users" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *ProfileQuery) WithUsers(opts ...func(*UserQuery)) *ProfileQuery {
+	query := &UserQuery{config: pq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withUsers = query
+	return pq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -316,8 +354,11 @@ func (pq *ProfileQuery) prepareQuery(ctx context.Context) error {
 
 func (pq *ProfileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Profile, error) {
 	var (
-		nodes = []*Profile{}
-		_spec = pq.querySpec()
+		nodes       = []*Profile{}
+		_spec       = pq.querySpec()
+		loadedTypes = [1]bool{
+			pq.withUsers != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		return (*Profile).scanValues(nil, columns)
@@ -325,6 +366,7 @@ func (pq *ProfileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Prof
 	_spec.Assign = func(columns []string, values []interface{}) error {
 		node := &Profile{config: pq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if len(pq.modifiers) > 0 {
@@ -339,6 +381,32 @@ func (pq *ProfileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Prof
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := pq.withUsers; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*Profile)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Users = []*User{}
+		}
+		query.Where(predicate.User(func(s *sql.Selector) {
+			s.Where(sql.InValues(profile.UsersColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.ProfileID
+			node, ok := nodeids[fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "profile_id" returned %v for node %v`, fk, n.ID)
+			}
+			node.Edges.Users = append(node.Edges.Users, n)
+		}
+	}
+
 	for i := range pq.loadTotal {
 		if err := pq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err

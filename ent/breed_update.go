@@ -12,7 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/breed"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofilebreed"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // BreedUpdate is the builder for updating Breed entities.
@@ -62,9 +64,45 @@ func (bu *BreedUpdate) SetNillableCreatedAt(t *time.Time) *BreedUpdate {
 	return bu
 }
 
+// AddDogProfileIDs adds the "dogProfiles" edge to the DogProfileBreed entity by IDs.
+func (bu *BreedUpdate) AddDogProfileIDs(ids ...uuid.UUID) *BreedUpdate {
+	bu.mutation.AddDogProfileIDs(ids...)
+	return bu
+}
+
+// AddDogProfiles adds the "dogProfiles" edges to the DogProfileBreed entity.
+func (bu *BreedUpdate) AddDogProfiles(d ...*DogProfileBreed) *BreedUpdate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return bu.AddDogProfileIDs(ids...)
+}
+
 // Mutation returns the BreedMutation object of the builder.
 func (bu *BreedUpdate) Mutation() *BreedMutation {
 	return bu.mutation
+}
+
+// ClearDogProfiles clears all "dogProfiles" edges to the DogProfileBreed entity.
+func (bu *BreedUpdate) ClearDogProfiles() *BreedUpdate {
+	bu.mutation.ClearDogProfiles()
+	return bu
+}
+
+// RemoveDogProfileIDs removes the "dogProfiles" edge to DogProfileBreed entities by IDs.
+func (bu *BreedUpdate) RemoveDogProfileIDs(ids ...uuid.UUID) *BreedUpdate {
+	bu.mutation.RemoveDogProfileIDs(ids...)
+	return bu
+}
+
+// RemoveDogProfiles removes "dogProfiles" edges to DogProfileBreed entities.
+func (bu *BreedUpdate) RemoveDogProfiles(d ...*DogProfileBreed) *BreedUpdate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return bu.RemoveDogProfileIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -160,6 +198,60 @@ func (bu *BreedUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: breed.FieldCreatedAt,
 		})
 	}
+	if bu.mutation.DogProfilesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   breed.DogProfilesTable,
+			Columns: []string{breed.DogProfilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dogprofilebreed.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.RemovedDogProfilesIDs(); len(nodes) > 0 && !bu.mutation.DogProfilesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   breed.DogProfilesTable,
+			Columns: []string{breed.DogProfilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dogprofilebreed.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.DogProfilesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   breed.DogProfilesTable,
+			Columns: []string{breed.DogProfilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dogprofilebreed.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, bu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{breed.Label}
@@ -213,9 +305,45 @@ func (buo *BreedUpdateOne) SetNillableCreatedAt(t *time.Time) *BreedUpdateOne {
 	return buo
 }
 
+// AddDogProfileIDs adds the "dogProfiles" edge to the DogProfileBreed entity by IDs.
+func (buo *BreedUpdateOne) AddDogProfileIDs(ids ...uuid.UUID) *BreedUpdateOne {
+	buo.mutation.AddDogProfileIDs(ids...)
+	return buo
+}
+
+// AddDogProfiles adds the "dogProfiles" edges to the DogProfileBreed entity.
+func (buo *BreedUpdateOne) AddDogProfiles(d ...*DogProfileBreed) *BreedUpdateOne {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return buo.AddDogProfileIDs(ids...)
+}
+
 // Mutation returns the BreedMutation object of the builder.
 func (buo *BreedUpdateOne) Mutation() *BreedMutation {
 	return buo.mutation
+}
+
+// ClearDogProfiles clears all "dogProfiles" edges to the DogProfileBreed entity.
+func (buo *BreedUpdateOne) ClearDogProfiles() *BreedUpdateOne {
+	buo.mutation.ClearDogProfiles()
+	return buo
+}
+
+// RemoveDogProfileIDs removes the "dogProfiles" edge to DogProfileBreed entities by IDs.
+func (buo *BreedUpdateOne) RemoveDogProfileIDs(ids ...uuid.UUID) *BreedUpdateOne {
+	buo.mutation.RemoveDogProfileIDs(ids...)
+	return buo
+}
+
+// RemoveDogProfiles removes "dogProfiles" edges to DogProfileBreed entities.
+func (buo *BreedUpdateOne) RemoveDogProfiles(d ...*DogProfileBreed) *BreedUpdateOne {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return buo.RemoveDogProfileIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -340,6 +468,60 @@ func (buo *BreedUpdateOne) sqlSave(ctx context.Context) (_node *Breed, err error
 			Value:  value,
 			Column: breed.FieldCreatedAt,
 		})
+	}
+	if buo.mutation.DogProfilesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   breed.DogProfilesTable,
+			Columns: []string{breed.DogProfilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dogprofilebreed.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.RemovedDogProfilesIDs(); len(nodes) > 0 && !buo.mutation.DogProfilesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   breed.DogProfilesTable,
+			Columns: []string{breed.DogProfilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dogprofilebreed.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.DogProfilesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   breed.DogProfilesTable,
+			Columns: []string{breed.DogProfilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dogprofilebreed.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Breed{config: buo.config}
 	_spec.Assign = _node.assignValues

@@ -10,7 +10,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
 	"github.com/google/uuid"
 )
 
@@ -85,6 +87,36 @@ func (ic *ImageCreate) SetNillableID(u *uuid.UUID) *ImageCreate {
 		ic.SetID(*u)
 	}
 	return ic
+}
+
+// AddUserIDs adds the "users" edge to the User entity by IDs.
+func (ic *ImageCreate) AddUserIDs(ids ...uuid.UUID) *ImageCreate {
+	ic.mutation.AddUserIDs(ids...)
+	return ic
+}
+
+// AddUsers adds the "users" edges to the User entity.
+func (ic *ImageCreate) AddUsers(u ...*User) *ImageCreate {
+	ids := make([]uuid.UUID, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return ic.AddUserIDs(ids...)
+}
+
+// AddDogIDs adds the "dogs" edge to the Dog entity by IDs.
+func (ic *ImageCreate) AddDogIDs(ids ...uuid.UUID) *ImageCreate {
+	ic.mutation.AddDogIDs(ids...)
+	return ic
+}
+
+// AddDogs adds the "dogs" edges to the Dog entity.
+func (ic *ImageCreate) AddDogs(d ...*Dog) *ImageCreate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return ic.AddDogIDs(ids...)
 }
 
 // Mutation returns the ImageMutation object of the builder.
@@ -291,6 +323,44 @@ func (ic *ImageCreate) createSpec() (*Image, *sqlgraph.CreateSpec) {
 			Column: image.FieldCreatedAt,
 		})
 		_node.CreatedAt = value
+	}
+	if nodes := ic.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   image.UsersTable,
+			Columns: []string{image.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ic.mutation.DogsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   image.DogsTable,
+			Columns: []string{image.DogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dog.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

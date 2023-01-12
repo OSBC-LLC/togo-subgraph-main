@@ -31,8 +31,35 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
+	// EdgeImage holds the string denoting the image edge name in mutations.
+	EdgeImage = "image"
+	// EdgeOwnerProfiles holds the string denoting the ownerprofiles edge name in mutations.
+	EdgeOwnerProfiles = "ownerProfiles"
+	// EdgeBreedProfiles holds the string denoting the breedprofiles edge name in mutations.
+	EdgeBreedProfiles = "breedProfiles"
 	// Table holds the table name of the dog in the database.
 	Table = "dogs"
+	// ImageTable is the table that holds the image relation/edge.
+	ImageTable = "dogs"
+	// ImageInverseTable is the table name for the Image entity.
+	// It exists in this package in order to avoid circular dependency with the "image" package.
+	ImageInverseTable = "images"
+	// ImageColumn is the table column denoting the image relation/edge.
+	ImageColumn = "dog_img_id"
+	// OwnerProfilesTable is the table that holds the ownerProfiles relation/edge.
+	OwnerProfilesTable = "dog_profile_owners"
+	// OwnerProfilesInverseTable is the table name for the DogProfileOwner entity.
+	// It exists in this package in order to avoid circular dependency with the "dogprofileowner" package.
+	OwnerProfilesInverseTable = "dog_profile_owners"
+	// OwnerProfilesColumn is the table column denoting the ownerProfiles relation/edge.
+	OwnerProfilesColumn = "dog_id"
+	// BreedProfilesTable is the table that holds the breedProfiles relation/edge.
+	BreedProfilesTable = "dog_profile_breeds"
+	// BreedProfilesInverseTable is the table name for the DogProfileBreed entity.
+	// It exists in this package in order to avoid circular dependency with the "dogprofilebreed" package.
+	BreedProfilesInverseTable = "dog_profile_breeds"
+	// BreedProfilesColumn is the table column denoting the breedProfiles relation/edge.
+	BreedProfilesColumn = "dog_id"
 )
 
 // Columns holds all SQL columns for dog fields.

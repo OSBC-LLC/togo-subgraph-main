@@ -11,6 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofilebreed"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
 	"github.com/google/uuid"
 )
 
@@ -103,6 +106,47 @@ func (dc *DogCreate) SetNillableID(u *uuid.UUID) *DogCreate {
 		dc.SetID(*u)
 	}
 	return dc
+}
+
+// SetImageID sets the "image" edge to the Image entity by ID.
+func (dc *DogCreate) SetImageID(id uuid.UUID) *DogCreate {
+	dc.mutation.SetImageID(id)
+	return dc
+}
+
+// SetImage sets the "image" edge to the Image entity.
+func (dc *DogCreate) SetImage(i *Image) *DogCreate {
+	return dc.SetImageID(i.ID)
+}
+
+// AddOwnerProfileIDs adds the "ownerProfiles" edge to the DogProfileOwner entity by IDs.
+func (dc *DogCreate) AddOwnerProfileIDs(ids ...uuid.UUID) *DogCreate {
+	dc.mutation.AddOwnerProfileIDs(ids...)
+	return dc
+}
+
+// AddOwnerProfiles adds the "ownerProfiles" edges to the DogProfileOwner entity.
+func (dc *DogCreate) AddOwnerProfiles(d ...*DogProfileOwner) *DogCreate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return dc.AddOwnerProfileIDs(ids...)
+}
+
+// AddBreedProfileIDs adds the "breedProfiles" edge to the DogProfileBreed entity by IDs.
+func (dc *DogCreate) AddBreedProfileIDs(ids ...uuid.UUID) *DogCreate {
+	dc.mutation.AddBreedProfileIDs(ids...)
+	return dc
+}
+
+// AddBreedProfiles adds the "breedProfiles" edges to the DogProfileBreed entity.
+func (dc *DogCreate) AddBreedProfiles(d ...*DogProfileBreed) *DogCreate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return dc.AddBreedProfileIDs(ids...)
 }
 
 // Mutation returns the DogMutation object of the builder.
@@ -240,6 +284,9 @@ func (dc *DogCreate) check() error {
 	if _, ok := dc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Dog.created_at"`)}
 	}
+	if _, ok := dc.mutation.ImageID(); !ok {
+		return &ValidationError{Name: "image", err: errors.New(`ent: missing required edge "Dog.image"`)}
+	}
 	return nil
 }
 
@@ -324,14 +371,6 @@ func (dc *DogCreate) createSpec() (*Dog, *sqlgraph.CreateSpec) {
 		})
 		_node.Birthday = value
 	}
-	if value, ok := dc.mutation.DogImgID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: dog.FieldDogImgID,
-		})
-		_node.DogImgID = value
-	}
 	if value, ok := dc.mutation.UpdatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -347,6 +386,64 @@ func (dc *DogCreate) createSpec() (*Dog, *sqlgraph.CreateSpec) {
 			Column: dog.FieldCreatedAt,
 		})
 		_node.CreatedAt = value
+	}
+	if nodes := dc.mutation.ImageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   dog.ImageTable,
+			Columns: []string{dog.ImageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: image.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.DogImgID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := dc.mutation.OwnerProfilesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   dog.OwnerProfilesTable,
+			Columns: []string{dog.OwnerProfilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dogprofileowner.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := dc.mutation.BreedProfilesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   dog.BreedProfilesTable,
+			Columns: []string{dog.BreedProfilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dogprofilebreed.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

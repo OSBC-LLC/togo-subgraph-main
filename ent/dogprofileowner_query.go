@@ -10,8 +10,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
 	"github.com/google/uuid"
 )
 
@@ -24,8 +26,11 @@ type DogProfileOwnerQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.DogProfileOwner
-	modifiers  []func(*sql.Selector)
-	loadTotal  []func(context.Context, []*DogProfileOwner) error
+	// eager-loading edges.
+	withOwner *UserQuery
+	withDog   *DogQuery
+	modifiers []func(*sql.Selector)
+	loadTotal []func(context.Context, []*DogProfileOwner) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -60,6 +65,50 @@ func (dpoq *DogProfileOwnerQuery) Unique(unique bool) *DogProfileOwnerQuery {
 func (dpoq *DogProfileOwnerQuery) Order(o ...OrderFunc) *DogProfileOwnerQuery {
 	dpoq.order = append(dpoq.order, o...)
 	return dpoq
+}
+
+// QueryOwner chains the current query on the "owner" edge.
+func (dpoq *DogProfileOwnerQuery) QueryOwner() *UserQuery {
+	query := &UserQuery{config: dpoq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := dpoq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := dpoq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dogprofileowner.Table, dogprofileowner.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dogprofileowner.OwnerTable, dogprofileowner.OwnerColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(dpoq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDog chains the current query on the "dog" edge.
+func (dpoq *DogProfileOwnerQuery) QueryDog() *DogQuery {
+	query := &DogQuery{config: dpoq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := dpoq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := dpoq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dogprofileowner.Table, dogprofileowner.FieldID, selector),
+			sqlgraph.To(dog.Table, dog.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dogprofileowner.DogTable, dogprofileowner.DogColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(dpoq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first DogProfileOwner entity from the query.
@@ -243,11 +292,35 @@ func (dpoq *DogProfileOwnerQuery) Clone() *DogProfileOwnerQuery {
 		offset:     dpoq.offset,
 		order:      append([]OrderFunc{}, dpoq.order...),
 		predicates: append([]predicate.DogProfileOwner{}, dpoq.predicates...),
+		withOwner:  dpoq.withOwner.Clone(),
+		withDog:    dpoq.withDog.Clone(),
 		// clone intermediate query.
 		sql:    dpoq.sql.Clone(),
 		path:   dpoq.path,
 		unique: dpoq.unique,
 	}
+}
+
+// WithOwner tells the query-builder to eager-load the nodes that are connected to
+// the "owner" edge. The optional arguments are used to configure the query builder of the edge.
+func (dpoq *DogProfileOwnerQuery) WithOwner(opts ...func(*UserQuery)) *DogProfileOwnerQuery {
+	query := &UserQuery{config: dpoq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	dpoq.withOwner = query
+	return dpoq
+}
+
+// WithDog tells the query-builder to eager-load the nodes that are connected to
+// the "dog" edge. The optional arguments are used to configure the query builder of the edge.
+func (dpoq *DogProfileOwnerQuery) WithDog(opts ...func(*DogQuery)) *DogProfileOwnerQuery {
+	query := &DogQuery{config: dpoq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	dpoq.withDog = query
+	return dpoq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -316,8 +389,12 @@ func (dpoq *DogProfileOwnerQuery) prepareQuery(ctx context.Context) error {
 
 func (dpoq *DogProfileOwnerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*DogProfileOwner, error) {
 	var (
-		nodes = []*DogProfileOwner{}
-		_spec = dpoq.querySpec()
+		nodes       = []*DogProfileOwner{}
+		_spec       = dpoq.querySpec()
+		loadedTypes = [2]bool{
+			dpoq.withOwner != nil,
+			dpoq.withDog != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		return (*DogProfileOwner).scanValues(nil, columns)
@@ -325,6 +402,7 @@ func (dpoq *DogProfileOwnerQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	_spec.Assign = func(columns []string, values []interface{}) error {
 		node := &DogProfileOwner{config: dpoq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if len(dpoq.modifiers) > 0 {
@@ -339,6 +417,59 @@ func (dpoq *DogProfileOwnerQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := dpoq.withOwner; query != nil {
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*DogProfileOwner)
+		for i := range nodes {
+			fk := nodes[i].OwnerID
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(user.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Owner = n
+			}
+		}
+	}
+
+	if query := dpoq.withDog; query != nil {
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*DogProfileOwner)
+		for i := range nodes {
+			fk := nodes[i].DogID
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(dog.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "dog_id" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Dog = n
+			}
+		}
+	}
+
 	for i := range dpoq.loadTotal {
 		if err := dpoq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err

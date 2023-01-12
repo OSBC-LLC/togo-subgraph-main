@@ -20,6 +20,7 @@ import (
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -249,6 +250,22 @@ func (c *BreedClient) GetX(ctx context.Context, id uuid.UUID) *Breed {
 	return obj
 }
 
+// QueryDogProfiles queries the dogProfiles edge of a Breed.
+func (c *BreedClient) QueryDogProfiles(b *Breed) *DogProfileBreedQuery {
+	query := &DogProfileBreedQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(breed.Table, breed.FieldID, id),
+			sqlgraph.To(dogprofilebreed.Table, dogprofilebreed.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, breed.DogProfilesTable, breed.DogProfilesColumn),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *BreedClient) Hooks() []Hook {
 	return c.hooks.Breed
@@ -337,6 +354,54 @@ func (c *DogClient) GetX(ctx context.Context, id uuid.UUID) *Dog {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryImage queries the image edge of a Dog.
+func (c *DogClient) QueryImage(d *Dog) *ImageQuery {
+	query := &ImageQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := d.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dog.Table, dog.FieldID, id),
+			sqlgraph.To(image.Table, image.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dog.ImageTable, dog.ImageColumn),
+		)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryOwnerProfiles queries the ownerProfiles edge of a Dog.
+func (c *DogClient) QueryOwnerProfiles(d *Dog) *DogProfileOwnerQuery {
+	query := &DogProfileOwnerQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := d.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dog.Table, dog.FieldID, id),
+			sqlgraph.To(dogprofileowner.Table, dogprofileowner.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, dog.OwnerProfilesTable, dog.OwnerProfilesColumn),
+		)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryBreedProfiles queries the breedProfiles edge of a Dog.
+func (c *DogClient) QueryBreedProfiles(d *Dog) *DogProfileBreedQuery {
+	query := &DogProfileBreedQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := d.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dog.Table, dog.FieldID, id),
+			sqlgraph.To(dogprofilebreed.Table, dogprofilebreed.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, dog.BreedProfilesTable, dog.BreedProfilesColumn),
+		)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.
@@ -429,6 +494,38 @@ func (c *DogProfileBreedClient) GetX(ctx context.Context, id uuid.UUID) *DogProf
 	return obj
 }
 
+// QueryDog queries the dog edge of a DogProfileBreed.
+func (c *DogProfileBreedClient) QueryDog(dpb *DogProfileBreed) *DogQuery {
+	query := &DogQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := dpb.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dogprofilebreed.Table, dogprofilebreed.FieldID, id),
+			sqlgraph.To(dog.Table, dog.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dogprofilebreed.DogTable, dogprofilebreed.DogColumn),
+		)
+		fromV = sqlgraph.Neighbors(dpb.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryBreed queries the breed edge of a DogProfileBreed.
+func (c *DogProfileBreedClient) QueryBreed(dpb *DogProfileBreed) *BreedQuery {
+	query := &BreedQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := dpb.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dogprofilebreed.Table, dogprofilebreed.FieldID, id),
+			sqlgraph.To(breed.Table, breed.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dogprofilebreed.BreedTable, dogprofilebreed.BreedColumn),
+		)
+		fromV = sqlgraph.Neighbors(dpb.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *DogProfileBreedClient) Hooks() []Hook {
 	return c.hooks.DogProfileBreed
@@ -517,6 +614,38 @@ func (c *DogProfileOwnerClient) GetX(ctx context.Context, id uuid.UUID) *DogProf
 		panic(err)
 	}
 	return obj
+}
+
+// QueryOwner queries the owner edge of a DogProfileOwner.
+func (c *DogProfileOwnerClient) QueryOwner(dpo *DogProfileOwner) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := dpo.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dogprofileowner.Table, dogprofileowner.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dogprofileowner.OwnerTable, dogprofileowner.OwnerColumn),
+		)
+		fromV = sqlgraph.Neighbors(dpo.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDog queries the dog edge of a DogProfileOwner.
+func (c *DogProfileOwnerClient) QueryDog(dpo *DogProfileOwner) *DogQuery {
+	query := &DogQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := dpo.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dogprofileowner.Table, dogprofileowner.FieldID, id),
+			sqlgraph.To(dog.Table, dog.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dogprofileowner.DogTable, dogprofileowner.DogColumn),
+		)
+		fromV = sqlgraph.Neighbors(dpo.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.
@@ -609,6 +738,38 @@ func (c *ImageClient) GetX(ctx context.Context, id uuid.UUID) *Image {
 	return obj
 }
 
+// QueryUsers queries the users edge of a Image.
+func (c *ImageClient) QueryUsers(i *Image) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := i.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(image.Table, image.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, image.UsersTable, image.UsersColumn),
+		)
+		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDogs queries the dogs edge of a Image.
+func (c *ImageClient) QueryDogs(i *Image) *DogQuery {
+	query := &DogQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := i.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(image.Table, image.FieldID, id),
+			sqlgraph.To(dog.Table, dog.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, image.DogsTable, image.DogsColumn),
+		)
+		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ImageClient) Hooks() []Hook {
 	return c.hooks.Image
@@ -699,6 +860,22 @@ func (c *ProfileClient) GetX(ctx context.Context, id uuid.UUID) *Profile {
 	return obj
 }
 
+// QueryUsers queries the users edge of a Profile.
+func (c *ProfileClient) QueryUsers(pr *Profile) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(profile.Table, profile.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, profile.UsersTable, profile.UsersColumn),
+		)
+		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ProfileClient) Hooks() []Hook {
 	return c.hooks.Profile
@@ -787,6 +964,54 @@ func (c *UserClient) GetX(ctx context.Context, id uuid.UUID) *User {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryProfile queries the profile edge of a User.
+func (c *UserClient) QueryProfile(u *User) *ProfileQuery {
+	query := &ProfileQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(profile.Table, profile.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, user.ProfileTable, user.ProfileColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryImage queries the image edge of a User.
+func (c *UserClient) QueryImage(u *User) *ImageQuery {
+	query := &ImageQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(image.Table, image.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, user.ImageTable, user.ImageColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDogProfiles queries the dogProfiles edge of a User.
+func (c *UserClient) QueryDogProfiles(u *User) *DogProfileOwnerQuery {
+	query := &DogProfileOwnerQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(dogprofileowner.Table, dogprofileowner.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.DogProfilesTable, user.DogProfilesColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.

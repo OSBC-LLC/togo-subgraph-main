@@ -25,6 +25,29 @@ type Profile struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the ProfileQuery when eager-loading is set.
+	Edges ProfileEdges `json:"edges"`
+}
+
+// ProfileEdges holds the relations/edges for other nodes in the graph.
+type ProfileEdges struct {
+	// Users holds the value of the users edge.
+	Users []*User `json:"users,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+	// totalCount holds the count of the edges above.
+	totalCount [1]*int
+}
+
+// UsersOrErr returns the Users value or an error if the edge
+// was not loaded in eager-loading.
+func (e ProfileEdges) UsersOrErr() ([]*User, error) {
+	if e.loadedTypes[0] {
+		return e.Users, nil
+	}
+	return nil, &NotLoadedError{edge: "users"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -86,6 +109,11 @@ func (pr *Profile) assignValues(columns []string, values []interface{}) error {
 		}
 	}
 	return nil
+}
+
+// QueryUsers queries the "users" edge of the Profile entity.
+func (pr *Profile) QueryUsers() *UserQuery {
+	return (&ProfileClient{config: pr.config}).QueryUsers(pr)
 }
 
 // Update returns a builder for updating this Profile.

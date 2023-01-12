@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
 	"github.com/google/uuid"
 )
@@ -393,34 +394,6 @@ func UserImageIDNotIn(vs ...uuid.UUID) predicate.User {
 	})
 }
 
-// UserImageIDGT applies the GT predicate on the "user_image_id" field.
-func UserImageIDGT(v uuid.UUID) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUserImageID), v))
-	})
-}
-
-// UserImageIDGTE applies the GTE predicate on the "user_image_id" field.
-func UserImageIDGTE(v uuid.UUID) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUserImageID), v))
-	})
-}
-
-// UserImageIDLT applies the LT predicate on the "user_image_id" field.
-func UserImageIDLT(v uuid.UUID) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUserImageID), v))
-	})
-}
-
-// UserImageIDLTE applies the LTE predicate on the "user_image_id" field.
-func UserImageIDLTE(v uuid.UUID) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUserImageID), v))
-	})
-}
-
 // ProfileIDEQ applies the EQ predicate on the "profile_id" field.
 func ProfileIDEQ(v uuid.UUID) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -466,34 +439,6 @@ func ProfileIDNotIn(vs ...uuid.UUID) predicate.User {
 			return
 		}
 		s.Where(sql.NotIn(s.C(FieldProfileID), v...))
-	})
-}
-
-// ProfileIDGT applies the GT predicate on the "profile_id" field.
-func ProfileIDGT(v uuid.UUID) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldProfileID), v))
-	})
-}
-
-// ProfileIDGTE applies the GTE predicate on the "profile_id" field.
-func ProfileIDGTE(v uuid.UUID) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldProfileID), v))
-	})
-}
-
-// ProfileIDLT applies the LT predicate on the "profile_id" field.
-func ProfileIDLT(v uuid.UUID) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldProfileID), v))
-	})
-}
-
-// ProfileIDLTE applies the LTE predicate on the "profile_id" field.
-func ProfileIDLTE(v uuid.UUID) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldProfileID), v))
 	})
 }
 
@@ -646,6 +591,90 @@ func CreatedAtLT(v time.Time) predicate.User {
 func CreatedAtLTE(v time.Time) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
+	})
+}
+
+// HasProfile applies the HasEdge predicate on the "profile" edge.
+func HasProfile() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ProfileTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ProfileTable, ProfileColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasProfileWith applies the HasEdge predicate on the "profile" edge with a given conditions (other predicates).
+func HasProfileWith(preds ...predicate.Profile) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ProfileInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ProfileTable, ProfileColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasImage applies the HasEdge predicate on the "image" edge.
+func HasImage() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ImageTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ImageTable, ImageColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasImageWith applies the HasEdge predicate on the "image" edge with a given conditions (other predicates).
+func HasImageWith(preds ...predicate.Image) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ImageInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ImageTable, ImageColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasDogProfiles applies the HasEdge predicate on the "dogProfiles" edge.
+func HasDogProfiles() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(DogProfilesTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, DogProfilesTable, DogProfilesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDogProfilesWith applies the HasEdge predicate on the "dogProfiles" edge with a given conditions (other predicates).
+func HasDogProfilesWith(preds ...predicate.DogProfileOwner) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(DogProfilesInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, DogProfilesTable, DogProfilesColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 

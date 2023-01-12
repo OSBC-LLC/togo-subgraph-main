@@ -11,8 +11,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/user"
+	"github.com/google/uuid"
 )
 
 // ImageUpdate is the builder for updating Image entities.
@@ -94,9 +97,81 @@ func (iu *ImageUpdate) SetNillableCreatedAt(t *time.Time) *ImageUpdate {
 	return iu
 }
 
+// AddUserIDs adds the "users" edge to the User entity by IDs.
+func (iu *ImageUpdate) AddUserIDs(ids ...uuid.UUID) *ImageUpdate {
+	iu.mutation.AddUserIDs(ids...)
+	return iu
+}
+
+// AddUsers adds the "users" edges to the User entity.
+func (iu *ImageUpdate) AddUsers(u ...*User) *ImageUpdate {
+	ids := make([]uuid.UUID, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return iu.AddUserIDs(ids...)
+}
+
+// AddDogIDs adds the "dogs" edge to the Dog entity by IDs.
+func (iu *ImageUpdate) AddDogIDs(ids ...uuid.UUID) *ImageUpdate {
+	iu.mutation.AddDogIDs(ids...)
+	return iu
+}
+
+// AddDogs adds the "dogs" edges to the Dog entity.
+func (iu *ImageUpdate) AddDogs(d ...*Dog) *ImageUpdate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return iu.AddDogIDs(ids...)
+}
+
 // Mutation returns the ImageMutation object of the builder.
 func (iu *ImageUpdate) Mutation() *ImageMutation {
 	return iu.mutation
+}
+
+// ClearUsers clears all "users" edges to the User entity.
+func (iu *ImageUpdate) ClearUsers() *ImageUpdate {
+	iu.mutation.ClearUsers()
+	return iu
+}
+
+// RemoveUserIDs removes the "users" edge to User entities by IDs.
+func (iu *ImageUpdate) RemoveUserIDs(ids ...uuid.UUID) *ImageUpdate {
+	iu.mutation.RemoveUserIDs(ids...)
+	return iu
+}
+
+// RemoveUsers removes "users" edges to User entities.
+func (iu *ImageUpdate) RemoveUsers(u ...*User) *ImageUpdate {
+	ids := make([]uuid.UUID, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return iu.RemoveUserIDs(ids...)
+}
+
+// ClearDogs clears all "dogs" edges to the Dog entity.
+func (iu *ImageUpdate) ClearDogs() *ImageUpdate {
+	iu.mutation.ClearDogs()
+	return iu
+}
+
+// RemoveDogIDs removes the "dogs" edge to Dog entities by IDs.
+func (iu *ImageUpdate) RemoveDogIDs(ids ...uuid.UUID) *ImageUpdate {
+	iu.mutation.RemoveDogIDs(ids...)
+	return iu
+}
+
+// RemoveDogs removes "dogs" edges to Dog entities.
+func (iu *ImageUpdate) RemoveDogs(d ...*Dog) *ImageUpdate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return iu.RemoveDogIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -248,6 +323,114 @@ func (iu *ImageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: image.FieldCreatedAt,
 		})
 	}
+	if iu.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   image.UsersTable,
+			Columns: []string{image.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iu.mutation.RemovedUsersIDs(); len(nodes) > 0 && !iu.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   image.UsersTable,
+			Columns: []string{image.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iu.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   image.UsersTable,
+			Columns: []string{image.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if iu.mutation.DogsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   image.DogsTable,
+			Columns: []string{image.DogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dog.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iu.mutation.RemovedDogsIDs(); len(nodes) > 0 && !iu.mutation.DogsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   image.DogsTable,
+			Columns: []string{image.DogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dog.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iu.mutation.DogsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   image.DogsTable,
+			Columns: []string{image.DogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dog.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, iu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{image.Label}
@@ -333,9 +516,81 @@ func (iuo *ImageUpdateOne) SetNillableCreatedAt(t *time.Time) *ImageUpdateOne {
 	return iuo
 }
 
+// AddUserIDs adds the "users" edge to the User entity by IDs.
+func (iuo *ImageUpdateOne) AddUserIDs(ids ...uuid.UUID) *ImageUpdateOne {
+	iuo.mutation.AddUserIDs(ids...)
+	return iuo
+}
+
+// AddUsers adds the "users" edges to the User entity.
+func (iuo *ImageUpdateOne) AddUsers(u ...*User) *ImageUpdateOne {
+	ids := make([]uuid.UUID, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return iuo.AddUserIDs(ids...)
+}
+
+// AddDogIDs adds the "dogs" edge to the Dog entity by IDs.
+func (iuo *ImageUpdateOne) AddDogIDs(ids ...uuid.UUID) *ImageUpdateOne {
+	iuo.mutation.AddDogIDs(ids...)
+	return iuo
+}
+
+// AddDogs adds the "dogs" edges to the Dog entity.
+func (iuo *ImageUpdateOne) AddDogs(d ...*Dog) *ImageUpdateOne {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return iuo.AddDogIDs(ids...)
+}
+
 // Mutation returns the ImageMutation object of the builder.
 func (iuo *ImageUpdateOne) Mutation() *ImageMutation {
 	return iuo.mutation
+}
+
+// ClearUsers clears all "users" edges to the User entity.
+func (iuo *ImageUpdateOne) ClearUsers() *ImageUpdateOne {
+	iuo.mutation.ClearUsers()
+	return iuo
+}
+
+// RemoveUserIDs removes the "users" edge to User entities by IDs.
+func (iuo *ImageUpdateOne) RemoveUserIDs(ids ...uuid.UUID) *ImageUpdateOne {
+	iuo.mutation.RemoveUserIDs(ids...)
+	return iuo
+}
+
+// RemoveUsers removes "users" edges to User entities.
+func (iuo *ImageUpdateOne) RemoveUsers(u ...*User) *ImageUpdateOne {
+	ids := make([]uuid.UUID, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return iuo.RemoveUserIDs(ids...)
+}
+
+// ClearDogs clears all "dogs" edges to the Dog entity.
+func (iuo *ImageUpdateOne) ClearDogs() *ImageUpdateOne {
+	iuo.mutation.ClearDogs()
+	return iuo
+}
+
+// RemoveDogIDs removes the "dogs" edge to Dog entities by IDs.
+func (iuo *ImageUpdateOne) RemoveDogIDs(ids ...uuid.UUID) *ImageUpdateOne {
+	iuo.mutation.RemoveDogIDs(ids...)
+	return iuo
+}
+
+// RemoveDogs removes "dogs" edges to Dog entities.
+func (iuo *ImageUpdateOne) RemoveDogs(d ...*Dog) *ImageUpdateOne {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return iuo.RemoveDogIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -516,6 +771,114 @@ func (iuo *ImageUpdateOne) sqlSave(ctx context.Context) (_node *Image, err error
 			Value:  value,
 			Column: image.FieldCreatedAt,
 		})
+	}
+	if iuo.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   image.UsersTable,
+			Columns: []string{image.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iuo.mutation.RemovedUsersIDs(); len(nodes) > 0 && !iuo.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   image.UsersTable,
+			Columns: []string{image.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iuo.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   image.UsersTable,
+			Columns: []string{image.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if iuo.mutation.DogsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   image.DogsTable,
+			Columns: []string{image.DogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dog.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iuo.mutation.RemovedDogsIDs(); len(nodes) > 0 && !iuo.mutation.DogsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   image.DogsTable,
+			Columns: []string{image.DogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dog.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iuo.mutation.DogsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   image.DogsTable,
+			Columns: []string{image.DogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dog.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Image{config: iuo.config}
 	_spec.Assign = _node.assignValues

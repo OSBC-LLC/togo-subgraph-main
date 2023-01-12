@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -11,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/breed"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofilebreed"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
 	"github.com/google/uuid"
 )
@@ -24,8 +26,10 @@ type BreedQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Breed
-	modifiers  []func(*sql.Selector)
-	loadTotal  []func(context.Context, []*Breed) error
+	// eager-loading edges.
+	withDogProfiles *DogProfileBreedQuery
+	modifiers       []func(*sql.Selector)
+	loadTotal       []func(context.Context, []*Breed) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -60,6 +64,28 @@ func (bq *BreedQuery) Unique(unique bool) *BreedQuery {
 func (bq *BreedQuery) Order(o ...OrderFunc) *BreedQuery {
 	bq.order = append(bq.order, o...)
 	return bq
+}
+
+// QueryDogProfiles chains the current query on the "dogProfiles" edge.
+func (bq *BreedQuery) QueryDogProfiles() *DogProfileBreedQuery {
+	query := &DogProfileBreedQuery{config: bq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := bq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(breed.Table, breed.FieldID, selector),
+			sqlgraph.To(dogprofilebreed.Table, dogprofilebreed.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, breed.DogProfilesTable, breed.DogProfilesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Breed entity from the query.
@@ -238,16 +264,28 @@ func (bq *BreedQuery) Clone() *BreedQuery {
 		return nil
 	}
 	return &BreedQuery{
-		config:     bq.config,
-		limit:      bq.limit,
-		offset:     bq.offset,
-		order:      append([]OrderFunc{}, bq.order...),
-		predicates: append([]predicate.Breed{}, bq.predicates...),
+		config:          bq.config,
+		limit:           bq.limit,
+		offset:          bq.offset,
+		order:           append([]OrderFunc{}, bq.order...),
+		predicates:      append([]predicate.Breed{}, bq.predicates...),
+		withDogProfiles: bq.withDogProfiles.Clone(),
 		// clone intermediate query.
 		sql:    bq.sql.Clone(),
 		path:   bq.path,
 		unique: bq.unique,
 	}
+}
+
+// WithDogProfiles tells the query-builder to eager-load the nodes that are connected to
+// the "dogProfiles" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BreedQuery) WithDogProfiles(opts ...func(*DogProfileBreedQuery)) *BreedQuery {
+	query := &DogProfileBreedQuery{config: bq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	bq.withDogProfiles = query
+	return bq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -316,8 +354,11 @@ func (bq *BreedQuery) prepareQuery(ctx context.Context) error {
 
 func (bq *BreedQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Breed, error) {
 	var (
-		nodes = []*Breed{}
-		_spec = bq.querySpec()
+		nodes       = []*Breed{}
+		_spec       = bq.querySpec()
+		loadedTypes = [1]bool{
+			bq.withDogProfiles != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		return (*Breed).scanValues(nil, columns)
@@ -325,6 +366,7 @@ func (bq *BreedQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Breed,
 	_spec.Assign = func(columns []string, values []interface{}) error {
 		node := &Breed{config: bq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if len(bq.modifiers) > 0 {
@@ -339,6 +381,32 @@ func (bq *BreedQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Breed,
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := bq.withDogProfiles; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*Breed)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.DogProfiles = []*DogProfileBreed{}
+		}
+		query.Where(predicate.DogProfileBreed(func(s *sql.Selector) {
+			s.Where(sql.InValues(breed.DogProfilesColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.BreedID
+			node, ok := nodeids[fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "breed_id" returned %v for node %v`, fk, n.ID)
+			}
+			node.Edges.DogProfiles = append(node.Edges.DogProfiles, n)
+		}
+	}
+
 	for i := range bq.loadTotal {
 		if err := bq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err

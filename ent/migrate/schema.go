@@ -30,44 +30,80 @@ var (
 		{Name: "weight_kgs", Type: field.TypeFloat64},
 		{Name: "size", Type: field.TypeString},
 		{Name: "birthday", Type: field.TypeTime},
-		{Name: "dog_img_id", Type: field.TypeUUID},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "dog_img_id", Type: field.TypeUUID},
 	}
 	// DogsTable holds the schema information for the "dogs" table.
 	DogsTable = &schema.Table{
 		Name:       "dogs",
 		Columns:    DogsColumns,
 		PrimaryKey: []*schema.Column{DogsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "dogs_images_dogs",
+				Columns:    []*schema.Column{DogsColumns[9]},
+				RefColumns: []*schema.Column{ImagesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// DogProfileBreedsColumns holds the columns for the "dog_profile_breeds" table.
 	DogProfileBreedsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "breed_id", Type: field.TypeUUID},
-		{Name: "dog_id", Type: field.TypeUUID},
 		{Name: "percentage", Type: field.TypeFloat64},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "breed_id", Type: field.TypeUUID},
+		{Name: "dog_id", Type: field.TypeUUID},
 	}
 	// DogProfileBreedsTable holds the schema information for the "dog_profile_breeds" table.
 	DogProfileBreedsTable = &schema.Table{
 		Name:       "dog_profile_breeds",
 		Columns:    DogProfileBreedsColumns,
 		PrimaryKey: []*schema.Column{DogProfileBreedsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "dog_profile_breeds_breeds_dogProfiles",
+				Columns:    []*schema.Column{DogProfileBreedsColumns[4]},
+				RefColumns: []*schema.Column{BreedsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "dog_profile_breeds_dogs_breedProfiles",
+				Columns:    []*schema.Column{DogProfileBreedsColumns[5]},
+				RefColumns: []*schema.Column{DogsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// DogProfileOwnersColumns holds the columns for the "dog_profile_owners" table.
 	DogProfileOwnersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "owner_id", Type: field.TypeUUID},
-		{Name: "dog_id", Type: field.TypeUUID},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "dog_id", Type: field.TypeUUID},
+		{Name: "owner_id", Type: field.TypeUUID},
 	}
 	// DogProfileOwnersTable holds the schema information for the "dog_profile_owners" table.
 	DogProfileOwnersTable = &schema.Table{
 		Name:       "dog_profile_owners",
 		Columns:    DogProfileOwnersColumns,
 		PrimaryKey: []*schema.Column{DogProfileOwnersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "dog_profile_owners_dogs_ownerProfiles",
+				Columns:    []*schema.Column{DogProfileOwnersColumns[3]},
+				RefColumns: []*schema.Column{DogsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "dog_profile_owners_users_dogProfiles",
+				Columns:    []*schema.Column{DogProfileOwnersColumns[4]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// ImagesColumns holds the columns for the "images" table.
 	ImagesColumns = []*schema.Column{
@@ -104,16 +140,30 @@ var (
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "first_name", Type: field.TypeString},
 		{Name: "last_name", Type: field.TypeString},
-		{Name: "user_image_id", Type: field.TypeUUID},
-		{Name: "profile_id", Type: field.TypeUUID},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_image_id", Type: field.TypeUUID},
+		{Name: "profile_id", Type: field.TypeUUID},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "users_images_users",
+				Columns:    []*schema.Column{UsersColumns[5]},
+				RefColumns: []*schema.Column{ImagesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "users_profiles_users",
+				Columns:    []*schema.Column{UsersColumns[6]},
+				RefColumns: []*schema.Column{ProfilesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
@@ -128,4 +178,11 @@ var (
 )
 
 func init() {
+	DogsTable.ForeignKeys[0].RefTable = ImagesTable
+	DogProfileBreedsTable.ForeignKeys[0].RefTable = BreedsTable
+	DogProfileBreedsTable.ForeignKeys[1].RefTable = DogsTable
+	DogProfileOwnersTable.ForeignKeys[0].RefTable = DogsTable
+	DogProfileOwnersTable.ForeignKeys[1].RefTable = UsersTable
+	UsersTable.ForeignKeys[0].RefTable = ImagesTable
+	UsersTable.ForeignKeys[1].RefTable = ProfilesTable
 }

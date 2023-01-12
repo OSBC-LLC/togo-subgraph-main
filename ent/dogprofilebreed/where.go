@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
 	"github.com/google/uuid"
 )
@@ -164,34 +165,6 @@ func BreedIDNotIn(vs ...uuid.UUID) predicate.DogProfileBreed {
 	})
 }
 
-// BreedIDGT applies the GT predicate on the "breed_id" field.
-func BreedIDGT(v uuid.UUID) predicate.DogProfileBreed {
-	return predicate.DogProfileBreed(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldBreedID), v))
-	})
-}
-
-// BreedIDGTE applies the GTE predicate on the "breed_id" field.
-func BreedIDGTE(v uuid.UUID) predicate.DogProfileBreed {
-	return predicate.DogProfileBreed(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldBreedID), v))
-	})
-}
-
-// BreedIDLT applies the LT predicate on the "breed_id" field.
-func BreedIDLT(v uuid.UUID) predicate.DogProfileBreed {
-	return predicate.DogProfileBreed(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldBreedID), v))
-	})
-}
-
-// BreedIDLTE applies the LTE predicate on the "breed_id" field.
-func BreedIDLTE(v uuid.UUID) predicate.DogProfileBreed {
-	return predicate.DogProfileBreed(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldBreedID), v))
-	})
-}
-
 // DogIDEQ applies the EQ predicate on the "dog_id" field.
 func DogIDEQ(v uuid.UUID) predicate.DogProfileBreed {
 	return predicate.DogProfileBreed(func(s *sql.Selector) {
@@ -237,34 +210,6 @@ func DogIDNotIn(vs ...uuid.UUID) predicate.DogProfileBreed {
 			return
 		}
 		s.Where(sql.NotIn(s.C(FieldDogID), v...))
-	})
-}
-
-// DogIDGT applies the GT predicate on the "dog_id" field.
-func DogIDGT(v uuid.UUID) predicate.DogProfileBreed {
-	return predicate.DogProfileBreed(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldDogID), v))
-	})
-}
-
-// DogIDGTE applies the GTE predicate on the "dog_id" field.
-func DogIDGTE(v uuid.UUID) predicate.DogProfileBreed {
-	return predicate.DogProfileBreed(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldDogID), v))
-	})
-}
-
-// DogIDLT applies the LT predicate on the "dog_id" field.
-func DogIDLT(v uuid.UUID) predicate.DogProfileBreed {
-	return predicate.DogProfileBreed(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldDogID), v))
-	})
-}
-
-// DogIDLTE applies the LTE predicate on the "dog_id" field.
-func DogIDLTE(v uuid.UUID) predicate.DogProfileBreed {
-	return predicate.DogProfileBreed(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldDogID), v))
 	})
 }
 
@@ -493,6 +438,62 @@ func CreatedAtLT(v time.Time) predicate.DogProfileBreed {
 func CreatedAtLTE(v time.Time) predicate.DogProfileBreed {
 	return predicate.DogProfileBreed(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
+	})
+}
+
+// HasDog applies the HasEdge predicate on the "dog" edge.
+func HasDog() predicate.DogProfileBreed {
+	return predicate.DogProfileBreed(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(DogTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, DogTable, DogColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDogWith applies the HasEdge predicate on the "dog" edge with a given conditions (other predicates).
+func HasDogWith(preds ...predicate.Dog) predicate.DogProfileBreed {
+	return predicate.DogProfileBreed(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(DogInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, DogTable, DogColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasBreed applies the HasEdge predicate on the "breed" edge.
+func HasBreed() predicate.DogProfileBreed {
+	return predicate.DogProfileBreed(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(BreedTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, BreedTable, BreedColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasBreedWith applies the HasEdge predicate on the "breed" edge with a given conditions (other predicates).
+func HasBreedWith(preds ...predicate.Breed) predicate.DogProfileBreed {
+	return predicate.DogProfileBreed(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(BreedInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, BreedTable, BreedColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 
