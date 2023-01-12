@@ -4,6 +4,14 @@ package ent
 
 import "context"
 
+func (b *Breed) DogProfiles(ctx context.Context) ([]*DogProfileBreed, error) {
+	result, err := b.Edges.DogProfilesOrErr()
+	if IsNotLoaded(err) {
+		result, err = b.QueryDogProfiles().All(ctx)
+	}
+	return result, err
+}
+
 func (d *Dog) Image(ctx context.Context) (*Image, error) {
 	result, err := d.Edges.ImageOrErr()
 	if IsNotLoaded(err) {
@@ -16,6 +24,30 @@ func (d *Dog) OwnerProfiles(ctx context.Context) ([]*DogProfileOwner, error) {
 	result, err := d.Edges.OwnerProfilesOrErr()
 	if IsNotLoaded(err) {
 		result, err = d.QueryOwnerProfiles().All(ctx)
+	}
+	return result, err
+}
+
+func (d *Dog) BreedProfiles(ctx context.Context) ([]*DogProfileBreed, error) {
+	result, err := d.Edges.BreedProfilesOrErr()
+	if IsNotLoaded(err) {
+		result, err = d.QueryBreedProfiles().All(ctx)
+	}
+	return result, err
+}
+
+func (dpb *DogProfileBreed) Dog(ctx context.Context) (*Dog, error) {
+	result, err := dpb.Edges.DogOrErr()
+	if IsNotLoaded(err) {
+		result, err = dpb.QueryDog().Only(ctx)
+	}
+	return result, err
+}
+
+func (dpb *DogProfileBreed) Breed(ctx context.Context) (*Breed, error) {
+	result, err := dpb.Edges.BreedOrErr()
+	if IsNotLoaded(err) {
+		result, err = dpb.QueryBreed().Only(ctx)
 	}
 	return result, err
 }

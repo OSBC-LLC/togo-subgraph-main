@@ -23,6 +23,29 @@ type Breed struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the BreedQuery when eager-loading is set.
+	Edges BreedEdges `json:"edges"`
+}
+
+// BreedEdges holds the relations/edges for other nodes in the graph.
+type BreedEdges struct {
+	// DogProfiles holds the value of the dogProfiles edge.
+	DogProfiles []*DogProfileBreed `json:"dogProfiles,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+	// totalCount holds the count of the edges above.
+	totalCount [1]*int
+}
+
+// DogProfilesOrErr returns the DogProfiles value or an error if the edge
+// was not loaded in eager-loading.
+func (e BreedEdges) DogProfilesOrErr() ([]*DogProfileBreed, error) {
+	if e.loadedTypes[0] {
+		return e.DogProfiles, nil
+	}
+	return nil, &NotLoadedError{edge: "dogProfiles"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -78,6 +101,11 @@ func (b *Breed) assignValues(columns []string, values []interface{}) error {
 		}
 	}
 	return nil
+}
+
+// QueryDogProfiles queries the "dogProfiles" edge of the Breed entity.
+func (b *Breed) QueryDogProfiles() *DogProfileBreedQuery {
+	return (&BreedClient{config: b.config}).QueryDogProfiles(b)
 }
 
 // Update returns a builder for updating this Breed.

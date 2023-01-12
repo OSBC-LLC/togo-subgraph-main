@@ -43,16 +43,19 @@ const (
 // BreedMutation represents an operation that mutates the Breed nodes in the graph.
 type BreedMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *uuid.UUID
-	name          *string
-	updated_at    *time.Time
-	created_at    *time.Time
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Breed, error)
-	predicates    []predicate.Breed
+	op                 Op
+	typ                string
+	id                 *uuid.UUID
+	name               *string
+	updated_at         *time.Time
+	created_at         *time.Time
+	clearedFields      map[string]struct{}
+	dogProfiles        map[uuid.UUID]struct{}
+	removeddogProfiles map[uuid.UUID]struct{}
+	cleareddogProfiles bool
+	done               bool
+	oldValue           func(context.Context) (*Breed, error)
+	predicates         []predicate.Breed
 }
 
 var _ ent.Mutation = (*BreedMutation)(nil)
@@ -267,6 +270,60 @@ func (m *BreedMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
+// AddDogProfileIDs adds the "dogProfiles" edge to the DogProfileBreed entity by ids.
+func (m *BreedMutation) AddDogProfileIDs(ids ...uuid.UUID) {
+	if m.dogProfiles == nil {
+		m.dogProfiles = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.dogProfiles[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDogProfiles clears the "dogProfiles" edge to the DogProfileBreed entity.
+func (m *BreedMutation) ClearDogProfiles() {
+	m.cleareddogProfiles = true
+}
+
+// DogProfilesCleared reports if the "dogProfiles" edge to the DogProfileBreed entity was cleared.
+func (m *BreedMutation) DogProfilesCleared() bool {
+	return m.cleareddogProfiles
+}
+
+// RemoveDogProfileIDs removes the "dogProfiles" edge to the DogProfileBreed entity by IDs.
+func (m *BreedMutation) RemoveDogProfileIDs(ids ...uuid.UUID) {
+	if m.removeddogProfiles == nil {
+		m.removeddogProfiles = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.dogProfiles, ids[i])
+		m.removeddogProfiles[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDogProfiles returns the removed IDs of the "dogProfiles" edge to the DogProfileBreed entity.
+func (m *BreedMutation) RemovedDogProfilesIDs() (ids []uuid.UUID) {
+	for id := range m.removeddogProfiles {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DogProfilesIDs returns the "dogProfiles" edge IDs in the mutation.
+func (m *BreedMutation) DogProfilesIDs() (ids []uuid.UUID) {
+	for id := range m.dogProfiles {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDogProfiles resets all changes to the "dogProfiles" edge.
+func (m *BreedMutation) ResetDogProfiles() {
+	m.dogProfiles = nil
+	m.cleareddogProfiles = false
+	m.removeddogProfiles = nil
+}
+
 // Where appends a list predicates to the BreedMutation builder.
 func (m *BreedMutation) Where(ps ...predicate.Breed) {
 	m.predicates = append(m.predicates, ps...)
@@ -419,49 +476,85 @@ func (m *BreedMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *BreedMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.dogProfiles != nil {
+		edges = append(edges, breed.EdgeDogProfiles)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *BreedMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case breed.EdgeDogProfiles:
+		ids := make([]ent.Value, 0, len(m.dogProfiles))
+		for id := range m.dogProfiles {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *BreedMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.removeddogProfiles != nil {
+		edges = append(edges, breed.EdgeDogProfiles)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *BreedMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case breed.EdgeDogProfiles:
+		ids := make([]ent.Value, 0, len(m.removeddogProfiles))
+		for id := range m.removeddogProfiles {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *BreedMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.cleareddogProfiles {
+		edges = append(edges, breed.EdgeDogProfiles)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *BreedMutation) EdgeCleared(name string) bool {
+	switch name {
+	case breed.EdgeDogProfiles:
+		return m.cleareddogProfiles
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *BreedMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown Breed unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *BreedMutation) ResetEdge(name string) error {
+	switch name {
+	case breed.EdgeDogProfiles:
+		m.ResetDogProfiles()
+		return nil
+	}
 	return fmt.Errorf("unknown Breed edge %s", name)
 }
 
@@ -488,6 +581,9 @@ type DogMutation struct {
 	ownerProfiles        map[uuid.UUID]struct{}
 	removedownerProfiles map[uuid.UUID]struct{}
 	clearedownerProfiles bool
+	breedProfiles        map[uuid.UUID]struct{}
+	removedbreedProfiles map[uuid.UUID]struct{}
+	clearedbreedProfiles bool
 	done                 bool
 	oldValue             func(context.Context) (*Dog, error)
 	predicates           []predicate.Dog
@@ -1074,6 +1170,60 @@ func (m *DogMutation) ResetOwnerProfiles() {
 	m.removedownerProfiles = nil
 }
 
+// AddBreedProfileIDs adds the "breedProfiles" edge to the DogProfileBreed entity by ids.
+func (m *DogMutation) AddBreedProfileIDs(ids ...uuid.UUID) {
+	if m.breedProfiles == nil {
+		m.breedProfiles = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.breedProfiles[ids[i]] = struct{}{}
+	}
+}
+
+// ClearBreedProfiles clears the "breedProfiles" edge to the DogProfileBreed entity.
+func (m *DogMutation) ClearBreedProfiles() {
+	m.clearedbreedProfiles = true
+}
+
+// BreedProfilesCleared reports if the "breedProfiles" edge to the DogProfileBreed entity was cleared.
+func (m *DogMutation) BreedProfilesCleared() bool {
+	return m.clearedbreedProfiles
+}
+
+// RemoveBreedProfileIDs removes the "breedProfiles" edge to the DogProfileBreed entity by IDs.
+func (m *DogMutation) RemoveBreedProfileIDs(ids ...uuid.UUID) {
+	if m.removedbreedProfiles == nil {
+		m.removedbreedProfiles = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.breedProfiles, ids[i])
+		m.removedbreedProfiles[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedBreedProfiles returns the removed IDs of the "breedProfiles" edge to the DogProfileBreed entity.
+func (m *DogMutation) RemovedBreedProfilesIDs() (ids []uuid.UUID) {
+	for id := range m.removedbreedProfiles {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// BreedProfilesIDs returns the "breedProfiles" edge IDs in the mutation.
+func (m *DogMutation) BreedProfilesIDs() (ids []uuid.UUID) {
+	for id := range m.breedProfiles {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetBreedProfiles resets all changes to the "breedProfiles" edge.
+func (m *DogMutation) ResetBreedProfiles() {
+	m.breedProfiles = nil
+	m.clearedbreedProfiles = false
+	m.removedbreedProfiles = nil
+}
+
 // Where appends a list predicates to the DogMutation builder.
 func (m *DogMutation) Where(ps ...predicate.Dog) {
 	m.predicates = append(m.predicates, ps...)
@@ -1367,12 +1517,15 @@ func (m *DogMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DogMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.image != nil {
 		edges = append(edges, dog.EdgeImage)
 	}
 	if m.ownerProfiles != nil {
 		edges = append(edges, dog.EdgeOwnerProfiles)
+	}
+	if m.breedProfiles != nil {
+		edges = append(edges, dog.EdgeBreedProfiles)
 	}
 	return edges
 }
@@ -1391,15 +1544,24 @@ func (m *DogMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case dog.EdgeBreedProfiles:
+		ids := make([]ent.Value, 0, len(m.breedProfiles))
+		for id := range m.breedProfiles {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DogMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedownerProfiles != nil {
 		edges = append(edges, dog.EdgeOwnerProfiles)
+	}
+	if m.removedbreedProfiles != nil {
+		edges = append(edges, dog.EdgeBreedProfiles)
 	}
 	return edges
 }
@@ -1414,18 +1576,27 @@ func (m *DogMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case dog.EdgeBreedProfiles:
+		ids := make([]ent.Value, 0, len(m.removedbreedProfiles))
+		for id := range m.removedbreedProfiles {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DogMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedimage {
 		edges = append(edges, dog.EdgeImage)
 	}
 	if m.clearedownerProfiles {
 		edges = append(edges, dog.EdgeOwnerProfiles)
+	}
+	if m.clearedbreedProfiles {
+		edges = append(edges, dog.EdgeBreedProfiles)
 	}
 	return edges
 }
@@ -1438,6 +1609,8 @@ func (m *DogMutation) EdgeCleared(name string) bool {
 		return m.clearedimage
 	case dog.EdgeOwnerProfiles:
 		return m.clearedownerProfiles
+	case dog.EdgeBreedProfiles:
+		return m.clearedbreedProfiles
 	}
 	return false
 }
@@ -1463,6 +1636,9 @@ func (m *DogMutation) ResetEdge(name string) error {
 	case dog.EdgeOwnerProfiles:
 		m.ResetOwnerProfiles()
 		return nil
+	case dog.EdgeBreedProfiles:
+		m.ResetBreedProfiles()
+		return nil
 	}
 	return fmt.Errorf("unknown Dog edge %s", name)
 }
@@ -1473,13 +1649,15 @@ type DogProfileBreedMutation struct {
 	op            Op
 	typ           string
 	id            *uuid.UUID
-	breed_id      *uuid.UUID
-	dog_id        *uuid.UUID
 	percentage    *float64
 	addpercentage *float64
 	updated_at    *time.Time
 	created_at    *time.Time
 	clearedFields map[string]struct{}
+	dog           *uuid.UUID
+	cleareddog    bool
+	breed         *uuid.UUID
+	clearedbreed  bool
 	done          bool
 	oldValue      func(context.Context) (*DogProfileBreed, error)
 	predicates    []predicate.DogProfileBreed
@@ -1591,12 +1769,12 @@ func (m *DogProfileBreedMutation) IDs(ctx context.Context) ([]uuid.UUID, error) 
 
 // SetBreedID sets the "breed_id" field.
 func (m *DogProfileBreedMutation) SetBreedID(u uuid.UUID) {
-	m.breed_id = &u
+	m.breed = &u
 }
 
 // BreedID returns the value of the "breed_id" field in the mutation.
 func (m *DogProfileBreedMutation) BreedID() (r uuid.UUID, exists bool) {
-	v := m.breed_id
+	v := m.breed
 	if v == nil {
 		return
 	}
@@ -1622,17 +1800,17 @@ func (m *DogProfileBreedMutation) OldBreedID(ctx context.Context) (v uuid.UUID, 
 
 // ResetBreedID resets all changes to the "breed_id" field.
 func (m *DogProfileBreedMutation) ResetBreedID() {
-	m.breed_id = nil
+	m.breed = nil
 }
 
 // SetDogID sets the "dog_id" field.
 func (m *DogProfileBreedMutation) SetDogID(u uuid.UUID) {
-	m.dog_id = &u
+	m.dog = &u
 }
 
 // DogID returns the value of the "dog_id" field in the mutation.
 func (m *DogProfileBreedMutation) DogID() (r uuid.UUID, exists bool) {
-	v := m.dog_id
+	v := m.dog
 	if v == nil {
 		return
 	}
@@ -1658,7 +1836,7 @@ func (m *DogProfileBreedMutation) OldDogID(ctx context.Context) (v uuid.UUID, er
 
 // ResetDogID resets all changes to the "dog_id" field.
 func (m *DogProfileBreedMutation) ResetDogID() {
-	m.dog_id = nil
+	m.dog = nil
 }
 
 // SetPercentage sets the "percentage" field.
@@ -1789,6 +1967,58 @@ func (m *DogProfileBreedMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
+// ClearDog clears the "dog" edge to the Dog entity.
+func (m *DogProfileBreedMutation) ClearDog() {
+	m.cleareddog = true
+}
+
+// DogCleared reports if the "dog" edge to the Dog entity was cleared.
+func (m *DogProfileBreedMutation) DogCleared() bool {
+	return m.cleareddog
+}
+
+// DogIDs returns the "dog" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// DogID instead. It exists only for internal usage by the builders.
+func (m *DogProfileBreedMutation) DogIDs() (ids []uuid.UUID) {
+	if id := m.dog; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetDog resets all changes to the "dog" edge.
+func (m *DogProfileBreedMutation) ResetDog() {
+	m.dog = nil
+	m.cleareddog = false
+}
+
+// ClearBreed clears the "breed" edge to the Breed entity.
+func (m *DogProfileBreedMutation) ClearBreed() {
+	m.clearedbreed = true
+}
+
+// BreedCleared reports if the "breed" edge to the Breed entity was cleared.
+func (m *DogProfileBreedMutation) BreedCleared() bool {
+	return m.clearedbreed
+}
+
+// BreedIDs returns the "breed" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// BreedID instead. It exists only for internal usage by the builders.
+func (m *DogProfileBreedMutation) BreedIDs() (ids []uuid.UUID) {
+	if id := m.breed; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetBreed resets all changes to the "breed" edge.
+func (m *DogProfileBreedMutation) ResetBreed() {
+	m.breed = nil
+	m.clearedbreed = false
+}
+
 // Where appends a list predicates to the DogProfileBreedMutation builder.
 func (m *DogProfileBreedMutation) Where(ps ...predicate.DogProfileBreed) {
 	m.predicates = append(m.predicates, ps...)
@@ -1809,10 +2039,10 @@ func (m *DogProfileBreedMutation) Type() string {
 // AddedFields().
 func (m *DogProfileBreedMutation) Fields() []string {
 	fields := make([]string, 0, 5)
-	if m.breed_id != nil {
+	if m.breed != nil {
 		fields = append(fields, dogprofilebreed.FieldBreedID)
 	}
-	if m.dog_id != nil {
+	if m.dog != nil {
 		fields = append(fields, dogprofilebreed.FieldDogID)
 	}
 	if m.percentage != nil {
@@ -1990,49 +2220,95 @@ func (m *DogProfileBreedMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DogProfileBreedMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.dog != nil {
+		edges = append(edges, dogprofilebreed.EdgeDog)
+	}
+	if m.breed != nil {
+		edges = append(edges, dogprofilebreed.EdgeBreed)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *DogProfileBreedMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case dogprofilebreed.EdgeDog:
+		if id := m.dog; id != nil {
+			return []ent.Value{*id}
+		}
+	case dogprofilebreed.EdgeBreed:
+		if id := m.breed; id != nil {
+			return []ent.Value{*id}
+		}
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DogProfileBreedMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *DogProfileBreedMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DogProfileBreedMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.cleareddog {
+		edges = append(edges, dogprofilebreed.EdgeDog)
+	}
+	if m.clearedbreed {
+		edges = append(edges, dogprofilebreed.EdgeBreed)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *DogProfileBreedMutation) EdgeCleared(name string) bool {
+	switch name {
+	case dogprofilebreed.EdgeDog:
+		return m.cleareddog
+	case dogprofilebreed.EdgeBreed:
+		return m.clearedbreed
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *DogProfileBreedMutation) ClearEdge(name string) error {
+	switch name {
+	case dogprofilebreed.EdgeDog:
+		m.ClearDog()
+		return nil
+	case dogprofilebreed.EdgeBreed:
+		m.ClearBreed()
+		return nil
+	}
 	return fmt.Errorf("unknown DogProfileBreed unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *DogProfileBreedMutation) ResetEdge(name string) error {
+	switch name {
+	case dogprofilebreed.EdgeDog:
+		m.ResetDog()
+		return nil
+	case dogprofilebreed.EdgeBreed:
+		m.ResetBreed()
+		return nil
+	}
 	return fmt.Errorf("unknown DogProfileBreed edge %s", name)
 }
 

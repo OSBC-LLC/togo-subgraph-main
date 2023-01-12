@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/breed"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofilebreed"
 	"github.com/google/uuid"
 )
@@ -27,6 +29,50 @@ type DogProfileBreed struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the DogProfileBreedQuery when eager-loading is set.
+	Edges DogProfileBreedEdges `json:"edges"`
+}
+
+// DogProfileBreedEdges holds the relations/edges for other nodes in the graph.
+type DogProfileBreedEdges struct {
+	// Dog holds the value of the dog edge.
+	Dog *Dog `json:"dog,omitempty"`
+	// Breed holds the value of the breed edge.
+	Breed *Breed `json:"breed,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+	// totalCount holds the count of the edges above.
+	totalCount [2]*int
+}
+
+// DogOrErr returns the Dog value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e DogProfileBreedEdges) DogOrErr() (*Dog, error) {
+	if e.loadedTypes[0] {
+		if e.Dog == nil {
+			// The edge dog was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: dog.Label}
+		}
+		return e.Dog, nil
+	}
+	return nil, &NotLoadedError{edge: "dog"}
+}
+
+// BreedOrErr returns the Breed value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e DogProfileBreedEdges) BreedOrErr() (*Breed, error) {
+	if e.loadedTypes[1] {
+		if e.Breed == nil {
+			// The edge breed was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: breed.Label}
+		}
+		return e.Breed, nil
+	}
+	return nil, &NotLoadedError{edge: "breed"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -94,6 +140,16 @@ func (dpb *DogProfileBreed) assignValues(columns []string, values []interface{})
 		}
 	}
 	return nil
+}
+
+// QueryDog queries the "dog" edge of the DogProfileBreed entity.
+func (dpb *DogProfileBreed) QueryDog() *DogQuery {
+	return (&DogProfileBreedClient{config: dpb.config}).QueryDog(dpb)
+}
+
+// QueryBreed queries the "breed" edge of the DogProfileBreed entity.
+func (dpb *DogProfileBreed) QueryBreed() *BreedQuery {
+	return (&DogProfileBreedClient{config: dpb.config}).QueryBreed(dpb)
 }
 
 // Update returns a builder for updating this DogProfileBreed.

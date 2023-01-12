@@ -5,6 +5,7 @@ type Breed implements Node {
   name: String!
   updatedAt: Time!
   createdAt: Time!
+  dogprofiles: [DogProfileBreed!]
 }
 """
 BreedWhereInput is used for filtering Breed objects.
@@ -55,6 +56,9 @@ input BreedWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
+  """dogProfiles edge predicates"""
+  hasDogProfiles: Boolean
+  hasDogProfilesWith: [DogProfileBreedWhereInput!]
 }
 """
 Define a Relay Cursor type:
@@ -74,14 +78,17 @@ type Dog implements Node {
   createdAt: Time!
   image: Image!
   ownerprofiles: [DogProfileOwner!]
+  breedprofiles: [DogProfileBreed!]
 }
 type DogProfileBreed implements Node {
   id: ID!
-  breedID: UUID!
-  dogID: UUID!
+  breedID: ID!
+  dogID: ID!
   percentage: Float!
   updatedAt: Time!
   createdAt: Time!
+  dog: Dog!
+  breed: Breed!
 }
 """
 DogProfileBreedWhereInput is used for filtering DogProfileBreed objects.
@@ -101,23 +108,15 @@ input DogProfileBreedWhereInput {
   idLT: ID
   idLTE: ID
   """breed_id field predicates"""
-  breedID: UUID
-  breedIDNEQ: UUID
-  breedIDIn: [UUID!]
-  breedIDNotIn: [UUID!]
-  breedIDGT: UUID
-  breedIDGTE: UUID
-  breedIDLT: UUID
-  breedIDLTE: UUID
+  breedID: ID
+  breedIDNEQ: ID
+  breedIDIn: [ID!]
+  breedIDNotIn: [ID!]
   """dog_id field predicates"""
-  dogID: UUID
-  dogIDNEQ: UUID
-  dogIDIn: [UUID!]
-  dogIDNotIn: [UUID!]
-  dogIDGT: UUID
-  dogIDGTE: UUID
-  dogIDLT: UUID
-  dogIDLTE: UUID
+  dogID: ID
+  dogIDNEQ: ID
+  dogIDIn: [ID!]
+  dogIDNotIn: [ID!]
   """percentage field predicates"""
   percentage: Float
   percentageNEQ: Float
@@ -145,6 +144,12 @@ input DogProfileBreedWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
+  """dog edge predicates"""
+  hasDog: Boolean
+  hasDogWith: [DogWhereInput!]
+  """breed edge predicates"""
+  hasBreed: Boolean
+  hasBreedWith: [BreedWhereInput!]
 }
 type DogProfileOwner implements Node {
   id: ID!
@@ -317,6 +322,9 @@ input DogWhereInput {
   """ownerProfiles edge predicates"""
   hasOwnerProfiles: Boolean
   hasOwnerProfilesWith: [DogProfileOwnerWhereInput!]
+  """breedProfiles edge predicates"""
+  hasBreedProfiles: Boolean
+  hasBreedProfilesWith: [DogProfileBreedWhereInput!]
 }
 type Image implements Node {
   id: ID!

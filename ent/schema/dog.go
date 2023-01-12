@@ -66,5 +66,6 @@ func (Dog) Edges() []ent.Edge {
 			Unique(),
 
 		edge.To("ownerProfiles", DogProfileOwner.Type),
+		edge.To("breedProfiles", DogProfileBreed.Type),
 	}
 }

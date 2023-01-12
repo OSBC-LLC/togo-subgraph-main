@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofilebreed"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
@@ -30,6 +31,7 @@ type DogQuery struct {
 	// eager-loading edges.
 	withImage         *ImageQuery
 	withOwnerProfiles *DogProfileOwnerQuery
+	withBreedProfiles *DogProfileBreedQuery
 	modifiers         []func(*sql.Selector)
 	loadTotal         []func(context.Context, []*Dog) error
 	// intermediate query (i.e. traversal path).
@@ -105,6 +107,28 @@ func (dq *DogQuery) QueryOwnerProfiles() *DogProfileOwnerQuery {
 			sqlgraph.From(dog.Table, dog.FieldID, selector),
 			sqlgraph.To(dogprofileowner.Table, dogprofileowner.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, dog.OwnerProfilesTable, dog.OwnerProfilesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(dq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryBreedProfiles chains the current query on the "breedProfiles" edge.
+func (dq *DogQuery) QueryBreedProfiles() *DogProfileBreedQuery {
+	query := &DogProfileBreedQuery{config: dq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := dq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := dq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dog.Table, dog.FieldID, selector),
+			sqlgraph.To(dogprofilebreed.Table, dogprofilebreed.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, dog.BreedProfilesTable, dog.BreedProfilesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(dq.driver.Dialect(), step)
 		return fromU, nil
@@ -295,6 +319,7 @@ func (dq *DogQuery) Clone() *DogQuery {
 		predicates:        append([]predicate.Dog{}, dq.predicates...),
 		withImage:         dq.withImage.Clone(),
 		withOwnerProfiles: dq.withOwnerProfiles.Clone(),
+		withBreedProfiles: dq.withBreedProfiles.Clone(),
 		// clone intermediate query.
 		sql:    dq.sql.Clone(),
 		path:   dq.path,
@@ -321,6 +346,17 @@ func (dq *DogQuery) WithOwnerProfiles(opts ...func(*DogProfileOwnerQuery)) *DogQ
 		opt(query)
 	}
 	dq.withOwnerProfiles = query
+	return dq
+}
+
+// WithBreedProfiles tells the query-builder to eager-load the nodes that are connected to
+// the "breedProfiles" edge. The optional arguments are used to configure the query builder of the edge.
+func (dq *DogQuery) WithBreedProfiles(opts ...func(*DogProfileBreedQuery)) *DogQuery {
+	query := &DogProfileBreedQuery{config: dq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	dq.withBreedProfiles = query
 	return dq
 }
 
@@ -392,9 +428,10 @@ func (dq *DogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Dog, err
 	var (
 		nodes       = []*Dog{}
 		_spec       = dq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			dq.withImage != nil,
 			dq.withOwnerProfiles != nil,
+			dq.withBreedProfiles != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -467,6 +504,31 @@ func (dq *DogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Dog, err
 				return nil, fmt.Errorf(`unexpected foreign-key "dog_id" returned %v for node %v`, fk, n.ID)
 			}
 			node.Edges.OwnerProfiles = append(node.Edges.OwnerProfiles, n)
+		}
+	}
+
+	if query := dq.withBreedProfiles; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*Dog)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.BreedProfiles = []*DogProfileBreed{}
+		}
+		query.Where(predicate.DogProfileBreed(func(s *sql.Selector) {
+			s.Where(sql.InValues(dog.BreedProfilesColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.DogID
+			node, ok := nodeids[fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "dog_id" returned %v for node %v`, fk, n.ID)
+			}
+			node.Edges.BreedProfiles = append(node.Edges.BreedProfiles, n)
 		}
 	}
 

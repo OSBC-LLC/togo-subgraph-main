@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofilebreed"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofileowner"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/image"
 	"github.com/google/uuid"
@@ -131,6 +132,21 @@ func (dc *DogCreate) AddOwnerProfiles(d ...*DogProfileOwner) *DogCreate {
 		ids[i] = d[i].ID
 	}
 	return dc.AddOwnerProfileIDs(ids...)
+}
+
+// AddBreedProfileIDs adds the "breedProfiles" edge to the DogProfileBreed entity by IDs.
+func (dc *DogCreate) AddBreedProfileIDs(ids ...uuid.UUID) *DogCreate {
+	dc.mutation.AddBreedProfileIDs(ids...)
+	return dc
+}
+
+// AddBreedProfiles adds the "breedProfiles" edges to the DogProfileBreed entity.
+func (dc *DogCreate) AddBreedProfiles(d ...*DogProfileBreed) *DogCreate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return dc.AddBreedProfileIDs(ids...)
 }
 
 // Mutation returns the DogMutation object of the builder.
@@ -402,6 +418,25 @@ func (dc *DogCreate) createSpec() (*Dog, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: dogprofileowner.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := dc.mutation.BreedProfilesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   dog.BreedProfilesTable,
+			Columns: []string{dog.BreedProfilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: dogprofilebreed.FieldID,
 				},
 			},
 		}

@@ -23,6 +23,19 @@ func (b *BreedQuery) CollectFields(ctx context.Context, satisfies ...string) (*B
 
 func (b *BreedQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
+	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+		switch field.Name {
+		case "dogprofiles", "dogProfiles":
+			var (
+				path  = append(path, field.Name)
+				query = &DogProfileBreedQuery{config: b.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			b.withDogProfiles = query
+		}
+	}
 	return nil
 }
 
@@ -89,6 +102,15 @@ func (d *DogQuery) collectField(ctx context.Context, op *graphql.OperationContex
 				return err
 			}
 			d.withOwnerProfiles = query
+		case "breedprofiles", "breedProfiles":
+			var (
+				path  = append(path, field.Name)
+				query = &DogProfileBreedQuery{config: d.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			d.withBreedProfiles = query
 		}
 	}
 	return nil
@@ -137,6 +159,28 @@ func (dpb *DogProfileBreedQuery) CollectFields(ctx context.Context, satisfies ..
 
 func (dpb *DogProfileBreedQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
+	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+		switch field.Name {
+		case "dog":
+			var (
+				path  = append(path, field.Name)
+				query = &DogQuery{config: dpb.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			dpb.withDog = query
+		case "breed":
+			var (
+				path  = append(path, field.Name)
+				query = &BreedQuery{config: dpb.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			dpb.withBreed = query
+		}
+	}
 	return nil
 }
 

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -27,5 +28,17 @@ func (DogProfileBreed) Fields() []ent.Field {
 
 // Edges of the DogProfileBreed.
 func (DogProfileBreed) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.From("dog", Dog.Type).
+			Ref("breedProfiles").
+			Field("dog_id").
+			Required().
+			Unique(),
+
+		edge.From("breed", Breed.Type).
+			Ref("dogProfiles").
+			Field("breed_id").
+			Required().
+			Unique(),
+	}
 }

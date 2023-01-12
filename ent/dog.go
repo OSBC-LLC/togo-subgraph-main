@@ -47,11 +47,13 @@ type DogEdges struct {
 	Image *Image `json:"image,omitempty"`
 	// OwnerProfiles holds the value of the ownerProfiles edge.
 	OwnerProfiles []*DogProfileOwner `json:"ownerProfiles,omitempty"`
+	// BreedProfiles holds the value of the breedProfiles edge.
+	BreedProfiles []*DogProfileBreed `json:"breedProfiles,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 	// totalCount holds the count of the edges above.
-	totalCount [2]*int
+	totalCount [3]*int
 }
 
 // ImageOrErr returns the Image value or an error if the edge
@@ -75,6 +77,15 @@ func (e DogEdges) OwnerProfilesOrErr() ([]*DogProfileOwner, error) {
 		return e.OwnerProfiles, nil
 	}
 	return nil, &NotLoadedError{edge: "ownerProfiles"}
+}
+
+// BreedProfilesOrErr returns the BreedProfiles value or an error if the edge
+// was not loaded in eager-loading.
+func (e DogEdges) BreedProfilesOrErr() ([]*DogProfileBreed, error) {
+	if e.loadedTypes[2] {
+		return e.BreedProfiles, nil
+	}
+	return nil, &NotLoadedError{edge: "breedProfiles"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -180,6 +191,11 @@ func (d *Dog) QueryImage() *ImageQuery {
 // QueryOwnerProfiles queries the "ownerProfiles" edge of the Dog entity.
 func (d *Dog) QueryOwnerProfiles() *DogProfileOwnerQuery {
 	return (&DogClient{config: d.config}).QueryOwnerProfiles(d)
+}
+
+// QueryBreedProfiles queries the "breedProfiles" edge of the Dog entity.
+func (d *Dog) QueryBreedProfiles() *DogProfileBreedQuery {
+	return (&DogClient{config: d.config}).QueryBreedProfiles(d)
 }
 
 // Update returns a builder for updating this Dog.

@@ -52,7 +52,7 @@ func (b *Breed) Node(ctx context.Context) (node *Node, err error) {
 		ID:     b.ID,
 		Type:   "Breed",
 		Fields: make([]*Field, 3),
-		Edges:  make([]*Edge, 0),
+		Edges:  make([]*Edge, 1),
 	}
 	var buf []byte
 	if buf, err = json.Marshal(b.Name); err != nil {
@@ -79,6 +79,16 @@ func (b *Breed) Node(ctx context.Context) (node *Node, err error) {
 		Name:  "created_at",
 		Value: string(buf),
 	}
+	node.Edges[0] = &Edge{
+		Type: "DogProfileBreed",
+		Name: "dogProfiles",
+	}
+	err = b.QueryDogProfiles().
+		Select(dogprofilebreed.FieldID).
+		Scan(ctx, &node.Edges[0].IDs)
+	if err != nil {
+		return nil, err
+	}
 	return node, nil
 }
 
@@ -87,7 +97,7 @@ func (d *Dog) Node(ctx context.Context) (node *Node, err error) {
 		ID:     d.ID,
 		Type:   "Dog",
 		Fields: make([]*Field, 9),
-		Edges:  make([]*Edge, 2),
+		Edges:  make([]*Edge, 3),
 	}
 	var buf []byte
 	if buf, err = json.Marshal(d.FullName); err != nil {
@@ -182,6 +192,16 @@ func (d *Dog) Node(ctx context.Context) (node *Node, err error) {
 	if err != nil {
 		return nil, err
 	}
+	node.Edges[2] = &Edge{
+		Type: "DogProfileBreed",
+		Name: "breedProfiles",
+	}
+	err = d.QueryBreedProfiles().
+		Select(dogprofilebreed.FieldID).
+		Scan(ctx, &node.Edges[2].IDs)
+	if err != nil {
+		return nil, err
+	}
 	return node, nil
 }
 
@@ -190,7 +210,7 @@ func (dpb *DogProfileBreed) Node(ctx context.Context) (node *Node, err error) {
 		ID:     dpb.ID,
 		Type:   "DogProfileBreed",
 		Fields: make([]*Field, 5),
-		Edges:  make([]*Edge, 0),
+		Edges:  make([]*Edge, 2),
 	}
 	var buf []byte
 	if buf, err = json.Marshal(dpb.BreedID); err != nil {
@@ -232,6 +252,26 @@ func (dpb *DogProfileBreed) Node(ctx context.Context) (node *Node, err error) {
 		Type:  "time.Time",
 		Name:  "created_at",
 		Value: string(buf),
+	}
+	node.Edges[0] = &Edge{
+		Type: "Dog",
+		Name: "dog",
+	}
+	err = dpb.QueryDog().
+		Select(dog.FieldID).
+		Scan(ctx, &node.Edges[0].IDs)
+	if err != nil {
+		return nil, err
+	}
+	node.Edges[1] = &Edge{
+		Type: "Breed",
+		Name: "breed",
+	}
+	err = dpb.QueryBreed().
+		Select(breed.FieldID).
+		Scan(ctx, &node.Edges[1].IDs)
+	if err != nil {
+		return nil, err
 	}
 	return node, nil
 }

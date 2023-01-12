@@ -10,6 +10,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/breed"
+	"github.com/OSBC-LLC/togo-subgraph-main/ent/dog"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/dogprofilebreed"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/predicate"
 	"github.com/google/uuid"
@@ -24,8 +26,11 @@ type DogProfileBreedQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.DogProfileBreed
-	modifiers  []func(*sql.Selector)
-	loadTotal  []func(context.Context, []*DogProfileBreed) error
+	// eager-loading edges.
+	withDog   *DogQuery
+	withBreed *BreedQuery
+	modifiers []func(*sql.Selector)
+	loadTotal []func(context.Context, []*DogProfileBreed) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -60,6 +65,50 @@ func (dpbq *DogProfileBreedQuery) Unique(unique bool) *DogProfileBreedQuery {
 func (dpbq *DogProfileBreedQuery) Order(o ...OrderFunc) *DogProfileBreedQuery {
 	dpbq.order = append(dpbq.order, o...)
 	return dpbq
+}
+
+// QueryDog chains the current query on the "dog" edge.
+func (dpbq *DogProfileBreedQuery) QueryDog() *DogQuery {
+	query := &DogQuery{config: dpbq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := dpbq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := dpbq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dogprofilebreed.Table, dogprofilebreed.FieldID, selector),
+			sqlgraph.To(dog.Table, dog.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dogprofilebreed.DogTable, dogprofilebreed.DogColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(dpbq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryBreed chains the current query on the "breed" edge.
+func (dpbq *DogProfileBreedQuery) QueryBreed() *BreedQuery {
+	query := &BreedQuery{config: dpbq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := dpbq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := dpbq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dogprofilebreed.Table, dogprofilebreed.FieldID, selector),
+			sqlgraph.To(breed.Table, breed.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dogprofilebreed.BreedTable, dogprofilebreed.BreedColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(dpbq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first DogProfileBreed entity from the query.
@@ -243,11 +292,35 @@ func (dpbq *DogProfileBreedQuery) Clone() *DogProfileBreedQuery {
 		offset:     dpbq.offset,
 		order:      append([]OrderFunc{}, dpbq.order...),
 		predicates: append([]predicate.DogProfileBreed{}, dpbq.predicates...),
+		withDog:    dpbq.withDog.Clone(),
+		withBreed:  dpbq.withBreed.Clone(),
 		// clone intermediate query.
 		sql:    dpbq.sql.Clone(),
 		path:   dpbq.path,
 		unique: dpbq.unique,
 	}
+}
+
+// WithDog tells the query-builder to eager-load the nodes that are connected to
+// the "dog" edge. The optional arguments are used to configure the query builder of the edge.
+func (dpbq *DogProfileBreedQuery) WithDog(opts ...func(*DogQuery)) *DogProfileBreedQuery {
+	query := &DogQuery{config: dpbq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	dpbq.withDog = query
+	return dpbq
+}
+
+// WithBreed tells the query-builder to eager-load the nodes that are connected to
+// the "breed" edge. The optional arguments are used to configure the query builder of the edge.
+func (dpbq *DogProfileBreedQuery) WithBreed(opts ...func(*BreedQuery)) *DogProfileBreedQuery {
+	query := &BreedQuery{config: dpbq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	dpbq.withBreed = query
+	return dpbq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -316,8 +389,12 @@ func (dpbq *DogProfileBreedQuery) prepareQuery(ctx context.Context) error {
 
 func (dpbq *DogProfileBreedQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*DogProfileBreed, error) {
 	var (
-		nodes = []*DogProfileBreed{}
-		_spec = dpbq.querySpec()
+		nodes       = []*DogProfileBreed{}
+		_spec       = dpbq.querySpec()
+		loadedTypes = [2]bool{
+			dpbq.withDog != nil,
+			dpbq.withBreed != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		return (*DogProfileBreed).scanValues(nil, columns)
@@ -325,6 +402,7 @@ func (dpbq *DogProfileBreedQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	_spec.Assign = func(columns []string, values []interface{}) error {
 		node := &DogProfileBreed{config: dpbq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if len(dpbq.modifiers) > 0 {
@@ -339,6 +417,59 @@ func (dpbq *DogProfileBreedQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := dpbq.withDog; query != nil {
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*DogProfileBreed)
+		for i := range nodes {
+			fk := nodes[i].DogID
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(dog.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "dog_id" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Dog = n
+			}
+		}
+	}
+
+	if query := dpbq.withBreed; query != nil {
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*DogProfileBreed)
+		for i := range nodes {
+			fk := nodes[i].BreedID
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(breed.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "breed_id" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Breed = n
+			}
+		}
+	}
+
 	for i := range dpbq.loadTotal {
 		if err := dpbq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
