@@ -81,7 +81,6 @@ func main() {
 	}
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/viz", ent.ServeEntviz())
 	http.Handle(newrelic.WrapHandle(newRelicApp, "/query", srv))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
