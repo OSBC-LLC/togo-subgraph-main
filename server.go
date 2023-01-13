@@ -5,9 +5,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	_ "github.com/lib/pq"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -34,7 +36,9 @@ func main() {
 	}
 
 	var entOptions []ent.Option
-	entOptions = append(entOptions, ent.Debug())
+	if os.Getenv("LOG_LEVEL") == "debug" || os.Getenv("LOG_LEVEL") == "silly" {
+		entOptions = append(entOptions, ent.Debug())
+	}
 
 	client, err := ent.Open("postgres", kit_utils.GetDSN(os.Getenv("DATABASE_URL")), entOptions...)
 	if err != nil {
@@ -58,8 +62,23 @@ func main() {
 		log.Printf("new relic init failed: %v", err)
 	}
 
+	complexity, err := strconv.Atoi(os.Getenv("QUERY_COMPLEXITY"))
+	if err != nil {
+		log.Printf("error getting query_complexity. Defaulting to: 15")
+		complexity = 15
+	}
 	srv := handler.NewDefaultServer(graph.NewSchema(client))
-	srv.Use(extension.FixedComplexityLimit(10))
+	srv.Use(extension.FixedComplexityLimit(complexity))
+
+	if os.Getenv("LOG_LEVEL") == "silly" {
+		srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+			rc := graphql.GetFieldContext(ctx)
+			log.Println("Entered", rc.Object, rc.Field.Name)
+			res, err = next(ctx)
+			log.Println("Left", rc.Object, rc.Field.Name, "=>", res, err)
+			return res, err
+		})
+	}
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/viz", ent.ServeEntviz())
