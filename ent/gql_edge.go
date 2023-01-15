@@ -36,22 +36,6 @@ func (dpo *DogProfileOwner) Dog(ctx context.Context) (*Dog, error) {
 	return result, err
 }
 
-func (i *Image) Users(ctx context.Context) ([]*User, error) {
-	result, err := i.Edges.UsersOrErr()
-	if IsNotLoaded(err) {
-		result, err = i.QueryUsers().All(ctx)
-	}
-	return result, err
-}
-
-func (i *Image) Dogs(ctx context.Context) ([]*Dog, error) {
-	result, err := i.Edges.DogsOrErr()
-	if IsNotLoaded(err) {
-		result, err = i.QueryDogs().All(ctx)
-	}
-	return result, err
-}
-
 func (u *User) Profile(ctx context.Context) (*Profile, error) {
 	result, err := u.Edges.ProfileOrErr()
 	if IsNotLoaded(err) {

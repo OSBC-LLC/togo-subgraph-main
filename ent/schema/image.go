@@ -3,6 +3,7 @@ package schema
 import (
 	"time"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -47,7 +48,9 @@ func (Image) Fields() []ent.Field {
 // Edges of the Image.
 func (Image) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("users", User.Type),
-		edge.To("dogs", Dog.Type),
+		edge.To("users", User.Type).
+			Annotations(entgql.Skip()),
+		edge.To("dogs", Dog.Type).
+			Annotations(entgql.Skip()),
 	}
 }

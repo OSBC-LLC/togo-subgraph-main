@@ -304,7 +304,7 @@ func (i *Image) Node(ctx context.Context) (node *Node, err error) {
 		ID:     i.ID,
 		Type:   "Image",
 		Fields: make([]*Field, 6),
-		Edges:  make([]*Edge, 2),
+		Edges:  make([]*Edge, 0),
 	}
 	var buf []byte
 	if buf, err = json.Marshal(i.URL); err != nil {
@@ -354,26 +354,6 @@ func (i *Image) Node(ctx context.Context) (node *Node, err error) {
 		Type:  "time.Time",
 		Name:  "created_at",
 		Value: string(buf),
-	}
-	node.Edges[0] = &Edge{
-		Type: "User",
-		Name: "users",
-	}
-	err = i.QueryUsers().
-		Select(user.FieldID).
-		Scan(ctx, &node.Edges[0].IDs)
-	if err != nil {
-		return nil, err
-	}
-	node.Edges[1] = &Edge{
-		Type: "Dog",
-		Name: "dogs",
-	}
-	err = i.QueryDogs().
-		Select(dog.FieldID).
-		Scan(ctx, &node.Edges[1].IDs)
-	if err != nil {
-		return nil, err
 	}
 	return node, nil
 }

@@ -1382,14 +1382,6 @@ type ImageWhereInput struct {
 	CreatedAtGTE   *time.Time  `json:"createdAtGTE,omitempty"`
 	CreatedAtLT    *time.Time  `json:"createdAtLT,omitempty"`
 	CreatedAtLTE   *time.Time  `json:"createdAtLTE,omitempty"`
-
-	// "users" edge predicates.
-	HasUsers     *bool             `json:"hasUsers,omitempty"`
-	HasUsersWith []*UserWhereInput `json:"hasUsersWith,omitempty"`
-
-	// "dogs" edge predicates.
-	HasDogs     *bool            `json:"hasDogs,omitempty"`
-	HasDogsWith []*DogWhereInput `json:"hasDogsWith,omitempty"`
 }
 
 // AddPredicates adds custom predicates to the where input to be used during the filtering phase.
@@ -1662,42 +1654,6 @@ func (i *ImageWhereInput) P() (predicate.Image, error) {
 		predicates = append(predicates, image.CreatedAtLTE(*i.CreatedAtLTE))
 	}
 
-	if i.HasUsers != nil {
-		p := image.HasUsers()
-		if !*i.HasUsers {
-			p = image.Not(p)
-		}
-		predicates = append(predicates, p)
-	}
-	if len(i.HasUsersWith) > 0 {
-		with := make([]predicate.User, 0, len(i.HasUsersWith))
-		for _, w := range i.HasUsersWith {
-			p, err := w.P()
-			if err != nil {
-				return nil, fmt.Errorf("%w: field 'HasUsersWith'", err)
-			}
-			with = append(with, p)
-		}
-		predicates = append(predicates, image.HasUsersWith(with...))
-	}
-	if i.HasDogs != nil {
-		p := image.HasDogs()
-		if !*i.HasDogs {
-			p = image.Not(p)
-		}
-		predicates = append(predicates, p)
-	}
-	if len(i.HasDogsWith) > 0 {
-		with := make([]predicate.Dog, 0, len(i.HasDogsWith))
-		for _, w := range i.HasDogsWith {
-			p, err := w.P()
-			if err != nil {
-				return nil, fmt.Errorf("%w: field 'HasDogsWith'", err)
-			}
-			with = append(with, p)
-		}
-		predicates = append(predicates, image.HasDogsWith(with...))
-	}
 	switch len(predicates) {
 	case 0:
 		return nil, ErrEmptyImageWhereInput

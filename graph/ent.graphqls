@@ -318,8 +318,6 @@ type Image implements Node {
   type: String!
   updatedAt: Time!
   createdAt: Time!
-  users: [User!]
-  dogs: [Dog!]
 }
 """
 ImageWhereInput is used for filtering Image objects.
@@ -402,12 +400,6 @@ input ImageWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
-  """users edge predicates"""
-  hasUsers: Boolean
-  hasUsersWith: [UserWhereInput!]
-  """dogs edge predicates"""
-  hasDogs: Boolean
-  hasDogsWith: [DogWhereInput!]
 }
 """
 An object with an ID.

@@ -92,13 +92,11 @@ type ComplexityRoot struct {
 
 	Image struct {
 		CreatedAt func(childComplexity int) int
-		Dogs      func(childComplexity int) int
 		Height    func(childComplexity int) int
 		ID        func(childComplexity int) int
 		Type      func(childComplexity int) int
 		URL       func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
-		Users     func(childComplexity int) int
 		Width     func(childComplexity int) int
 	}
 
@@ -384,13 +382,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Image.CreatedAt(childComplexity), true
 
-	case "Image.dogs":
-		if e.complexity.Image.Dogs == nil {
-			break
-		}
-
-		return e.complexity.Image.Dogs(childComplexity), true
-
 	case "Image.height":
 		if e.complexity.Image.Height == nil {
 			break
@@ -425,13 +416,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Image.UpdatedAt(childComplexity), true
-
-	case "Image.users":
-		if e.complexity.Image.Users == nil {
-			break
-		}
-
-		return e.complexity.Image.Users(childComplexity), true
 
 	case "Image.width":
 		if e.complexity.Image.Width == nil {
@@ -1058,8 +1042,6 @@ type Image implements Node {
   type: String!
   updatedAt: Time!
   createdAt: Time!
-  users: [User!]
-  dogs: [Dog!]
 }
 """
 ImageWhereInput is used for filtering Image objects.
@@ -1142,12 +1124,6 @@ input ImageWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
-  """users edge predicates"""
-  hasUsers: Boolean
-  hasUsersWith: [UserWhereInput!]
-  """dogs edge predicates"""
-  hasDogs: Boolean
-  hasDogsWith: [DogWhereInput!]
 }
 """
 An object with an ID.
@@ -2267,10 +2243,6 @@ func (ec *executionContext) fieldContext_Dog_image(ctx context.Context, field gr
 				return ec.fieldContext_Image_updatedAt(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Image_createdAt(ctx, field)
-			case "users":
-				return ec.fieldContext_Image_users(ctx, field)
-			case "dogs":
-				return ec.fieldContext_Image_dogs(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Image", field.Name)
 		},
@@ -3251,136 +3223,6 @@ func (ec *executionContext) fieldContext_Image_createdAt(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Image_users(ctx context.Context, field graphql.CollectedField, obj *ent.Image) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Image_users(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Users(ctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*ent.User)
-	fc.Result = res
-	return ec.marshalOUser2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUserᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Image_users(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Image",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "firstName":
-				return ec.fieldContext_User_firstName(ctx, field)
-			case "lastName":
-				return ec.fieldContext_User_lastName(ctx, field)
-			case "userImageID":
-				return ec.fieldContext_User_userImageID(ctx, field)
-			case "profileID":
-				return ec.fieldContext_User_profileID(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_User_updatedAt(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_User_createdAt(ctx, field)
-			case "profile":
-				return ec.fieldContext_User_profile(ctx, field)
-			case "image":
-				return ec.fieldContext_User_image(ctx, field)
-			case "dogprofiles":
-				return ec.fieldContext_User_dogprofiles(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Image_dogs(ctx context.Context, field graphql.CollectedField, obj *ent.Image) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Image_dogs(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Dogs(ctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*ent.Dog)
-	fc.Result = res
-	return ec.marshalODog2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDogᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Image_dogs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Image",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Dog_id(ctx, field)
-			case "fullName":
-				return ec.fieldContext_Dog_fullName(ctx, field)
-			case "age":
-				return ec.fieldContext_Dog_age(ctx, field)
-			case "weightLbs":
-				return ec.fieldContext_Dog_weightLbs(ctx, field)
-			case "weightKgs":
-				return ec.fieldContext_Dog_weightKgs(ctx, field)
-			case "size":
-				return ec.fieldContext_Dog_size(ctx, field)
-			case "birthday":
-				return ec.fieldContext_Dog_birthday(ctx, field)
-			case "dogImgID":
-				return ec.fieldContext_Dog_dogImgID(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_Dog_updatedAt(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Dog_createdAt(ctx, field)
-			case "image":
-				return ec.fieldContext_Dog_image(ctx, field)
-			case "breedprofiles":
-				return ec.fieldContext_Dog_breedprofiles(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Dog", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Mutation_createProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_createProfile(ctx, field)
 	if err != nil {
@@ -3495,10 +3337,6 @@ func (ec *executionContext) fieldContext_Mutation_createImage(ctx context.Contex
 				return ec.fieldContext_Image_updatedAt(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Image_createdAt(ctx, field)
-			case "users":
-				return ec.fieldContext_Image_users(ctx, field)
-			case "dogs":
-				return ec.fieldContext_Image_dogs(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Image", field.Name)
 		},
@@ -4756,10 +4594,6 @@ func (ec *executionContext) fieldContext_User_image(ctx context.Context, field g
 				return ec.fieldContext_Image_updatedAt(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Image_createdAt(ctx, field)
-			case "users":
-				return ec.fieldContext_Image_users(ctx, field)
-			case "dogs":
-				return ec.fieldContext_Image_dogs(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Image", field.Name)
 		},
@@ -8443,7 +8277,7 @@ func (ec *executionContext) unmarshalInputImageWhereInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "url", "urlNEQ", "urlIn", "urlNotIn", "urlGT", "urlGTE", "urlLT", "urlLTE", "urlContains", "urlHasPrefix", "urlHasSuffix", "urlEqualFold", "urlContainsFold", "width", "widthNEQ", "widthIn", "widthNotIn", "widthGT", "widthGTE", "widthLT", "widthLTE", "height", "heightNEQ", "heightIn", "heightNotIn", "heightGT", "heightGTE", "heightLT", "heightLTE", "type", "typeNEQ", "typeIn", "typeNotIn", "typeGT", "typeGTE", "typeLT", "typeLTE", "typeContains", "typeHasPrefix", "typeHasSuffix", "typeEqualFold", "typeContainsFold", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "hasUsers", "hasUsersWith", "hasDogs", "hasDogsWith"}
+	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "url", "urlNEQ", "urlIn", "urlNotIn", "urlGT", "urlGTE", "urlLT", "urlLTE", "urlContains", "urlHasPrefix", "urlHasSuffix", "urlEqualFold", "urlContainsFold", "width", "widthNEQ", "widthIn", "widthNotIn", "widthGT", "widthGTE", "widthLT", "widthLTE", "height", "heightNEQ", "heightIn", "heightNotIn", "heightGT", "heightGTE", "heightLT", "heightLTE", "type", "typeNEQ", "typeIn", "typeNotIn", "typeGT", "typeGTE", "typeLT", "typeLTE", "typeContains", "typeHasPrefix", "typeHasSuffix", "typeEqualFold", "typeContainsFold", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -8999,38 +8833,6 @@ func (ec *executionContext) unmarshalInputImageWhereInput(ctx context.Context, o
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("createdAtLTE"))
 			it.CreatedAtLTE, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "hasUsers":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasUsers"))
-			it.HasUsers, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "hasUsersWith":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasUsersWith"))
-			it.HasUsersWith, err = ec.unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUserWhereInputᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "hasDogs":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasDogs"))
-			it.HasDogs, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "hasDogsWith":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasDogsWith"))
-			it.HasDogsWith, err = ec.unmarshalODogWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDogWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -10595,84 +10397,50 @@ func (ec *executionContext) _Image(ctx context.Context, sel ast.SelectionSet, ob
 			out.Values[i] = ec._Image_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "url":
 
 			out.Values[i] = ec._Image_url(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "width":
 
 			out.Values[i] = ec._Image_width(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "height":
 
 			out.Values[i] = ec._Image_height(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "type":
 
 			out.Values[i] = ec._Image_type(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "updatedAt":
 
 			out.Values[i] = ec._Image_updatedAt(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "createdAt":
 
 			out.Values[i] = ec._Image_createdAt(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
-		case "users":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Image_users(ctx, field, obj)
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
-		case "dogs":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Image_dogs(ctx, field, obj)
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -11699,16 +11467,6 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUser(ctx context.Context, sel ast.SelectionSet, v *ent.User) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._User(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalNUserWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUserWhereInput(ctx context.Context, v interface{}) (*ent.UserWhereInput, error) {
 	res, err := ec.unmarshalInputUserWhereInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
@@ -12054,53 +11812,6 @@ func (ec *executionContext) marshalOCursor2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogo�
 		return graphql.Null
 	}
 	return v
-}
-
-func (ec *executionContext) marshalODog2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDogᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Dog) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNDog2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDog(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
 }
 
 func (ec *executionContext) marshalODogProfileBreed2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDogProfileBreedᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.DogProfileBreed) graphql.Marshaler {
@@ -12636,53 +12347,6 @@ func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel
 	}
 	res := graphql.MarshalTime(*v)
 	return res
-}
-
-func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.User) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUser(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
 }
 
 func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUser(ctx context.Context, sel ast.SelectionSet, v *ent.User) graphql.Marshaler {

@@ -255,28 +255,6 @@ func (i *ImageQuery) CollectFields(ctx context.Context, satisfies ...string) (*I
 
 func (i *ImageQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
-	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
-		switch field.Name {
-		case "users":
-			var (
-				path  = append(path, field.Name)
-				query = &UserQuery{config: i.config}
-			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
-				return err
-			}
-			i.withUsers = query
-		case "dogs":
-			var (
-				path  = append(path, field.Name)
-				query = &DogQuery{config: i.config}
-			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
-				return err
-			}
-			i.withDogs = query
-		}
-	}
 	return nil
 }
 
