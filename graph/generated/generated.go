@@ -50,11 +50,10 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Breed struct {
-		CreatedAt   func(childComplexity int) int
-		DogProfiles func(childComplexity int) int
-		ID          func(childComplexity int) int
-		Name        func(childComplexity int) int
-		UpdatedAt   func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Name      func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
 	}
 
 	Dog struct {
@@ -66,7 +65,6 @@ type ComplexityRoot struct {
 		FullName      func(childComplexity int) int
 		ID            func(childComplexity int) int
 		Image         func(childComplexity int) int
-		OwnerProfiles func(childComplexity int) int
 		Size          func(childComplexity int) int
 		UpdatedAt     func(childComplexity int) int
 		WeightKgs     func(childComplexity int) int
@@ -77,7 +75,6 @@ type ComplexityRoot struct {
 		Breed      func(childComplexity int) int
 		BreedID    func(childComplexity int) int
 		CreatedAt  func(childComplexity int) int
-		Dog        func(childComplexity int) int
 		DogID      func(childComplexity int) int
 		ID         func(childComplexity int) int
 		Percentage func(childComplexity int) int
@@ -89,7 +86,6 @@ type ComplexityRoot struct {
 		Dog       func(childComplexity int) int
 		DogID     func(childComplexity int) int
 		ID        func(childComplexity int) int
-		Owner     func(childComplexity int) int
 		OwnerID   func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
 	}
@@ -185,13 +181,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Breed.CreatedAt(childComplexity), true
 
-	case "Breed.dogprofiles":
-		if e.complexity.Breed.DogProfiles == nil {
-			break
-		}
-
-		return e.complexity.Breed.DogProfiles(childComplexity), true
-
 	case "Breed.id":
 		if e.complexity.Breed.ID == nil {
 			break
@@ -269,13 +258,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Dog.Image(childComplexity), true
 
-	case "Dog.ownerprofiles":
-		if e.complexity.Dog.OwnerProfiles == nil {
-			break
-		}
-
-		return e.complexity.Dog.OwnerProfiles(childComplexity), true
-
 	case "Dog.size":
 		if e.complexity.Dog.Size == nil {
 			break
@@ -324,13 +306,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.DogProfileBreed.CreatedAt(childComplexity), true
-
-	case "DogProfileBreed.dog":
-		if e.complexity.DogProfileBreed.Dog == nil {
-			break
-		}
-
-		return e.complexity.DogProfileBreed.Dog(childComplexity), true
 
 	case "DogProfileBreed.dogID":
 		if e.complexity.DogProfileBreed.DogID == nil {
@@ -387,13 +362,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.DogProfileOwner.ID(childComplexity), true
-
-	case "DogProfileOwner.owner":
-		if e.complexity.DogProfileOwner.Owner == nil {
-			break
-		}
-
-		return e.complexity.DogProfileOwner.Owner(childComplexity), true
 
 	case "DogProfileOwner.ownerID":
 		if e.complexity.DogProfileOwner.OwnerID == nil {
@@ -777,7 +745,6 @@ type Breed implements Node {
   name: String!
   updatedAt: Time!
   createdAt: Time!
-  dogprofiles: [DogProfileBreed!]
 }
 """
 BreedWhereInput is used for filtering Breed objects.
@@ -828,9 +795,6 @@ input BreedWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
-  """dogProfiles edge predicates"""
-  hasDogProfiles: Boolean
-  hasDogProfilesWith: [DogProfileBreedWhereInput!]
 }
 """
 Define a Relay Cursor type:
@@ -849,7 +813,6 @@ type Dog implements Node {
   updatedAt: Time!
   createdAt: Time!
   image: Image!
-  ownerprofiles: [DogProfileOwner!]
   breedprofiles: [DogProfileBreed!]
 }
 type DogProfileBreed implements Node {
@@ -859,7 +822,6 @@ type DogProfileBreed implements Node {
   percentage: Float!
   updatedAt: Time!
   createdAt: Time!
-  dog: Dog!
   breed: Breed!
 }
 """
@@ -916,9 +878,6 @@ input DogProfileBreedWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
-  """dog edge predicates"""
-  hasDog: Boolean
-  hasDogWith: [DogWhereInput!]
   """breed edge predicates"""
   hasBreed: Boolean
   hasBreedWith: [BreedWhereInput!]
@@ -929,7 +888,6 @@ type DogProfileOwner implements Node {
   dogID: ID!
   updatedAt: Time!
   createdAt: Time!
-  owner: User!
   dog: Dog!
 }
 """
@@ -977,9 +935,6 @@ input DogProfileOwnerWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
-  """owner edge predicates"""
-  hasOwner: Boolean
-  hasOwnerWith: [UserWhereInput!]
   """dog edge predicates"""
   hasDog: Boolean
   hasDogWith: [DogWhereInput!]
@@ -1091,9 +1046,6 @@ input DogWhereInput {
   """image edge predicates"""
   hasImage: Boolean
   hasImageWith: [ImageWhereInput!]
-  """ownerProfiles edge predicates"""
-  hasOwnerProfiles: Boolean
-  hasOwnerProfilesWith: [DogProfileOwnerWhereInput!]
   """breedProfiles edge predicates"""
   hasBreedProfiles: Boolean
   hasBreedProfilesWith: [DogProfileBreedWhereInput!]
@@ -1822,65 +1774,6 @@ func (ec *executionContext) fieldContext_Breed_createdAt(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Breed_dogprofiles(ctx context.Context, field graphql.CollectedField, obj *ent.Breed) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Breed_dogprofiles(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.DogProfiles(ctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*ent.DogProfileBreed)
-	fc.Result = res
-	return ec.marshalODogProfileBreed2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDogProfileBreedᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Breed_dogprofiles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Breed",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_DogProfileBreed_id(ctx, field)
-			case "breedID":
-				return ec.fieldContext_DogProfileBreed_breedID(ctx, field)
-			case "dogID":
-				return ec.fieldContext_DogProfileBreed_dogID(ctx, field)
-			case "percentage":
-				return ec.fieldContext_DogProfileBreed_percentage(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_DogProfileBreed_updatedAt(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_DogProfileBreed_createdAt(ctx, field)
-			case "dog":
-				return ec.fieldContext_DogProfileBreed_dog(ctx, field)
-			case "breed":
-				return ec.fieldContext_DogProfileBreed_breed(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type DogProfileBreed", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Dog_id(ctx context.Context, field graphql.CollectedField, obj *ent.Dog) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Dog_id(ctx, field)
 	if err != nil {
@@ -2385,63 +2278,6 @@ func (ec *executionContext) fieldContext_Dog_image(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Dog_ownerprofiles(ctx context.Context, field graphql.CollectedField, obj *ent.Dog) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Dog_ownerprofiles(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.OwnerProfiles(ctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*ent.DogProfileOwner)
-	fc.Result = res
-	return ec.marshalODogProfileOwner2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDogProfileOwnerᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Dog_ownerprofiles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Dog",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_DogProfileOwner_id(ctx, field)
-			case "ownerID":
-				return ec.fieldContext_DogProfileOwner_ownerID(ctx, field)
-			case "dogID":
-				return ec.fieldContext_DogProfileOwner_dogID(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_DogProfileOwner_updatedAt(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_DogProfileOwner_createdAt(ctx, field)
-			case "owner":
-				return ec.fieldContext_DogProfileOwner_owner(ctx, field)
-			case "dog":
-				return ec.fieldContext_DogProfileOwner_dog(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type DogProfileOwner", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Dog_breedprofiles(ctx context.Context, field graphql.CollectedField, obj *ent.Dog) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Dog_breedprofiles(ctx, field)
 	if err != nil {
@@ -2490,8 +2326,6 @@ func (ec *executionContext) fieldContext_Dog_breedprofiles(ctx context.Context, 
 				return ec.fieldContext_DogProfileBreed_updatedAt(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_DogProfileBreed_createdAt(ctx, field)
-			case "dog":
-				return ec.fieldContext_DogProfileBreed_dog(ctx, field)
 			case "breed":
 				return ec.fieldContext_DogProfileBreed_breed(ctx, field)
 			}
@@ -2765,78 +2599,6 @@ func (ec *executionContext) fieldContext_DogProfileBreed_createdAt(ctx context.C
 	return fc, nil
 }
 
-func (ec *executionContext) _DogProfileBreed_dog(ctx context.Context, field graphql.CollectedField, obj *ent.DogProfileBreed) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DogProfileBreed_dog(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Dog(ctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*ent.Dog)
-	fc.Result = res
-	return ec.marshalNDog2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDog(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_DogProfileBreed_dog(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "DogProfileBreed",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Dog_id(ctx, field)
-			case "fullName":
-				return ec.fieldContext_Dog_fullName(ctx, field)
-			case "age":
-				return ec.fieldContext_Dog_age(ctx, field)
-			case "weightLbs":
-				return ec.fieldContext_Dog_weightLbs(ctx, field)
-			case "weightKgs":
-				return ec.fieldContext_Dog_weightKgs(ctx, field)
-			case "size":
-				return ec.fieldContext_Dog_size(ctx, field)
-			case "birthday":
-				return ec.fieldContext_Dog_birthday(ctx, field)
-			case "dogImgID":
-				return ec.fieldContext_Dog_dogImgID(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_Dog_updatedAt(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Dog_createdAt(ctx, field)
-			case "image":
-				return ec.fieldContext_Dog_image(ctx, field)
-			case "ownerprofiles":
-				return ec.fieldContext_Dog_ownerprofiles(ctx, field)
-			case "breedprofiles":
-				return ec.fieldContext_Dog_breedprofiles(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Dog", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _DogProfileBreed_breed(ctx context.Context, field graphql.CollectedField, obj *ent.DogProfileBreed) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_DogProfileBreed_breed(ctx, field)
 	if err != nil {
@@ -2884,8 +2646,6 @@ func (ec *executionContext) fieldContext_DogProfileBreed_breed(ctx context.Conte
 				return ec.fieldContext_Breed_updatedAt(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Breed_createdAt(ctx, field)
-			case "dogprofiles":
-				return ec.fieldContext_Breed_dogprofiles(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Breed", field.Name)
 		},
@@ -3113,72 +2873,6 @@ func (ec *executionContext) fieldContext_DogProfileOwner_createdAt(ctx context.C
 	return fc, nil
 }
 
-func (ec *executionContext) _DogProfileOwner_owner(ctx context.Context, field graphql.CollectedField, obj *ent.DogProfileOwner) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DogProfileOwner_owner(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Owner(ctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*ent.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_DogProfileOwner_owner(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "DogProfileOwner",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "firstName":
-				return ec.fieldContext_User_firstName(ctx, field)
-			case "lastName":
-				return ec.fieldContext_User_lastName(ctx, field)
-			case "userImageID":
-				return ec.fieldContext_User_userImageID(ctx, field)
-			case "profileID":
-				return ec.fieldContext_User_profileID(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_User_updatedAt(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_User_createdAt(ctx, field)
-			case "profile":
-				return ec.fieldContext_User_profile(ctx, field)
-			case "image":
-				return ec.fieldContext_User_image(ctx, field)
-			case "dogprofiles":
-				return ec.fieldContext_User_dogprofiles(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _DogProfileOwner_dog(ctx context.Context, field graphql.CollectedField, obj *ent.DogProfileOwner) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_DogProfileOwner_dog(ctx, field)
 	if err != nil {
@@ -3240,8 +2934,6 @@ func (ec *executionContext) fieldContext_DogProfileOwner_dog(ctx context.Context
 				return ec.fieldContext_Dog_createdAt(ctx, field)
 			case "image":
 				return ec.fieldContext_Dog_image(ctx, field)
-			case "ownerprofiles":
-				return ec.fieldContext_Dog_ownerprofiles(ctx, field)
 			case "breedprofiles":
 				return ec.fieldContext_Dog_breedprofiles(ctx, field)
 			}
@@ -3680,8 +3372,6 @@ func (ec *executionContext) fieldContext_Image_dogs(ctx context.Context, field g
 				return ec.fieldContext_Dog_createdAt(ctx, field)
 			case "image":
 				return ec.fieldContext_Dog_image(ctx, field)
-			case "ownerprofiles":
-				return ec.fieldContext_Dog_ownerprofiles(ctx, field)
 			case "breedprofiles":
 				return ec.fieldContext_Dog_breedprofiles(ctx, field)
 			}
@@ -5123,8 +4813,6 @@ func (ec *executionContext) fieldContext_User_dogprofiles(ctx context.Context, f
 				return ec.fieldContext_DogProfileOwner_updatedAt(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_DogProfileOwner_createdAt(ctx, field)
-			case "owner":
-				return ec.fieldContext_DogProfileOwner_owner(ctx, field)
 			case "dog":
 				return ec.fieldContext_DogProfileOwner_dog(ctx, field)
 			}
@@ -6955,7 +6643,7 @@ func (ec *executionContext) unmarshalInputBreedWhereInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "name", "nameNEQ", "nameIn", "nameNotIn", "nameGT", "nameGTE", "nameLT", "nameLTE", "nameContains", "nameHasPrefix", "nameHasSuffix", "nameEqualFold", "nameContainsFold", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "hasDogProfiles", "hasDogProfilesWith"}
+	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "name", "nameNEQ", "nameIn", "nameNotIn", "nameGT", "nameGTE", "nameLT", "nameLTE", "nameContains", "nameHasPrefix", "nameHasSuffix", "nameEqualFold", "nameContainsFold", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -7282,22 +6970,6 @@ func (ec *executionContext) unmarshalInputBreedWhereInput(ctx context.Context, o
 			if err != nil {
 				return it, err
 			}
-		case "hasDogProfiles":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasDogProfiles"))
-			it.HasDogProfiles, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "hasDogProfilesWith":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasDogProfilesWith"))
-			it.HasDogProfilesWith, err = ec.unmarshalODogProfileBreedWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDogProfileBreedWhereInputᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		}
 	}
 
@@ -7311,7 +6983,7 @@ func (ec *executionContext) unmarshalInputDogProfileBreedWhereInput(ctx context.
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "breedID", "breedIDNEQ", "breedIDIn", "breedIDNotIn", "dogID", "dogIDNEQ", "dogIDIn", "dogIDNotIn", "percentage", "percentageNEQ", "percentageIn", "percentageNotIn", "percentageGT", "percentageGTE", "percentageLT", "percentageLTE", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "hasDog", "hasDogWith", "hasBreed", "hasBreedWith"}
+	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "breedID", "breedIDNEQ", "breedIDIn", "breedIDNotIn", "dogID", "dogIDNEQ", "dogIDIn", "dogIDNotIn", "percentage", "percentageNEQ", "percentageIn", "percentageNotIn", "percentageGT", "percentageGTE", "percentageLT", "percentageLTE", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "hasBreed", "hasBreedWith"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -7662,22 +7334,6 @@ func (ec *executionContext) unmarshalInputDogProfileBreedWhereInput(ctx context.
 			if err != nil {
 				return it, err
 			}
-		case "hasDog":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasDog"))
-			it.HasDog, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "hasDogWith":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasDogWith"))
-			it.HasDogWith, err = ec.unmarshalODogWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDogWhereInputᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "hasBreed":
 			var err error
 
@@ -7707,7 +7363,7 @@ func (ec *executionContext) unmarshalInputDogProfileOwnerWhereInput(ctx context.
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "ownerID", "ownerIDNEQ", "ownerIDIn", "ownerIDNotIn", "dogID", "dogIDNEQ", "dogIDIn", "dogIDNotIn", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "hasOwner", "hasOwnerWith", "hasDog", "hasDogWith"}
+	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "ownerID", "ownerIDNEQ", "ownerIDIn", "ownerIDNotIn", "dogID", "dogIDNEQ", "dogIDIn", "dogIDNotIn", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "hasDog", "hasDogWith"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -7994,22 +7650,6 @@ func (ec *executionContext) unmarshalInputDogProfileOwnerWhereInput(ctx context.
 			if err != nil {
 				return it, err
 			}
-		case "hasOwner":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasOwner"))
-			it.HasOwner, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "hasOwnerWith":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasOwnerWith"))
-			it.HasOwnerWith, err = ec.unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUserWhereInputᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "hasDog":
 			var err error
 
@@ -8039,7 +7679,7 @@ func (ec *executionContext) unmarshalInputDogWhereInput(ctx context.Context, obj
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "fullName", "fullNameNEQ", "fullNameIn", "fullNameNotIn", "fullNameGT", "fullNameGTE", "fullNameLT", "fullNameLTE", "fullNameContains", "fullNameHasPrefix", "fullNameHasSuffix", "fullNameEqualFold", "fullNameContainsFold", "age", "ageNEQ", "ageIn", "ageNotIn", "ageGT", "ageGTE", "ageLT", "ageLTE", "weightLbs", "weightLbsNEQ", "weightLbsIn", "weightLbsNotIn", "weightLbsGT", "weightLbsGTE", "weightLbsLT", "weightLbsLTE", "weightKgs", "weightKgsNEQ", "weightKgsIn", "weightKgsNotIn", "weightKgsGT", "weightKgsGTE", "weightKgsLT", "weightKgsLTE", "size", "sizeNEQ", "sizeIn", "sizeNotIn", "sizeGT", "sizeGTE", "sizeLT", "sizeLTE", "sizeContains", "sizeHasPrefix", "sizeHasSuffix", "sizeEqualFold", "sizeContainsFold", "birthday", "birthdayNEQ", "birthdayIn", "birthdayNotIn", "birthdayGT", "birthdayGTE", "birthdayLT", "birthdayLTE", "dogImgID", "dogImgIDNEQ", "dogImgIDIn", "dogImgIDNotIn", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "hasImage", "hasImageWith", "hasOwnerProfiles", "hasOwnerProfilesWith", "hasBreedProfiles", "hasBreedProfilesWith"}
+	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "fullName", "fullNameNEQ", "fullNameIn", "fullNameNotIn", "fullNameGT", "fullNameGTE", "fullNameLT", "fullNameLTE", "fullNameContains", "fullNameHasPrefix", "fullNameHasSuffix", "fullNameEqualFold", "fullNameContainsFold", "age", "ageNEQ", "ageIn", "ageNotIn", "ageGT", "ageGTE", "ageLT", "ageLTE", "weightLbs", "weightLbsNEQ", "weightLbsIn", "weightLbsNotIn", "weightLbsGT", "weightLbsGTE", "weightLbsLT", "weightLbsLTE", "weightKgs", "weightKgsNEQ", "weightKgsIn", "weightKgsNotIn", "weightKgsGT", "weightKgsGTE", "weightKgsLT", "weightKgsLTE", "size", "sizeNEQ", "sizeIn", "sizeNotIn", "sizeGT", "sizeGTE", "sizeLT", "sizeLTE", "sizeContains", "sizeHasPrefix", "sizeHasSuffix", "sizeEqualFold", "sizeContainsFold", "birthday", "birthdayNEQ", "birthdayIn", "birthdayNotIn", "birthdayGT", "birthdayGTE", "birthdayLT", "birthdayLTE", "dogImgID", "dogImgIDNEQ", "dogImgIDIn", "dogImgIDNotIn", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "hasImage", "hasImageWith", "hasBreedProfiles", "hasBreedProfilesWith"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -8771,22 +8411,6 @@ func (ec *executionContext) unmarshalInputDogWhereInput(ctx context.Context, obj
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasImageWith"))
 			it.HasImageWith, err = ec.unmarshalOImageWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐImageWhereInputᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "hasOwnerProfiles":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasOwnerProfiles"))
-			it.HasOwnerProfiles, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "hasOwnerProfilesWith":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasOwnerProfilesWith"))
-			it.HasOwnerProfilesWith, err = ec.unmarshalODogProfileOwnerWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDogProfileOwnerWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -10635,46 +10259,29 @@ func (ec *executionContext) _Breed(ctx context.Context, sel ast.SelectionSet, ob
 			out.Values[i] = ec._Breed_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "name":
 
 			out.Values[i] = ec._Breed_name(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "updatedAt":
 
 			out.Values[i] = ec._Breed_updatedAt(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "createdAt":
 
 			out.Values[i] = ec._Breed_createdAt(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
-		case "dogprofiles":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Breed_dogprofiles(ctx, field, obj)
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10786,23 +10393,6 @@ func (ec *executionContext) _Dog(ctx context.Context, sel ast.SelectionSet, obj 
 				return innerFunc(ctx)
 
 			})
-		case "ownerprofiles":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Dog_ownerprofiles(ctx, field, obj)
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "breedprofiles":
 			field := field
 
@@ -10883,26 +10473,6 @@ func (ec *executionContext) _DogProfileBreed(ctx context.Context, sel ast.Select
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "dog":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._DogProfileBreed_dog(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "breed":
 			field := field
 
@@ -10979,26 +10549,6 @@ func (ec *executionContext) _DogProfileOwner(ctx context.Context, sel ast.Select
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "owner":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._DogProfileOwner_owner(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "dog":
 			field := field
 
