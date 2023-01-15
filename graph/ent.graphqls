@@ -460,7 +460,6 @@ type Profile implements Node {
   description: String!
   updatedAt: Time!
   createdAt: Time!
-  users: [User!]
 }
 """
 ProfileWhereInput is used for filtering Profile objects.
@@ -525,9 +524,6 @@ input ProfileWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
-  """users edge predicates"""
-  hasUsers: Boolean
-  hasUsersWith: [UserWhereInput!]
 }
 type Query {
   """Fetches an object given its ID."""

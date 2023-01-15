@@ -84,14 +84,6 @@ func (i *Image) Dogs(ctx context.Context) ([]*Dog, error) {
 	return result, err
 }
 
-func (pr *Profile) Users(ctx context.Context) ([]*User, error) {
-	result, err := pr.Edges.UsersOrErr()
-	if IsNotLoaded(err) {
-		result, err = pr.QueryUsers().All(ctx)
-	}
-	return result, err
-}
-
 func (u *User) Profile(ctx context.Context) (*Profile, error) {
 	result, err := u.Edges.ProfileOrErr()
 	if IsNotLoaded(err) {
