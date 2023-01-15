@@ -4,26 +4,10 @@ package ent
 
 import "context"
 
-func (b *Breed) DogProfiles(ctx context.Context) ([]*DogProfileBreed, error) {
-	result, err := b.Edges.DogProfilesOrErr()
-	if IsNotLoaded(err) {
-		result, err = b.QueryDogProfiles().All(ctx)
-	}
-	return result, err
-}
-
 func (d *Dog) Image(ctx context.Context) (*Image, error) {
 	result, err := d.Edges.ImageOrErr()
 	if IsNotLoaded(err) {
 		result, err = d.QueryImage().Only(ctx)
-	}
-	return result, err
-}
-
-func (d *Dog) OwnerProfiles(ctx context.Context) ([]*DogProfileOwner, error) {
-	result, err := d.Edges.OwnerProfilesOrErr()
-	if IsNotLoaded(err) {
-		result, err = d.QueryOwnerProfiles().All(ctx)
 	}
 	return result, err
 }
@@ -36,14 +20,6 @@ func (d *Dog) BreedProfiles(ctx context.Context) ([]*DogProfileBreed, error) {
 	return result, err
 }
 
-func (dpb *DogProfileBreed) Dog(ctx context.Context) (*Dog, error) {
-	result, err := dpb.Edges.DogOrErr()
-	if IsNotLoaded(err) {
-		result, err = dpb.QueryDog().Only(ctx)
-	}
-	return result, err
-}
-
 func (dpb *DogProfileBreed) Breed(ctx context.Context) (*Breed, error) {
 	result, err := dpb.Edges.BreedOrErr()
 	if IsNotLoaded(err) {
@@ -52,42 +28,10 @@ func (dpb *DogProfileBreed) Breed(ctx context.Context) (*Breed, error) {
 	return result, err
 }
 
-func (dpo *DogProfileOwner) Owner(ctx context.Context) (*User, error) {
-	result, err := dpo.Edges.OwnerOrErr()
-	if IsNotLoaded(err) {
-		result, err = dpo.QueryOwner().Only(ctx)
-	}
-	return result, err
-}
-
 func (dpo *DogProfileOwner) Dog(ctx context.Context) (*Dog, error) {
 	result, err := dpo.Edges.DogOrErr()
 	if IsNotLoaded(err) {
 		result, err = dpo.QueryDog().Only(ctx)
-	}
-	return result, err
-}
-
-func (i *Image) Users(ctx context.Context) ([]*User, error) {
-	result, err := i.Edges.UsersOrErr()
-	if IsNotLoaded(err) {
-		result, err = i.QueryUsers().All(ctx)
-	}
-	return result, err
-}
-
-func (i *Image) Dogs(ctx context.Context) ([]*Dog, error) {
-	result, err := i.Edges.DogsOrErr()
-	if IsNotLoaded(err) {
-		result, err = i.QueryDogs().All(ctx)
-	}
-	return result, err
-}
-
-func (pr *Profile) Users(ctx context.Context) ([]*User, error) {
-	result, err := pr.Edges.UsersOrErr()
-	if IsNotLoaded(err) {
-		result, err = pr.QueryUsers().All(ctx)
 	}
 	return result, err
 }

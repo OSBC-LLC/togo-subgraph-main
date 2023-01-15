@@ -17,6 +17,7 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/schema/uuidgql"
+	"github.com/OSBC-LLC/togo-subgraph-main/graph/model"
 	"github.com/google/uuid"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -40,6 +41,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Mutation() MutationResolver
 	Query() QueryResolver
 }
 
@@ -48,11 +50,10 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Breed struct {
-		CreatedAt   func(childComplexity int) int
-		DogProfiles func(childComplexity int) int
-		ID          func(childComplexity int) int
-		Name        func(childComplexity int) int
-		UpdatedAt   func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Name      func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
 	}
 
 	Dog struct {
@@ -64,7 +65,6 @@ type ComplexityRoot struct {
 		FullName      func(childComplexity int) int
 		ID            func(childComplexity int) int
 		Image         func(childComplexity int) int
-		OwnerProfiles func(childComplexity int) int
 		Size          func(childComplexity int) int
 		UpdatedAt     func(childComplexity int) int
 		WeightKgs     func(childComplexity int) int
@@ -75,7 +75,6 @@ type ComplexityRoot struct {
 		Breed      func(childComplexity int) int
 		BreedID    func(childComplexity int) int
 		CreatedAt  func(childComplexity int) int
-		Dog        func(childComplexity int) int
 		DogID      func(childComplexity int) int
 		ID         func(childComplexity int) int
 		Percentage func(childComplexity int) int
@@ -87,21 +86,24 @@ type ComplexityRoot struct {
 		Dog       func(childComplexity int) int
 		DogID     func(childComplexity int) int
 		ID        func(childComplexity int) int
-		Owner     func(childComplexity int) int
 		OwnerID   func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
 	}
 
 	Image struct {
 		CreatedAt func(childComplexity int) int
-		Dogs      func(childComplexity int) int
 		Height    func(childComplexity int) int
 		ID        func(childComplexity int) int
 		Type      func(childComplexity int) int
 		URL       func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
-		Users     func(childComplexity int) int
 		Width     func(childComplexity int) int
+	}
+
+	Mutation struct {
+		CreateDefaultUser func(childComplexity int, session model.Session, details model.NewUser) int
+		CreateImage       func(childComplexity int, session model.Session, details model.NewImage) int
+		CreateProfile     func(childComplexity int, session model.Session, details model.NewProfile) int
 	}
 
 	PageInfo struct {
@@ -117,10 +119,10 @@ type ComplexityRoot struct {
 		ID          func(childComplexity int) int
 		Name        func(childComplexity int) int
 		UpdatedAt   func(childComplexity int) int
-		Users       func(childComplexity int) int
 	}
 
 	Query struct {
+		GetAppData         func(childComplexity int, session model.Session) int
 		Node               func(childComplexity int, id uuid.UUID) int
 		Nodes              func(childComplexity int, ids []uuid.UUID) int
 		__resolve__service func(childComplexity int) int
@@ -144,9 +146,15 @@ type ComplexityRoot struct {
 	}
 }
 
+type MutationResolver interface {
+	CreateProfile(ctx context.Context, session model.Session, details model.NewProfile) (*ent.Profile, error)
+	CreateImage(ctx context.Context, session model.Session, details model.NewImage) (*ent.Image, error)
+	CreateDefaultUser(ctx context.Context, session model.Session, details model.NewUser) (*ent.User, error)
+}
 type QueryResolver interface {
 	Node(ctx context.Context, id uuid.UUID) (ent.Noder, error)
 	Nodes(ctx context.Context, ids []uuid.UUID) ([]ent.Noder, error)
+	GetAppData(ctx context.Context, session model.Session) (*ent.User, error)
 }
 
 type executableSchema struct {
@@ -170,13 +178,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Breed.CreatedAt(childComplexity), true
-
-	case "Breed.dogprofiles":
-		if e.complexity.Breed.DogProfiles == nil {
-			break
-		}
-
-		return e.complexity.Breed.DogProfiles(childComplexity), true
 
 	case "Breed.id":
 		if e.complexity.Breed.ID == nil {
@@ -255,13 +256,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Dog.Image(childComplexity), true
 
-	case "Dog.ownerprofiles":
-		if e.complexity.Dog.OwnerProfiles == nil {
-			break
-		}
-
-		return e.complexity.Dog.OwnerProfiles(childComplexity), true
-
 	case "Dog.size":
 		if e.complexity.Dog.Size == nil {
 			break
@@ -310,13 +304,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.DogProfileBreed.CreatedAt(childComplexity), true
-
-	case "DogProfileBreed.dog":
-		if e.complexity.DogProfileBreed.Dog == nil {
-			break
-		}
-
-		return e.complexity.DogProfileBreed.Dog(childComplexity), true
 
 	case "DogProfileBreed.dogID":
 		if e.complexity.DogProfileBreed.DogID == nil {
@@ -374,13 +361,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.DogProfileOwner.ID(childComplexity), true
 
-	case "DogProfileOwner.owner":
-		if e.complexity.DogProfileOwner.Owner == nil {
-			break
-		}
-
-		return e.complexity.DogProfileOwner.Owner(childComplexity), true
-
 	case "DogProfileOwner.ownerID":
 		if e.complexity.DogProfileOwner.OwnerID == nil {
 			break
@@ -401,13 +381,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Image.CreatedAt(childComplexity), true
-
-	case "Image.dogs":
-		if e.complexity.Image.Dogs == nil {
-			break
-		}
-
-		return e.complexity.Image.Dogs(childComplexity), true
 
 	case "Image.height":
 		if e.complexity.Image.Height == nil {
@@ -444,19 +417,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Image.UpdatedAt(childComplexity), true
 
-	case "Image.users":
-		if e.complexity.Image.Users == nil {
-			break
-		}
-
-		return e.complexity.Image.Users(childComplexity), true
-
 	case "Image.width":
 		if e.complexity.Image.Width == nil {
 			break
 		}
 
 		return e.complexity.Image.Width(childComplexity), true
+
+	case "Mutation.createDefaultUser":
+		if e.complexity.Mutation.CreateDefaultUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createDefaultUser_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateDefaultUser(childComplexity, args["session"].(model.Session), args["details"].(model.NewUser)), true
+
+	case "Mutation.createImage":
+		if e.complexity.Mutation.CreateImage == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createImage_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateImage(childComplexity, args["session"].(model.Session), args["details"].(model.NewImage)), true
+
+	case "Mutation.createProfile":
+		if e.complexity.Mutation.CreateProfile == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createProfile_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateProfile(childComplexity, args["session"].(model.Session), args["details"].(model.NewProfile)), true
 
 	case "PageInfo.endCursor":
 		if e.complexity.PageInfo.EndCursor == nil {
@@ -521,12 +523,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Profile.UpdatedAt(childComplexity), true
 
-	case "Profile.users":
-		if e.complexity.Profile.Users == nil {
+	case "Query.getAppData":
+		if e.complexity.Query.GetAppData == nil {
 			break
 		}
 
-		return e.complexity.Profile.Users(childComplexity), true
+		args, err := ec.field_Query_getAppData_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetAppData(childComplexity, args["session"].(model.Session)), true
 
 	case "Query.node":
 		if e.complexity.Query.Node == nil {
@@ -649,7 +656,11 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputDogProfileOwnerWhereInput,
 		ec.unmarshalInputDogWhereInput,
 		ec.unmarshalInputImageWhereInput,
+		ec.unmarshalInputNewImage,
+		ec.unmarshalInputNewProfile,
+		ec.unmarshalInputNewUser,
 		ec.unmarshalInputProfileWhereInput,
+		ec.unmarshalInputSession,
 		ec.unmarshalInputUserWhereInput,
 	)
 	first := true
@@ -663,6 +674,21 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			first = false
 			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 			data := ec._Query(ctx, rc.Operation.SelectionSet)
+			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
+	case ast.Mutation:
+		return func(ctx context.Context) *graphql.Response {
+			if !first {
+				return nil
+			}
+			first = false
+			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+			data := ec._Mutation(ctx, rc.Operation.SelectionSet)
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 
@@ -703,7 +729,6 @@ type Breed implements Node {
   name: String!
   updatedAt: Time!
   createdAt: Time!
-  dogprofiles: [DogProfileBreed!]
 }
 """
 BreedWhereInput is used for filtering Breed objects.
@@ -754,9 +779,6 @@ input BreedWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
-  """dogProfiles edge predicates"""
-  hasDogProfiles: Boolean
-  hasDogProfilesWith: [DogProfileBreedWhereInput!]
 }
 """
 Define a Relay Cursor type:
@@ -775,7 +797,6 @@ type Dog implements Node {
   updatedAt: Time!
   createdAt: Time!
   image: Image!
-  ownerprofiles: [DogProfileOwner!]
   breedprofiles: [DogProfileBreed!]
 }
 type DogProfileBreed implements Node {
@@ -785,7 +806,6 @@ type DogProfileBreed implements Node {
   percentage: Float!
   updatedAt: Time!
   createdAt: Time!
-  dog: Dog!
   breed: Breed!
 }
 """
@@ -842,9 +862,6 @@ input DogProfileBreedWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
-  """dog edge predicates"""
-  hasDog: Boolean
-  hasDogWith: [DogWhereInput!]
   """breed edge predicates"""
   hasBreed: Boolean
   hasBreedWith: [BreedWhereInput!]
@@ -855,7 +872,6 @@ type DogProfileOwner implements Node {
   dogID: ID!
   updatedAt: Time!
   createdAt: Time!
-  owner: User!
   dog: Dog!
 }
 """
@@ -903,9 +919,6 @@ input DogProfileOwnerWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
-  """owner edge predicates"""
-  hasOwner: Boolean
-  hasOwnerWith: [UserWhereInput!]
   """dog edge predicates"""
   hasDog: Boolean
   hasDogWith: [DogWhereInput!]
@@ -1017,9 +1030,6 @@ input DogWhereInput {
   """image edge predicates"""
   hasImage: Boolean
   hasImageWith: [ImageWhereInput!]
-  """ownerProfiles edge predicates"""
-  hasOwnerProfiles: Boolean
-  hasOwnerProfilesWith: [DogProfileOwnerWhereInput!]
   """breedProfiles edge predicates"""
   hasBreedProfiles: Boolean
   hasBreedProfilesWith: [DogProfileBreedWhereInput!]
@@ -1032,8 +1042,6 @@ type Image implements Node {
   type: String!
   updatedAt: Time!
   createdAt: Time!
-  users: [User!]
-  dogs: [Dog!]
 }
 """
 ImageWhereInput is used for filtering Image objects.
@@ -1116,12 +1124,6 @@ input ImageWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
-  """users edge predicates"""
-  hasUsers: Boolean
-  hasUsersWith: [UserWhereInput!]
-  """dogs edge predicates"""
-  hasDogs: Boolean
-  hasDogsWith: [DogWhereInput!]
 }
 """
 An object with an ID.
@@ -1158,7 +1160,6 @@ type Profile implements Node {
   description: String!
   updatedAt: Time!
   createdAt: Time!
-  users: [User!]
 }
 """
 ProfileWhereInput is used for filtering Profile objects.
@@ -1223,9 +1224,6 @@ input ProfileWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
-  """users edge predicates"""
-  hasUsers: Boolean
-  hasUsersWith: [UserWhereInput!]
 }
 type Query {
   """Fetches an object given its ID."""
@@ -1342,6 +1340,37 @@ input UserWhereInput {
 scalar Time
 
 scalar UUID
+
+input Session {
+	jwt: String!
+}
+
+input NewProfile {
+	name: String!
+	description: String!
+}
+
+input NewImage {
+	url: String!
+	width: Int!
+	height: Int!
+	type: String!
+}
+
+input NewUser {
+	firstName: String!
+	lastName: String!
+}
+
+extend type Query {
+	getAppData(session: Session!): User
+}
+
+type Mutation {
+	createProfile(session: Session!, details: NewProfile!): Profile
+	createImage(session: Session!, details: NewImage!): Image
+	createDefaultUser(session: Session!, details: NewUser!): User
+}
 `, BuiltIn: false},
 	{Name: "../../federation/directives.graphql", Input: `
 	scalar _Any
@@ -1375,6 +1404,78 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_createDefaultUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.Session
+	if tmp, ok := rawArgs["session"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("session"))
+		arg0, err = ec.unmarshalNSession2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋgraphᚋmodelᚐSession(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["session"] = arg0
+	var arg1 model.NewUser
+	if tmp, ok := rawArgs["details"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("details"))
+		arg1, err = ec.unmarshalNNewUser2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋgraphᚋmodelᚐNewUser(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["details"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createImage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.Session
+	if tmp, ok := rawArgs["session"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("session"))
+		arg0, err = ec.unmarshalNSession2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋgraphᚋmodelᚐSession(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["session"] = arg0
+	var arg1 model.NewImage
+	if tmp, ok := rawArgs["details"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("details"))
+		arg1, err = ec.unmarshalNNewImage2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋgraphᚋmodelᚐNewImage(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["details"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createProfile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.Session
+	if tmp, ok := rawArgs["session"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("session"))
+		arg0, err = ec.unmarshalNSession2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋgraphᚋmodelᚐSession(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["session"] = arg0
+	var arg1 model.NewProfile
+	if tmp, ok := rawArgs["details"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("details"))
+		arg1, err = ec.unmarshalNNewProfile2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋgraphᚋmodelᚐNewProfile(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["details"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1387,6 +1488,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getAppData_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.Session
+	if tmp, ok := rawArgs["session"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("session"))
+		arg0, err = ec.unmarshalNSession2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋgraphᚋmodelᚐSession(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["session"] = arg0
 	return args, nil
 }
 
@@ -1629,65 +1745,6 @@ func (ec *executionContext) fieldContext_Breed_createdAt(ctx context.Context, fi
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Time does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Breed_dogprofiles(ctx context.Context, field graphql.CollectedField, obj *ent.Breed) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Breed_dogprofiles(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.DogProfiles(ctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*ent.DogProfileBreed)
-	fc.Result = res
-	return ec.marshalODogProfileBreed2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDogProfileBreedᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Breed_dogprofiles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Breed",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_DogProfileBreed_id(ctx, field)
-			case "breedID":
-				return ec.fieldContext_DogProfileBreed_breedID(ctx, field)
-			case "dogID":
-				return ec.fieldContext_DogProfileBreed_dogID(ctx, field)
-			case "percentage":
-				return ec.fieldContext_DogProfileBreed_percentage(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_DogProfileBreed_updatedAt(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_DogProfileBreed_createdAt(ctx, field)
-			case "dog":
-				return ec.fieldContext_DogProfileBreed_dog(ctx, field)
-			case "breed":
-				return ec.fieldContext_DogProfileBreed_breed(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type DogProfileBreed", field.Name)
 		},
 	}
 	return fc, nil
@@ -2186,69 +2243,8 @@ func (ec *executionContext) fieldContext_Dog_image(ctx context.Context, field gr
 				return ec.fieldContext_Image_updatedAt(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Image_createdAt(ctx, field)
-			case "users":
-				return ec.fieldContext_Image_users(ctx, field)
-			case "dogs":
-				return ec.fieldContext_Image_dogs(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Image", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Dog_ownerprofiles(ctx context.Context, field graphql.CollectedField, obj *ent.Dog) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Dog_ownerprofiles(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.OwnerProfiles(ctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*ent.DogProfileOwner)
-	fc.Result = res
-	return ec.marshalODogProfileOwner2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDogProfileOwnerᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Dog_ownerprofiles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Dog",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_DogProfileOwner_id(ctx, field)
-			case "ownerID":
-				return ec.fieldContext_DogProfileOwner_ownerID(ctx, field)
-			case "dogID":
-				return ec.fieldContext_DogProfileOwner_dogID(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_DogProfileOwner_updatedAt(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_DogProfileOwner_createdAt(ctx, field)
-			case "owner":
-				return ec.fieldContext_DogProfileOwner_owner(ctx, field)
-			case "dog":
-				return ec.fieldContext_DogProfileOwner_dog(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type DogProfileOwner", field.Name)
 		},
 	}
 	return fc, nil
@@ -2302,8 +2298,6 @@ func (ec *executionContext) fieldContext_Dog_breedprofiles(ctx context.Context, 
 				return ec.fieldContext_DogProfileBreed_updatedAt(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_DogProfileBreed_createdAt(ctx, field)
-			case "dog":
-				return ec.fieldContext_DogProfileBreed_dog(ctx, field)
 			case "breed":
 				return ec.fieldContext_DogProfileBreed_breed(ctx, field)
 			}
@@ -2577,78 +2571,6 @@ func (ec *executionContext) fieldContext_DogProfileBreed_createdAt(ctx context.C
 	return fc, nil
 }
 
-func (ec *executionContext) _DogProfileBreed_dog(ctx context.Context, field graphql.CollectedField, obj *ent.DogProfileBreed) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DogProfileBreed_dog(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Dog(ctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*ent.Dog)
-	fc.Result = res
-	return ec.marshalNDog2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDog(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_DogProfileBreed_dog(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "DogProfileBreed",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Dog_id(ctx, field)
-			case "fullName":
-				return ec.fieldContext_Dog_fullName(ctx, field)
-			case "age":
-				return ec.fieldContext_Dog_age(ctx, field)
-			case "weightLbs":
-				return ec.fieldContext_Dog_weightLbs(ctx, field)
-			case "weightKgs":
-				return ec.fieldContext_Dog_weightKgs(ctx, field)
-			case "size":
-				return ec.fieldContext_Dog_size(ctx, field)
-			case "birthday":
-				return ec.fieldContext_Dog_birthday(ctx, field)
-			case "dogImgID":
-				return ec.fieldContext_Dog_dogImgID(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_Dog_updatedAt(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Dog_createdAt(ctx, field)
-			case "image":
-				return ec.fieldContext_Dog_image(ctx, field)
-			case "ownerprofiles":
-				return ec.fieldContext_Dog_ownerprofiles(ctx, field)
-			case "breedprofiles":
-				return ec.fieldContext_Dog_breedprofiles(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Dog", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _DogProfileBreed_breed(ctx context.Context, field graphql.CollectedField, obj *ent.DogProfileBreed) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_DogProfileBreed_breed(ctx, field)
 	if err != nil {
@@ -2696,8 +2618,6 @@ func (ec *executionContext) fieldContext_DogProfileBreed_breed(ctx context.Conte
 				return ec.fieldContext_Breed_updatedAt(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Breed_createdAt(ctx, field)
-			case "dogprofiles":
-				return ec.fieldContext_Breed_dogprofiles(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Breed", field.Name)
 		},
@@ -2925,72 +2845,6 @@ func (ec *executionContext) fieldContext_DogProfileOwner_createdAt(ctx context.C
 	return fc, nil
 }
 
-func (ec *executionContext) _DogProfileOwner_owner(ctx context.Context, field graphql.CollectedField, obj *ent.DogProfileOwner) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DogProfileOwner_owner(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Owner(ctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*ent.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_DogProfileOwner_owner(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "DogProfileOwner",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "firstName":
-				return ec.fieldContext_User_firstName(ctx, field)
-			case "lastName":
-				return ec.fieldContext_User_lastName(ctx, field)
-			case "userImageID":
-				return ec.fieldContext_User_userImageID(ctx, field)
-			case "profileID":
-				return ec.fieldContext_User_profileID(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_User_updatedAt(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_User_createdAt(ctx, field)
-			case "profile":
-				return ec.fieldContext_User_profile(ctx, field)
-			case "image":
-				return ec.fieldContext_User_image(ctx, field)
-			case "dogprofiles":
-				return ec.fieldContext_User_dogprofiles(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _DogProfileOwner_dog(ctx context.Context, field graphql.CollectedField, obj *ent.DogProfileOwner) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_DogProfileOwner_dog(ctx, field)
 	if err != nil {
@@ -3052,8 +2906,6 @@ func (ec *executionContext) fieldContext_DogProfileOwner_dog(ctx context.Context
 				return ec.fieldContext_Dog_createdAt(ctx, field)
 			case "image":
 				return ec.fieldContext_Dog_image(ctx, field)
-			case "ownerprofiles":
-				return ec.fieldContext_Dog_ownerprofiles(ctx, field)
 			case "breedprofiles":
 				return ec.fieldContext_Dog_breedprofiles(ctx, field)
 			}
@@ -3371,8 +3223,8 @@ func (ec *executionContext) fieldContext_Image_createdAt(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Image_users(ctx context.Context, field graphql.CollectedField, obj *ent.Image) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Image_users(ctx, field)
+func (ec *executionContext) _Mutation_createProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createProfile(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3385,7 +3237,7 @@ func (ec *executionContext) _Image_users(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Users(ctx)
+		return ec.resolvers.Mutation().CreateProfile(rctx, fc.Args["session"].(model.Session), fc.Args["details"].(model.NewProfile))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3394,17 +3246,149 @@ func (ec *executionContext) _Image_users(ctx context.Context, field graphql.Coll
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*ent.User)
+	res := resTmp.(*ent.Profile)
 	fc.Result = res
-	return ec.marshalOUser2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUserᚄ(ctx, field.Selections, res)
+	return ec.marshalOProfile2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐProfile(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Image_users(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_createProfile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Image",
+		Object:     "Mutation",
 		Field:      field,
 		IsMethod:   true,
-		IsResolver: false,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Profile_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Profile_name(ctx, field)
+			case "description":
+				return ec.fieldContext_Profile_description(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Profile_updatedAt(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Profile_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createProfile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createImage(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createImage(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateImage(rctx, fc.Args["session"].(model.Session), fc.Args["details"].(model.NewImage))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ent.Image)
+	fc.Result = res
+	return ec.marshalOImage2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐImage(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createImage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Image_id(ctx, field)
+			case "url":
+				return ec.fieldContext_Image_url(ctx, field)
+			case "width":
+				return ec.fieldContext_Image_width(ctx, field)
+			case "height":
+				return ec.fieldContext_Image_height(ctx, field)
+			case "type":
+				return ec.fieldContext_Image_type(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Image_updatedAt(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Image_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Image", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createImage_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createDefaultUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createDefaultUser(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateDefaultUser(rctx, fc.Args["session"].(model.Session), fc.Args["details"].(model.NewUser))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ent.User)
+	fc.Result = res
+	return ec.marshalOUser2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createDefaultUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -3431,74 +3415,16 @@ func (ec *executionContext) fieldContext_Image_users(ctx context.Context, field 
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
 	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Image_dogs(ctx context.Context, field graphql.CollectedField, obj *ent.Image) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Image_dogs(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
 	defer func() {
 		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Dogs(ctx)
-	})
-	if err != nil {
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createDefaultUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*ent.Dog)
-	fc.Result = res
-	return ec.marshalODog2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDogᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Image_dogs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Image",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Dog_id(ctx, field)
-			case "fullName":
-				return ec.fieldContext_Dog_fullName(ctx, field)
-			case "age":
-				return ec.fieldContext_Dog_age(ctx, field)
-			case "weightLbs":
-				return ec.fieldContext_Dog_weightLbs(ctx, field)
-			case "weightKgs":
-				return ec.fieldContext_Dog_weightKgs(ctx, field)
-			case "size":
-				return ec.fieldContext_Dog_size(ctx, field)
-			case "birthday":
-				return ec.fieldContext_Dog_birthday(ctx, field)
-			case "dogImgID":
-				return ec.fieldContext_Dog_dogImgID(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_Dog_updatedAt(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Dog_createdAt(ctx, field)
-			case "image":
-				return ec.fieldContext_Dog_image(ctx, field)
-			case "ownerprofiles":
-				return ec.fieldContext_Dog_ownerprofiles(ctx, field)
-			case "breedprofiles":
-				return ec.fieldContext_Dog_breedprofiles(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Dog", field.Name)
-		},
+		return
 	}
 	return fc, nil
 }
@@ -3893,69 +3819,6 @@ func (ec *executionContext) fieldContext_Profile_createdAt(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _Profile_users(ctx context.Context, field graphql.CollectedField, obj *ent.Profile) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Profile_users(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Users(ctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*ent.User)
-	fc.Result = res
-	return ec.marshalOUser2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUserᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Profile_users(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Profile",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "firstName":
-				return ec.fieldContext_User_firstName(ctx, field)
-			case "lastName":
-				return ec.fieldContext_User_lastName(ctx, field)
-			case "userImageID":
-				return ec.fieldContext_User_userImageID(ctx, field)
-			case "profileID":
-				return ec.fieldContext_User_profileID(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_User_updatedAt(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_User_createdAt(ctx, field)
-			case "profile":
-				return ec.fieldContext_User_profile(ctx, field)
-			case "image":
-				return ec.fieldContext_User_image(ctx, field)
-			case "dogprofiles":
-				return ec.fieldContext_User_dogprofiles(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Query_node(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_node(ctx, field)
 	if err != nil {
@@ -4057,6 +3920,80 @@ func (ec *executionContext) fieldContext_Query_nodes(ctx context.Context, field 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_nodes_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getAppData(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getAppData(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetAppData(rctx, fc.Args["session"].(model.Session))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ent.User)
+	fc.Result = res
+	return ec.marshalOUser2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getAppData(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "userImageID":
+				return ec.fieldContext_User_userImageID(ctx, field)
+			case "profileID":
+				return ec.fieldContext_User_profileID(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_User_updatedAt(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "profile":
+				return ec.fieldContext_User_profile(ctx, field)
+			case "image":
+				return ec.fieldContext_User_image(ctx, field)
+			case "dogprofiles":
+				return ec.fieldContext_User_dogprofiles(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getAppData_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -4597,8 +4534,6 @@ func (ec *executionContext) fieldContext_User_profile(ctx context.Context, field
 				return ec.fieldContext_Profile_updatedAt(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Profile_createdAt(ctx, field)
-			case "users":
-				return ec.fieldContext_Profile_users(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
 		},
@@ -4659,10 +4594,6 @@ func (ec *executionContext) fieldContext_User_image(ctx context.Context, field g
 				return ec.fieldContext_Image_updatedAt(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Image_createdAt(ctx, field)
-			case "users":
-				return ec.fieldContext_Image_users(ctx, field)
-			case "dogs":
-				return ec.fieldContext_Image_dogs(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Image", field.Name)
 		},
@@ -4716,8 +4647,6 @@ func (ec *executionContext) fieldContext_User_dogprofiles(ctx context.Context, f
 				return ec.fieldContext_DogProfileOwner_updatedAt(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_DogProfileOwner_createdAt(ctx, field)
-			case "owner":
-				return ec.fieldContext_DogProfileOwner_owner(ctx, field)
 			case "dog":
 				return ec.fieldContext_DogProfileOwner_dog(ctx, field)
 			}
@@ -6548,7 +6477,7 @@ func (ec *executionContext) unmarshalInputBreedWhereInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "name", "nameNEQ", "nameIn", "nameNotIn", "nameGT", "nameGTE", "nameLT", "nameLTE", "nameContains", "nameHasPrefix", "nameHasSuffix", "nameEqualFold", "nameContainsFold", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "hasDogProfiles", "hasDogProfilesWith"}
+	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "name", "nameNEQ", "nameIn", "nameNotIn", "nameGT", "nameGTE", "nameLT", "nameLTE", "nameContains", "nameHasPrefix", "nameHasSuffix", "nameEqualFold", "nameContainsFold", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6875,22 +6804,6 @@ func (ec *executionContext) unmarshalInputBreedWhereInput(ctx context.Context, o
 			if err != nil {
 				return it, err
 			}
-		case "hasDogProfiles":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasDogProfiles"))
-			it.HasDogProfiles, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "hasDogProfilesWith":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasDogProfilesWith"))
-			it.HasDogProfilesWith, err = ec.unmarshalODogProfileBreedWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDogProfileBreedWhereInputᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		}
 	}
 
@@ -6904,7 +6817,7 @@ func (ec *executionContext) unmarshalInputDogProfileBreedWhereInput(ctx context.
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "breedID", "breedIDNEQ", "breedIDIn", "breedIDNotIn", "dogID", "dogIDNEQ", "dogIDIn", "dogIDNotIn", "percentage", "percentageNEQ", "percentageIn", "percentageNotIn", "percentageGT", "percentageGTE", "percentageLT", "percentageLTE", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "hasDog", "hasDogWith", "hasBreed", "hasBreedWith"}
+	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "breedID", "breedIDNEQ", "breedIDIn", "breedIDNotIn", "dogID", "dogIDNEQ", "dogIDIn", "dogIDNotIn", "percentage", "percentageNEQ", "percentageIn", "percentageNotIn", "percentageGT", "percentageGTE", "percentageLT", "percentageLTE", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "hasBreed", "hasBreedWith"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -7255,22 +7168,6 @@ func (ec *executionContext) unmarshalInputDogProfileBreedWhereInput(ctx context.
 			if err != nil {
 				return it, err
 			}
-		case "hasDog":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasDog"))
-			it.HasDog, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "hasDogWith":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasDogWith"))
-			it.HasDogWith, err = ec.unmarshalODogWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDogWhereInputᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "hasBreed":
 			var err error
 
@@ -7300,7 +7197,7 @@ func (ec *executionContext) unmarshalInputDogProfileOwnerWhereInput(ctx context.
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "ownerID", "ownerIDNEQ", "ownerIDIn", "ownerIDNotIn", "dogID", "dogIDNEQ", "dogIDIn", "dogIDNotIn", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "hasOwner", "hasOwnerWith", "hasDog", "hasDogWith"}
+	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "ownerID", "ownerIDNEQ", "ownerIDIn", "ownerIDNotIn", "dogID", "dogIDNEQ", "dogIDIn", "dogIDNotIn", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "hasDog", "hasDogWith"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -7587,22 +7484,6 @@ func (ec *executionContext) unmarshalInputDogProfileOwnerWhereInput(ctx context.
 			if err != nil {
 				return it, err
 			}
-		case "hasOwner":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasOwner"))
-			it.HasOwner, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "hasOwnerWith":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasOwnerWith"))
-			it.HasOwnerWith, err = ec.unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUserWhereInputᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "hasDog":
 			var err error
 
@@ -7632,7 +7513,7 @@ func (ec *executionContext) unmarshalInputDogWhereInput(ctx context.Context, obj
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "fullName", "fullNameNEQ", "fullNameIn", "fullNameNotIn", "fullNameGT", "fullNameGTE", "fullNameLT", "fullNameLTE", "fullNameContains", "fullNameHasPrefix", "fullNameHasSuffix", "fullNameEqualFold", "fullNameContainsFold", "age", "ageNEQ", "ageIn", "ageNotIn", "ageGT", "ageGTE", "ageLT", "ageLTE", "weightLbs", "weightLbsNEQ", "weightLbsIn", "weightLbsNotIn", "weightLbsGT", "weightLbsGTE", "weightLbsLT", "weightLbsLTE", "weightKgs", "weightKgsNEQ", "weightKgsIn", "weightKgsNotIn", "weightKgsGT", "weightKgsGTE", "weightKgsLT", "weightKgsLTE", "size", "sizeNEQ", "sizeIn", "sizeNotIn", "sizeGT", "sizeGTE", "sizeLT", "sizeLTE", "sizeContains", "sizeHasPrefix", "sizeHasSuffix", "sizeEqualFold", "sizeContainsFold", "birthday", "birthdayNEQ", "birthdayIn", "birthdayNotIn", "birthdayGT", "birthdayGTE", "birthdayLT", "birthdayLTE", "dogImgID", "dogImgIDNEQ", "dogImgIDIn", "dogImgIDNotIn", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "hasImage", "hasImageWith", "hasOwnerProfiles", "hasOwnerProfilesWith", "hasBreedProfiles", "hasBreedProfilesWith"}
+	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "fullName", "fullNameNEQ", "fullNameIn", "fullNameNotIn", "fullNameGT", "fullNameGTE", "fullNameLT", "fullNameLTE", "fullNameContains", "fullNameHasPrefix", "fullNameHasSuffix", "fullNameEqualFold", "fullNameContainsFold", "age", "ageNEQ", "ageIn", "ageNotIn", "ageGT", "ageGTE", "ageLT", "ageLTE", "weightLbs", "weightLbsNEQ", "weightLbsIn", "weightLbsNotIn", "weightLbsGT", "weightLbsGTE", "weightLbsLT", "weightLbsLTE", "weightKgs", "weightKgsNEQ", "weightKgsIn", "weightKgsNotIn", "weightKgsGT", "weightKgsGTE", "weightKgsLT", "weightKgsLTE", "size", "sizeNEQ", "sizeIn", "sizeNotIn", "sizeGT", "sizeGTE", "sizeLT", "sizeLTE", "sizeContains", "sizeHasPrefix", "sizeHasSuffix", "sizeEqualFold", "sizeContainsFold", "birthday", "birthdayNEQ", "birthdayIn", "birthdayNotIn", "birthdayGT", "birthdayGTE", "birthdayLT", "birthdayLTE", "dogImgID", "dogImgIDNEQ", "dogImgIDIn", "dogImgIDNotIn", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "hasImage", "hasImageWith", "hasBreedProfiles", "hasBreedProfilesWith"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -8367,22 +8248,6 @@ func (ec *executionContext) unmarshalInputDogWhereInput(ctx context.Context, obj
 			if err != nil {
 				return it, err
 			}
-		case "hasOwnerProfiles":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasOwnerProfiles"))
-			it.HasOwnerProfiles, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "hasOwnerProfilesWith":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasOwnerProfilesWith"))
-			it.HasOwnerProfilesWith, err = ec.unmarshalODogProfileOwnerWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDogProfileOwnerWhereInputᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "hasBreedProfiles":
 			var err error
 
@@ -8412,7 +8277,7 @@ func (ec *executionContext) unmarshalInputImageWhereInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "url", "urlNEQ", "urlIn", "urlNotIn", "urlGT", "urlGTE", "urlLT", "urlLTE", "urlContains", "urlHasPrefix", "urlHasSuffix", "urlEqualFold", "urlContainsFold", "width", "widthNEQ", "widthIn", "widthNotIn", "widthGT", "widthGTE", "widthLT", "widthLTE", "height", "heightNEQ", "heightIn", "heightNotIn", "heightGT", "heightGTE", "heightLT", "heightLTE", "type", "typeNEQ", "typeIn", "typeNotIn", "typeGT", "typeGTE", "typeLT", "typeLTE", "typeContains", "typeHasPrefix", "typeHasSuffix", "typeEqualFold", "typeContainsFold", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "hasUsers", "hasUsersWith", "hasDogs", "hasDogsWith"}
+	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "url", "urlNEQ", "urlIn", "urlNotIn", "urlGT", "urlGTE", "urlLT", "urlLTE", "urlContains", "urlHasPrefix", "urlHasSuffix", "urlEqualFold", "urlContainsFold", "width", "widthNEQ", "widthIn", "widthNotIn", "widthGT", "widthGTE", "widthLT", "widthLTE", "height", "heightNEQ", "heightIn", "heightNotIn", "heightGT", "heightGTE", "heightLT", "heightLTE", "type", "typeNEQ", "typeIn", "typeNotIn", "typeGT", "typeGTE", "typeLT", "typeLTE", "typeContains", "typeHasPrefix", "typeHasSuffix", "typeEqualFold", "typeContainsFold", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -8971,35 +8836,127 @@ func (ec *executionContext) unmarshalInputImageWhereInput(ctx context.Context, o
 			if err != nil {
 				return it, err
 			}
-		case "hasUsers":
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewImage(ctx context.Context, obj interface{}) (model.NewImage, error) {
+	var it model.NewImage
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"url", "width", "height", "type"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "url":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasUsers"))
-			it.HasUsers, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("url"))
+			it.URL, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "hasUsersWith":
+		case "width":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasUsersWith"))
-			it.HasUsersWith, err = ec.unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUserWhereInputᚄ(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("width"))
+			it.Width, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "hasDogs":
+		case "height":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasDogs"))
-			it.HasDogs, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("height"))
+			it.Height, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "hasDogsWith":
+		case "type":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasDogsWith"))
-			it.HasDogsWith, err = ec.unmarshalODogWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDogWhereInputᚄ(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+			it.Type, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewProfile(ctx context.Context, obj interface{}) (model.NewProfile, error) {
+	var it model.NewProfile
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "description"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			it.Description, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj interface{}) (model.NewUser, error) {
+	var it model.NewUser
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"firstName", "lastName"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "firstName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("firstName"))
+			it.FirstName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("lastName"))
+			it.LastName, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9016,7 +8973,7 @@ func (ec *executionContext) unmarshalInputProfileWhereInput(ctx context.Context,
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "name", "nameNEQ", "nameIn", "nameNotIn", "nameGT", "nameGTE", "nameLT", "nameLTE", "nameContains", "nameHasPrefix", "nameHasSuffix", "nameEqualFold", "nameContainsFold", "description", "descriptionNEQ", "descriptionIn", "descriptionNotIn", "descriptionGT", "descriptionGTE", "descriptionLT", "descriptionLTE", "descriptionContains", "descriptionHasPrefix", "descriptionHasSuffix", "descriptionEqualFold", "descriptionContainsFold", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "hasUsers", "hasUsersWith"}
+	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "name", "nameNEQ", "nameIn", "nameNotIn", "nameGT", "nameGTE", "nameLT", "nameLTE", "nameContains", "nameHasPrefix", "nameHasSuffix", "nameEqualFold", "nameContainsFold", "description", "descriptionNEQ", "descriptionIn", "descriptionNotIn", "descriptionGT", "descriptionGTE", "descriptionLT", "descriptionLTE", "descriptionContains", "descriptionHasPrefix", "descriptionHasSuffix", "descriptionEqualFold", "descriptionContainsFold", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -9447,19 +9404,31 @@ func (ec *executionContext) unmarshalInputProfileWhereInput(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
-		case "hasUsers":
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputSession(ctx context.Context, obj interface{}) (model.Session, error) {
+	var it model.Session
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"jwt"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "jwt":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasUsers"))
-			it.HasUsers, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "hasUsersWith":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasUsersWith"))
-			it.HasUsersWith, err = ec.unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUserWhereInputᚄ(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("jwt"))
+			it.Jwt, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -10092,46 +10061,29 @@ func (ec *executionContext) _Breed(ctx context.Context, sel ast.SelectionSet, ob
 			out.Values[i] = ec._Breed_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "name":
 
 			out.Values[i] = ec._Breed_name(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "updatedAt":
 
 			out.Values[i] = ec._Breed_updatedAt(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "createdAt":
 
 			out.Values[i] = ec._Breed_createdAt(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
-		case "dogprofiles":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Breed_dogprofiles(ctx, field, obj)
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10243,23 +10195,6 @@ func (ec *executionContext) _Dog(ctx context.Context, sel ast.SelectionSet, obj 
 				return innerFunc(ctx)
 
 			})
-		case "ownerprofiles":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Dog_ownerprofiles(ctx, field, obj)
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "breedprofiles":
 			field := field
 
@@ -10340,26 +10275,6 @@ func (ec *executionContext) _DogProfileBreed(ctx context.Context, sel ast.Select
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "dog":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._DogProfileBreed_dog(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "breed":
 			field := field
 
@@ -10436,26 +10351,6 @@ func (ec *executionContext) _DogProfileOwner(ctx context.Context, sel ast.Select
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "owner":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._DogProfileOwner_owner(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "dog":
 			field := field
 
@@ -10502,84 +10397,98 @@ func (ec *executionContext) _Image(ctx context.Context, sel ast.SelectionSet, ob
 			out.Values[i] = ec._Image_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "url":
 
 			out.Values[i] = ec._Image_url(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "width":
 
 			out.Values[i] = ec._Image_width(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "height":
 
 			out.Values[i] = ec._Image_height(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "type":
 
 			out.Values[i] = ec._Image_type(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "updatedAt":
 
 			out.Values[i] = ec._Image_updatedAt(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "createdAt":
 
 			out.Values[i] = ec._Image_createdAt(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
-		case "users":
-			field := field
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Image_users(ctx, field, obj)
-				return res
-			}
+var mutationImplementors = []string{"Mutation"}
 
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
+func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, mutationImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Mutation",
+	})
 
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
+			Object: field.Name,
+			Field:  field,
+		})
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Mutation")
+		case "createProfile":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createProfile(ctx, field)
 			})
-		case "dogs":
-			field := field
 
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Image_dogs(ctx, field, obj)
-				return res
-			}
+		case "createImage":
 
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createImage(ctx, field)
 			})
+
+		case "createDefaultUser":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createDefaultUser(ctx, field)
+			})
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10649,53 +10558,36 @@ func (ec *executionContext) _Profile(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = ec._Profile_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "name":
 
 			out.Values[i] = ec._Profile_name(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "description":
 
 			out.Values[i] = ec._Profile_description(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "updatedAt":
 
 			out.Values[i] = ec._Profile_updatedAt(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "createdAt":
 
 			out.Values[i] = ec._Profile_createdAt(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
-		case "users":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Profile_users(ctx, field, obj)
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10759,6 +10651,26 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "getAppData":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getAppData(ctx, field)
 				return res
 			}
 
@@ -11452,6 +11364,21 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
+func (ec *executionContext) unmarshalNNewImage2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋgraphᚋmodelᚐNewImage(ctx context.Context, v interface{}) (model.NewImage, error) {
+	res, err := ec.unmarshalInputNewImage(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNNewProfile2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋgraphᚋmodelᚐNewProfile(ctx context.Context, v interface{}) (model.NewProfile, error) {
+	res, err := ec.unmarshalInputNewProfile(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNNewUser2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋgraphᚋmodelᚐNewUser(ctx context.Context, v interface{}) (model.NewUser, error) {
+	res, err := ec.unmarshalInputNewUser(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNNode2ᚕgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐNoder(ctx context.Context, sel ast.SelectionSet, v []ent.Noder) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -11505,6 +11432,11 @@ func (ec *executionContext) unmarshalNProfileWhereInput2ᚖgithubᚗcomᚋOSBC�
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNSession2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋgraphᚋmodelᚐSession(ctx context.Context, v interface{}) (model.Session, error) {
+	res, err := ec.unmarshalInputSession(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -11533,16 +11465,6 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUser(ctx context.Context, sel ast.SelectionSet, v *ent.User) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._User(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNUserWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUserWhereInput(ctx context.Context, v interface{}) (*ent.UserWhereInput, error) {
@@ -11892,53 +11814,6 @@ func (ec *executionContext) marshalOCursor2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogo�
 	return v
 }
 
-func (ec *executionContext) marshalODog2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDogᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Dog) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNDog2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDog(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
 func (ec *executionContext) marshalODogProfileBreed2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDogProfileBreedᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.DogProfileBreed) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -12225,6 +12100,13 @@ func (ec *executionContext) marshalOID2ᚖgithubᚗcomᚋgoogleᚋuuidᚐUUID(ct
 	return res
 }
 
+func (ec *executionContext) marshalOImage2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐImage(ctx context.Context, sel ast.SelectionSet, v *ent.Image) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Image(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOImageWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐImageWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.ImageWhereInput, error) {
 	if v == nil {
 		return nil, nil
@@ -12312,6 +12194,13 @@ func (ec *executionContext) marshalONode2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubg
 		return graphql.Null
 	}
 	return ec._Node(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOProfile2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐProfile(ctx context.Context, sel ast.SelectionSet, v *ent.Profile) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Profile(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOProfileWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐProfileWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.ProfileWhereInput, error) {
@@ -12460,51 +12349,11 @@ func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel
 	return res
 }
 
-func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUser(ctx context.Context, sel ast.SelectionSet, v *ent.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUser(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
+	return ec._User(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOUserWhereInput2ᚕᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐUserWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.UserWhereInput, error) {

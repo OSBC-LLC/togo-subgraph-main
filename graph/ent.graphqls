@@ -5,7 +5,6 @@ type Breed implements Node {
   name: String!
   updatedAt: Time!
   createdAt: Time!
-  dogprofiles: [DogProfileBreed!]
 }
 """
 BreedWhereInput is used for filtering Breed objects.
@@ -56,9 +55,6 @@ input BreedWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
-  """dogProfiles edge predicates"""
-  hasDogProfiles: Boolean
-  hasDogProfilesWith: [DogProfileBreedWhereInput!]
 }
 """
 Define a Relay Cursor type:
@@ -77,7 +73,6 @@ type Dog implements Node {
   updatedAt: Time!
   createdAt: Time!
   image: Image!
-  ownerprofiles: [DogProfileOwner!]
   breedprofiles: [DogProfileBreed!]
 }
 type DogProfileBreed implements Node {
@@ -87,7 +82,6 @@ type DogProfileBreed implements Node {
   percentage: Float!
   updatedAt: Time!
   createdAt: Time!
-  dog: Dog!
   breed: Breed!
 }
 """
@@ -144,9 +138,6 @@ input DogProfileBreedWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
-  """dog edge predicates"""
-  hasDog: Boolean
-  hasDogWith: [DogWhereInput!]
   """breed edge predicates"""
   hasBreed: Boolean
   hasBreedWith: [BreedWhereInput!]
@@ -157,7 +148,6 @@ type DogProfileOwner implements Node {
   dogID: ID!
   updatedAt: Time!
   createdAt: Time!
-  owner: User!
   dog: Dog!
 }
 """
@@ -205,9 +195,6 @@ input DogProfileOwnerWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
-  """owner edge predicates"""
-  hasOwner: Boolean
-  hasOwnerWith: [UserWhereInput!]
   """dog edge predicates"""
   hasDog: Boolean
   hasDogWith: [DogWhereInput!]
@@ -319,9 +306,6 @@ input DogWhereInput {
   """image edge predicates"""
   hasImage: Boolean
   hasImageWith: [ImageWhereInput!]
-  """ownerProfiles edge predicates"""
-  hasOwnerProfiles: Boolean
-  hasOwnerProfilesWith: [DogProfileOwnerWhereInput!]
   """breedProfiles edge predicates"""
   hasBreedProfiles: Boolean
   hasBreedProfilesWith: [DogProfileBreedWhereInput!]
@@ -334,8 +318,6 @@ type Image implements Node {
   type: String!
   updatedAt: Time!
   createdAt: Time!
-  users: [User!]
-  dogs: [Dog!]
 }
 """
 ImageWhereInput is used for filtering Image objects.
@@ -418,12 +400,6 @@ input ImageWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
-  """users edge predicates"""
-  hasUsers: Boolean
-  hasUsersWith: [UserWhereInput!]
-  """dogs edge predicates"""
-  hasDogs: Boolean
-  hasDogsWith: [DogWhereInput!]
 }
 """
 An object with an ID.
@@ -460,7 +436,6 @@ type Profile implements Node {
   description: String!
   updatedAt: Time!
   createdAt: Time!
-  users: [User!]
 }
 """
 ProfileWhereInput is used for filtering Profile objects.
@@ -525,9 +500,6 @@ input ProfileWhereInput {
   createdAtGTE: Time
   createdAtLT: Time
   createdAtLTE: Time
-  """users edge predicates"""
-  hasUsers: Boolean
-  hasUsersWith: [UserWhereInput!]
 }
 type Query {
   """Fetches an object given its ID."""

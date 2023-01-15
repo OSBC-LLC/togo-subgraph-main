@@ -3,6 +3,7 @@ package schema
 import (
 	"time"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -33,7 +34,8 @@ func (DogProfileBreed) Edges() []ent.Edge {
 			Ref("breedProfiles").
 			Field("dog_id").
 			Required().
-			Unique(),
+			Unique().
+			Annotations(entgql.Skip()),
 
 		edge.From("breed", Breed.Type).
 			Ref("dogProfiles").

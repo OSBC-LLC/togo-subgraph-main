@@ -5,3 +5,34 @@
 scalar Time
 
 scalar UUID
+
+input Session {
+	jwt: String!
+}
+
+input NewProfile {
+	name: String!
+	description: String!
+}
+
+input NewImage {
+	url: String!
+	width: Int!
+	height: Int!
+	type: String!
+}
+
+input NewUser {
+	firstName: String!
+	lastName: String!
+}
+
+extend type Query {
+	getAppData(session: Session!): User
+}
+
+type Mutation {
+	createProfile(session: Session!, details: NewProfile!): Profile
+	createImage(session: Session!, details: NewImage!): Image
+	createDefaultUser(session: Session!, details: NewUser!): User
+}
