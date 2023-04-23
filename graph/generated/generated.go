@@ -122,10 +122,11 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetAppData         func(childComplexity int, session model.Session) int
-		Node               func(childComplexity int, id uuid.UUID) int
-		Nodes              func(childComplexity int, ids []uuid.UUID) int
-		__resolve__service func(childComplexity int) int
+		GetAppData          func(childComplexity int, session model.Session) int
+		GetDogSearchResults func(childComplexity int, input model.DogSearch) int
+		Node                func(childComplexity int, id uuid.UUID) int
+		Nodes               func(childComplexity int, ids []uuid.UUID) int
+		__resolve__service  func(childComplexity int) int
 	}
 
 	User struct {
@@ -155,6 +156,7 @@ type QueryResolver interface {
 	Node(ctx context.Context, id uuid.UUID) (ent.Noder, error)
 	Nodes(ctx context.Context, ids []uuid.UUID) ([]ent.Noder, error)
 	GetAppData(ctx context.Context, session model.Session) (*ent.User, error)
+	GetDogSearchResults(ctx context.Context, input model.DogSearch) (string, error)
 }
 
 type executableSchema struct {
@@ -535,6 +537,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetAppData(childComplexity, args["session"].(model.Session)), true
 
+	case "Query.getDogSearchResults":
+		if e.complexity.Query.GetDogSearchResults == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getDogSearchResults_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetDogSearchResults(childComplexity, args["input"].(model.DogSearch)), true
+
 	case "Query.node":
 		if e.complexity.Query.Node == nil {
 			break
@@ -654,6 +668,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputBreedWhereInput,
 		ec.unmarshalInputDogProfileBreedWhereInput,
 		ec.unmarshalInputDogProfileOwnerWhereInput,
+		ec.unmarshalInputDogSearch,
 		ec.unmarshalInputDogWhereInput,
 		ec.unmarshalInputImageWhereInput,
 		ec.unmarshalInputNewImage,
@@ -1342,34 +1357,45 @@ scalar Time
 scalar UUID
 
 input Session {
-	jwt: String!
+  jwt: String!
 }
 
 input NewProfile {
-	name: String!
-	description: String!
+  name: String!
+  description: String!
 }
 
 input NewImage {
-	url: String!
-	width: Int!
-	height: Int!
-	type: String!
+  url: String!
+  width: Int!
+  height: Int!
+  type: String!
 }
 
 input NewUser {
-	firstName: String!
-	lastName: String!
+  firstName: String!
+  lastName: String!
+}
+
+input DogSearch {
+  age: [String!]
+  careAndBehavior: [String!]
+  coatLength: [String!]
+  distance: Int!
+  gender: [String!]
+  goodWith: [String!]
+  size: [String!]
 }
 
 extend type Query {
-	getAppData(session: Session!): User
+  getAppData(session: Session!): User
+  getDogSearchResults(input: DogSearch!): String!
 }
 
 type Mutation {
-	createProfile(session: Session!, details: NewProfile!): Profile
-	createImage(session: Session!, details: NewImage!): Image
-	createDefaultUser(session: Session!, details: NewUser!): User
+  createProfile(session: Session!, details: NewProfile!): Profile
+  createImage(session: Session!, details: NewImage!): Image
+  createDefaultUser(session: Session!, details: NewUser!): User
 }
 `, BuiltIn: false},
 	{Name: "../../federation/directives.graphql", Input: `
@@ -1503,6 +1529,21 @@ func (ec *executionContext) field_Query_getAppData_args(ctx context.Context, raw
 		}
 	}
 	args["session"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getDogSearchResults_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.DogSearch
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNDogSearch2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋgraphᚋmodelᚐDogSearch(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -3994,6 +4035,61 @@ func (ec *executionContext) fieldContext_Query_getAppData(ctx context.Context, f
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_getAppData_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getDogSearchResults(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getDogSearchResults(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetDogSearchResults(rctx, fc.Args["input"].(model.DogSearch))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getDogSearchResults(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getDogSearchResults_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -7506,6 +7602,82 @@ func (ec *executionContext) unmarshalInputDogProfileOwnerWhereInput(ctx context.
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputDogSearch(ctx context.Context, obj interface{}) (model.DogSearch, error) {
+	var it model.DogSearch
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"age", "careAndBehavior", "coatLength", "distance", "gender", "goodWith", "size"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "age":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("age"))
+			it.Age, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "careAndBehavior":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("careAndBehavior"))
+			it.CareAndBehavior, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "coatLength":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("coatLength"))
+			it.CoatLength, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "distance":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("distance"))
+			it.Distance, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "gender":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("gender"))
+			it.Gender, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "goodWith":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("goodWith"))
+			it.GoodWith, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "size":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("size"))
+			it.Size, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputDogWhereInput(ctx context.Context, obj interface{}) (ent.DogWhereInput, error) {
 	var it ent.DogWhereInput
 	asMap := map[string]interface{}{}
@@ -10681,6 +10853,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
+		case "getDogSearchResults":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getDogSearchResults(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
 		case "_service":
 			field := field
 
@@ -11265,6 +11460,11 @@ func (ec *executionContext) marshalNDogProfileOwner2ᚖgithubᚗcomᚋOSBCᚑLLC
 func (ec *executionContext) unmarshalNDogProfileOwnerWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDogProfileOwnerWhereInput(ctx context.Context, v interface{}) (*ent.DogProfileOwnerWhereInput, error) {
 	res, err := ec.unmarshalInputDogProfileOwnerWhereInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNDogSearch2githubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋgraphᚋmodelᚐDogSearch(ctx context.Context, v interface{}) (model.DogSearch, error) {
+	res, err := ec.unmarshalInputDogSearch(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNDogWhereInput2ᚖgithubᚗcomᚋOSBCᚑLLCᚋtogoᚑsubgraphᚑmainᚋentᚐDogWhereInput(ctx context.Context, v interface{}) (*ent.DogWhereInput, error) {

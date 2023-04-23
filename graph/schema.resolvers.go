@@ -5,6 +5,9 @@ package graph
 
 import (
 	"context"
+	"fmt"
+	"log"
+	"strings"
 	"time"
 
 	"github.com/OSBC-LLC/togo-subgraph-main/ent"
@@ -14,6 +17,7 @@ import (
 	"github.com/OSBC-LLC/togo-subgraph-main/graph/generated"
 	"github.com/OSBC-LLC/togo-subgraph-main/graph/model"
 	"github.com/google/uuid"
+	"github.com/petfinder-com/petfinder-go-sdk/pfapi"
 )
 
 // CreateProfile is the resolver for the createProfile field.
@@ -69,6 +73,41 @@ func (r *queryResolver) GetAppData(ctx context.Context, session model.Session) (
 	return r.client.User.Query().
 		Where(user.FirstName("Will")).
 		Only(ctx)
+}
+
+// GetDogSearchResults is the resolver for the getDogSearchResults field.
+func (r *queryResolver) GetDogSearchResults(ctx context.Context, input model.DogSearch) (string, error) {
+	apiParams := pfapi.NewPetSearchParams()
+	apiParams.AddParam("type", "Dog")
+	apiParams.AddParam("limit", "100")
+	log.Println("Filters: ", input)
+
+	apiParams.AddParam("distance", fmt.Sprint(input.Distance))
+	apiParams.AddParam("age", strings.Replace(strings.Join(input.Age, ","), "puppy", "baby", 1))
+	apiParams.AddParam("size", strings.ReplaceAll(strings.Join(input.Size, ","), "-", ""))
+	apiParams.AddParam("gender", strings.Join(input.Gender, ","))
+
+	goodWithStr := strings.Join(input.GoodWith, ",")
+	if strings.Contains(goodWithStr, "kids") {
+		apiParams.AddParam("good_with_children", "true")
+	} else if strings.Contains(goodWithStr, "cats") {
+		apiParams.AddParam("good_with_cats", "true")
+	} else if strings.Contains(goodWithStr, "other dogs") {
+		apiParams.AddParam("good_with_dogs", "true")
+	}
+
+	careAndBehaviorStr := strings.Join(input.CareAndBehavior, ",")
+	if strings.Contains(careAndBehaviorStr, "house trained") {
+		apiParams.AddParam("house_trained", "true")
+	} else if strings.Contains(careAndBehaviorStr, "special needs") {
+		apiParams.AddParam("special_needs", "true")
+	}
+
+	apiParams.AddParam("coat", strings.Join(input.CoatLength, ","))
+
+	log.Println("pfapi query: ", apiParams.CreateQueryString())
+
+	return "", nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

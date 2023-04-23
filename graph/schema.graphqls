@@ -7,32 +7,43 @@ scalar Time
 scalar UUID
 
 input Session {
-	jwt: String!
+  jwt: String!
 }
 
 input NewProfile {
-	name: String!
-	description: String!
+  name: String!
+  description: String!
 }
 
 input NewImage {
-	url: String!
-	width: Int!
-	height: Int!
-	type: String!
+  url: String!
+  width: Int!
+  height: Int!
+  type: String!
 }
 
 input NewUser {
-	firstName: String!
-	lastName: String!
+  firstName: String!
+  lastName: String!
+}
+
+input DogSearch {
+  age: [String!]
+  careAndBehavior: [String!]
+  coatLength: [String!]
+  distance: Int!
+  gender: [String!]
+  goodWith: [String!]
+  size: [String!]
 }
 
 extend type Query {
-	getAppData(session: Session!): User
+  getAppData(session: Session!): User
+  getDogSearchResults(input: DogSearch!): String!
 }
 
 type Mutation {
-	createProfile(session: Session!, details: NewProfile!): Profile
-	createImage(session: Session!, details: NewImage!): Image
-	createDefaultUser(session: Session!, details: NewUser!): User
+  createProfile(session: Session!, details: NewProfile!): Profile
+  createImage(session: Session!, details: NewImage!): Image
+  createDefaultUser(session: Session!, details: NewUser!): User
 }

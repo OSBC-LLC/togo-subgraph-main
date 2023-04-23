@@ -2,6 +2,16 @@
 
 package model
 
+type DogSearch struct {
+	Age             []string `json:"age"`
+	CareAndBehavior []string `json:"careAndBehavior"`
+	CoatLength      []string `json:"coatLength"`
+	Distance        int      `json:"distance"`
+	Gender          []string `json:"gender"`
+	GoodWith        []string `json:"goodWith"`
+	Size            []string `json:"size"`
+}
+
 type NewImage struct {
 	URL    string `json:"url"`
 	Width  int    `json:"width"`
