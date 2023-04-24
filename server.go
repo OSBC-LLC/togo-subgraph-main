@@ -7,11 +7,15 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
+	"github.com/gorilla/websocket"
 	_ "github.com/lib/pq"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent"
 	"github.com/OSBC-LLC/togo-subgraph-main/ent/migrate"
@@ -34,6 +38,15 @@ func main() {
 	if port == "" {
 		port = defaultPort
 	}
+
+	router := chi.NewRouter()
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedHeaders:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
 
 	var entOptions []ent.Option
 	if os.Getenv("LOG_LEVEL") == "debug" || os.Getenv("LOG_LEVEL") == "silly" {
@@ -68,6 +81,16 @@ func main() {
 		complexity = 15
 	}
 	srv := handler.NewDefaultServer(graph.NewSchema(client))
+	srv.AddTransport(&transport.Websocket{
+		Upgrader: websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				// Check against your desired domains here
+				return true
+			},
+			ReadBufferSize:  1024,
+			WriteBufferSize: 1024,
+		},
+	})
 	srv.Use(extension.FixedComplexityLimit(complexity))
 
 	if os.Getenv("LOG_LEVEL") == "silly" {
@@ -80,9 +103,9 @@ func main() {
 		})
 	}
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle(newrelic.WrapHandle(newRelicApp, "/query", srv))
+	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	router.Handle(newrelic.WrapHandle(newRelicApp, "/query", srv))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }
